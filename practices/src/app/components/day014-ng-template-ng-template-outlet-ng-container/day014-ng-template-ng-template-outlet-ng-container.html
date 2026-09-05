@@ -1,4 +1,805 @@
-<div class="day-container">
-  <h2>Day014-ng-template-ng-template-outlet-ng-container</h2>
-  <p>day014-ng-template-ng-template-outlet-ng-container works!</p>
+<div class="day014-page">
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 14</span>
+        <span class="badge badge-syntax">&lt;ng-template&gt;</span>
+        <span class="badge badge-syntax">[ngTemplateOutlet]</span>
+        <span class="badge badge-syntax">[ngTemplateOutletContext]</span>
+        <span class="badge badge-syntax">&lt;ng-container&gt;</span>
+        <span class="badge badge-syntax">let-* / $implicit</span>
+        <span class="badge badge-syntax">TemplateRef</span>
+      </div>
+      <h1 class="page-title">ng-template, ngTemplateOutlet và ng-container trong Angular</h1>
+      <p class="page-subtitle">
+        Khám phá bộ ba công cụ mạnh mẽ nhất trong việc xây dựng UI linh hoạt:
+        hiểu rõ cơ chế <strong>Lazy Render</strong> của <code>&lt;ng-template&gt;</code>,
+        cách truyền context dữ liệu với <code>ngTemplateOutlet</code>,
+        kỹ thuật <strong>Override Template</strong> trong design system,
+        và loại bỏ hoàn toàn thẻ DOM rác với <code>&lt;ng-container&gt;</code>.
+      </p>
+    </div>
+
+    <!-- Quick Status Box -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Trạng thái Demo Thực Hành:</span>
+        <span class="stat-value">6 Kịch bản Thực tế Sẵn Sàng</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Hành động vừa thực hiện:</span>
+        <span class="stat-value action-highlight">{{ lastActionMessage() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation / Filter Tabs -->
+  <nav class="lab-tabs-nav">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'all'"
+      (click)="currentTab.set('all')"
+    >
+      📚 Toàn bộ Bài Học
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'basics'"
+      (click)="currentTab.set('basics')"
+    >
+      1. ng-template Cơ Bản
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'reusable-ui'"
+      (click)="currentTab.set('reusable-ui')"
+    >
+      2. Tái Sử Dụng UI Trong Component
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'context'"
+      (click)="currentTab.set('context')"
+    >
+      3. ngTemplateOutlet & Context
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'override'"
+      (click)="currentTab.set('override')"
+    >
+      4. Override Template Con
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'ng-container'"
+      (click)="currentTab.set('ng-container')"
+    >
+      5. ng-container vs Thẻ Div Rác
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'advanced-list'"
+      (click)="currentTab.set('advanced-list')"
+    >
+      6. Generic Data List View
+    </button>
+  </nav>
+
+  <!-- MAIN CONTENT GRID -->
+  <div class="content-sections">
+
+    <!-- ================================================================= -->
+    <!-- SECTION 1: ng-template Basics (Lazy Render & Structural Directive) -->
+    <!-- ================================================================= -->
+    @if (currentTab() === 'all' || currentTab() === 'basics') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 1</span>
+            <h2 class="card-title">ng-template: Cơ Chế Template Ảo & Không Render Tự Động</h2>
+          </div>
+          <span class="info-tag">Khái niệm cốt lõi</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">💡</div>
+            <div class="concept-text">
+              <strong>Đặc điểm cốt lõi:</strong> Nội dung đặt trong <code>&lt;ng-template&gt;</code> <strong>KHÔNG BAO GIỜ</strong> xuất hiện trực tiếp trên DOM nơi nó được khai báo. Nó chỉ được Angular biên dịch thành một <code>TemplateRef</code> trừu tượng trong bộ nhớ, và chỉ render khi được gọi (qua directive điều kiện hoặc <code>ngTemplateOutlet</code>).
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Điều khiển thử nghiệm -->
+            <div class="panel-box">
+              <h3 class="panel-title">🎮 Thử Nghiệm: Kiểm Tra Phân Loại Độ Tuổi (PG-13)</h3>
+              <p class="panel-desc">
+                Kéo slider tuổi để xem Angular luân phiên render template chính hoặc template dự phòng <code>#noPG13</code>.
+              </p>
+
+              <div class="control-row">
+                <label class="control-label" for="ageInput">
+                  Độ tuổi hiện tại: <strong class="highlight-val">{{ userAge() }} tuổi</strong>
+                </label>
+                <div class="range-wrapper">
+                  <input
+                    id="ageInput"
+                    type="range"
+                    min="5"
+                    max="30"
+                    [value]="userAge()"
+                    (input)="userAge.set(+$any($event.target).value)"
+                  />
+                  <div class="range-marks">
+                    <span>5 tuổi</span>
+                    <span class="mark-pg13">Mốc 13 (PG-13)</span>
+                    <span>30 tuổi</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Kết quả render thực tế -->
+              <div class="render-output-box">
+                <div class="output-label">Kết Quả Render DOM:</div>
+                
+                @if (canWatchPG13()) {
+                  <div class="result-badge success">
+                    <span class="badge-icon">🍿</span>
+                    <div>
+                      <div class="result-title">Đủ Điều Kiện Xem Phim (Tuổi: {{ userAge() }} >= 13)</div>
+                      <div class="result-sub">Khối HTML mặc định được render trực tiếp vào DOM.</div>
+                    </div>
+                  </div>
+                } @else {
+                  <!-- Gọi ng-template dự phòng -->
+                  <ng-container [ngTemplateOutlet]="noPG13Tmpl"></ng-container>
+                }
+
+                <!-- Template dự phòng (Lazy Template) -->
+                <ng-template #noPG13Tmpl>
+                  <div class="result-badge warning">
+                    <span class="badge-icon">⛔</span>
+                    <div>
+                      <div class="result-title">Chưa Đủ Tuổi PG-13 (Tuổi: {{ userAge() }} &lt; 13)</div>
+                      <div class="result-sub">
+                        Nội dung này đến từ <code>&lt;ng-template #noPG13Tmpl&gt;</code>!
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+
+            <!-- Giải thích mã nguồn -->
+            <div class="panel-box code-panel">
+              <h3 class="panel-title">📝 Cú Pháp Mẫu (Template Syntax)</h3>
+              <div class="code-block">
+                <pre><code><span class="tok-comment">&lt;!-- Cách 1: Control Flow hiện đại (Angular 17+) --&gt;</span>
+&#64;if (user.age &gt;= 13) &#123;
+  &lt;div&gt;Bạn có thể xem nội dung PG-13&lt;/div&gt;
+&#125; &#64;else &#123;
+  &lt;ng-container [ngTemplateOutlet]="noPG13"&gt;&lt;/ng-container&gt;
+&#125;
+
+<span class="tok-comment">&lt;!-- Cách 2: Cú pháp cổ điển với *ngIf else --&gt;</span>
+&lt;div *ngIf="user.age &gt;= 13; else noPG13"&gt;
+  Bạn có thể xem nội dung PG-13
+&lt;/div&gt;
+
+<span class="tok-comment">&lt;!-- Khối template không render trực tiếp ở đây --&gt;</span>
+&lt;ng-template #noPG13&gt;
+  &lt;div class="warning"&gt;Bạn không thể xem nội dung PG-13&lt;/div&gt;
+&lt;/ng-template&gt;</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ================================================================= -->
+    <!-- SECTION 2: Reusable UI Snippet in Component (Counter Badge)       -->
+    <!-- ================================================================= -->
+    @if (currentTab() === 'all' || currentTab() === 'reusable-ui') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge emerald">Phần 2</span>
+            <h2 class="card-title">Tái Sử Dụng UI Trong Component (Single-Point Maintenance)</h2>
+          </div>
+          <span class="info-tag">Nguyên lý DRY</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner emerald-theme">
+            <div class="concept-icon">♻️</div>
+            <div class="concept-text">
+              <strong>Vấn đề thực tế:</strong> Bạn có một khối UI nhỏ (như Counter badge, Status pill, Avatar chip) xuất hiện lặp lại ở <strong>Header, Body, Footer</strong>. Nếu copy-paste code thì khi cần sửa kiểu dáng phải sửa ở 3 nơi. Tách riêng thành component mới thì lại <em>overkill</em> cho 1-2 dòng HTML. 
+              <strong>Giải pháp hoàn hảo:</strong> Dùng <code>&lt;ng-template #tmpl&gt;</code> kết hợp <code>[ngTemplateOutlet]="tmpl"</code>.
+            </div>
+          </div>
+
+          <!-- Bảng điều khiển thử nghiệm -->
+          <div class="controls-bar">
+            <div class="counter-actions">
+              <span class="bar-label">Thử nghiệm Counter:</span>
+              <button type="button" class="btn btn-sm btn-outline" (click)="decrementCounter()">➖ Giảm</button>
+              <span class="counter-display">{{ counter() }} mục</span>
+              <button type="button" class="btn btn-sm btn-outline" (click)="incrementCounter()">➕ Tăng</button>
+              <button type="button" class="btn btn-sm btn-ghost" (click)="resetCounter()">↺ Reset</button>
+            </div>
+
+            <div class="theme-selector">
+              <span class="bar-label">Đổi màu sắc Badge tại ng-template:</span>
+              <button
+                type="button"
+                class="theme-chip emerald"
+                [class.active]="counterTheme() === 'emerald'"
+                (click)="counterTheme.set('emerald')"
+              >
+                Emerald
+              </button>
+              <button
+                type="button"
+                class="theme-chip indigo"
+                [class.active]="counterTheme() === 'indigo'"
+                (click)="counterTheme.set('indigo')"
+              >
+                Indigo
+              </button>
+              <button
+                type="button"
+                class="theme-chip rose"
+                [class.active]="counterTheme() === 'rose'"
+                (click)="counterTheme.set('rose')"
+              >
+                Rose
+              </button>
+              <button
+                type="button"
+                class="theme-chip amber"
+                [class.active]="counterTheme() === 'amber'"
+                (click)="counterTheme.set('amber')"
+              >
+                Amber
+              </button>
+            </div>
+          </div>
+
+          <!-- UI Card minh họa tái sử dụng ở 3 vị trí -->
+          <div class="demo-card-preview">
+            <div class="preview-card-header">
+              <div class="title-with-badge">
+                <span>📋 Tiêu đề Card: Bạn đã chọn</span>
+                <!-- Vị trí 1: Header -->
+                <ng-container [ngTemplateOutlet]="counterBadgeTmpl"></ng-container>
+                <span>mặt hàng trong giỏ.</span>
+              </div>
+              <span class="loc-tag">Vị trí 1: Card Header</span>
+            </div>
+
+            <div class="preview-card-body">
+              <p>
+                Nội dung chi tiết đơn hàng đang xử lý. Hiện tại có
+                <!-- Vị trí 2: Body -->
+                <ng-container [ngTemplateOutlet]="counterBadgeTmpl"></ng-container>
+                được hệ thống đánh dấu ưu tiên xuất kho trong ngày hôm nay.
+              </p>
+              <div class="loc-tag inline">Vị trí 2: Card Body</div>
+            </div>
+
+            <div class="preview-card-footer">
+              <div class="footer-summary">
+                <span>Tổng kết thanh toán: Đã xác nhận</span>
+                <!-- Vị trí 3: Footer -->
+                <ng-container [ngTemplateOutlet]="counterBadgeTmpl"></ng-container>
+              </div>
+              <span class="loc-tag">Vị trí 3: Card Footer</span>
+            </div>
+          </div>
+
+          <!-- Định nghĩa duy nhất 1 lần ng-template #counterBadgeTmpl -->
+          <ng-template #counterBadgeTmpl>
+            <span class="shared-badge" [ngClass]="counterTheme()">
+              <span class="pulse-dot"></span>
+              <strong>{{ counter() }}</strong> items
+            </span>
+          </ng-template>
+
+          <div class="summary-points">
+            <div class="point-item">
+              <span class="check-icon">✓</span>
+              <span><strong>Bảo trì 1 điểm duy nhất:</strong> Sửa màu sắc, icon, hiệu ứng bên trong <code>#counterBadgeTmpl</code> thì cả 3 nơi lập tức cập nhật.</span>
+            </div>
+            <div class="point-item">
+              <span class="check-icon">✓</span>
+              <span><strong>Tối ưu Bundle:</strong> Không cần sinh thêm class Component, không overhead lifecycle hooks.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ================================================================= -->
+    <!-- SECTION 3: ngTemplateOutlet & ngTemplateOutletContext            -->
+    <!-- ================================================================= -->
+    @if (currentTab() === 'all' || currentTab() === 'context') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge indigo">Phần 3</span>
+            <h2 class="card-title">ngTemplateOutlet & ngTemplateOutletContext (Truyền Dữ Liệu Vào Template)</h2>
+          </div>
+          <span class="info-tag">Parameterization</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner indigo-theme">
+            <div class="concept-icon">⚙️</div>
+            <div class="concept-text">
+              Giống như component nhận <code>&#64;Input()</code>, <code>&lt;ng-template&gt;</code> nhận dữ liệu thông qua <code>ngTemplateOutletContext</code>:
+              <ul class="context-rules">
+                <li><strong>Explicit (Tường minh):</strong> <code>let-myVar="keyInContext"</code> &rarr; Truy cập biến <code>{{ '{{' }} myVar {{ '}}' }}</code> tương ứng giá trị của property <code>keyInContext</code> trong object.</li>
+                <li><strong>Implicit (Ngầm định):</strong> <code>let-defaultVar</code> (không có dấu <code>=</code>) &rarr; Tự động ánh xạ với giá trị của property đặc biệt <code>$implicit</code>.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Template Button Tái Sử Dụng Chung -->
+          <ng-template
+            #dynamicBtnTmpl
+            let-implicitVal
+            let-lbl="label"
+            let-cls="className"
+            let-ic="icon"
+            let-bdg="badge"
+            let-act="actionKey"
+          >
+            <button
+              type="button"
+              class="dyn-btn"
+              [ngClass]="cls"
+              (click)="onExecuteAction(act, lbl || implicitVal)"
+            >
+              @if (ic) {
+                <span class="btn-ic">{{ ic }}</span>
+              }
+              <span class="dyn-btn-label">{{ lbl || implicitVal }}</span>
+              @if (bdg !== undefined && bdg !== null && bdg > 0) {
+                <span class="btn-badge">{{ bdg }}</span>
+              }
+            </button>
+          </ng-template>
+
+          <!-- Danh sách các nút được sinh từ 1 template duy nhất -->
+          <div class="dynamic-buttons-section">
+            <h3 class="subsection-title">1. Các Nút Được Render Từ Cùng 1 Template (#dynamicBtnTmpl)</h3>
+            <div class="buttons-grid">
+              @for (btn of dynamicButtons; track btn.actionKey) {
+                <div class="btn-card">
+                  <div class="btn-preview-wrap">
+                    <ng-container
+                      [ngTemplateOutlet]="dynamicBtnTmpl"
+                      [ngTemplateOutletContext]="btn"
+                    ></ng-container>
+                  </div>
+                  <div class="btn-context-code">
+                    <code>Context: &#123; label: '{{ btn.label }}', class: '{{ btn.className }}', icon: '{{ btn.icon }}', badge: {{ btn.badge }} &#125;</code>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Thử nghiệm với Implicit ($implicit) -->
+          <div class="implicit-test-section">
+            <h3 class="subsection-title">2. Thử Nghiệm Biến Ngầm Định ($implicit)</h3>
+            <div class="implicit-box">
+              <div class="implicit-input-row">
+                <label>Nhập nội dung $implicit:</label>
+                <input
+                  type="text"
+                  class="text-input"
+                  [(ngModel)]="implicitText"
+                  placeholder="Nhập chữ bất kỳ..."
+                />
+              </div>
+
+              <div class="implicit-result">
+                <span>Kết quả truyền vào:</span>
+                <ng-container
+                  [ngTemplateOutlet]="dynamicBtnTmpl"
+                  [ngTemplateOutletContext]="{ $implicit: implicitText, className: 'btn-purple', icon: '✨', actionKey: 'implicit_test' }"
+                ></ng-container>
+                <span class="hint-tag">Template dùng <code>let-implicitVal</code> để đón <code>$implicit</code></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ================================================================= -->
+    <!-- SECTION 4: Template Customization / Override Pattern              -->
+    <!-- ================================================================= -->
+    @if (currentTab() === 'all' || currentTab() === 'override') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge purple">Phần 4</span>
+            <h2 class="card-title">Kỹ Thuật Override Template (Component Slot Customization)</h2>
+          </div>
+          <span class="info-tag">Pattern thư viện UI</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner purple-theme">
+            <div class="concept-icon">🧩</div>
+            <div class="concept-text">
+              <strong>Kỹ thuật chuyên sâu:</strong> Các UI Framework nổi tiếng (như Angular Material, NG-ZORRO, PrimeNG) đều sử dụng mô hình này. Component con cung cấp một template header mặc định, nhưng nhận thêm <code>&#64;Input() headerTemplate?: TemplateRef&lt;any&gt;</code>. Nếu component cha truyền vào template tùy chỉnh, nó sẽ ghi đè (override) template mặc định mà không cần sửa code của component con!
+            </div>
+          </div>
+
+          <div class="override-controls">
+            <div class="toggle-box">
+              <label class="switch-label">
+                <input
+                  type="checkbox"
+                  [checked]="useCustomHeader()"
+                  (change)="toggleCustomHeader()"
+                />
+                <span class="switch-slider"></span>
+                <span class="switch-text">
+                  Bật Override: <strong>{{ useCustomHeader() ? 'Đang Dùng Custom Header Từ Cha' : 'Đang Dùng Default Header Của Con' }}</strong>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Component con SubTabContainerComponent -->
+          <div class="sub-tab-wrapper">
+            <!-- Nếu useCustomHeader() bật thì truyền customHeaderTmpl, nếu không thì null để dùng default -->
+            <app-sub-tab-container
+              [headerTemplate]="useCustomHeader() ? customHeaderTmpl : undefined"
+              [title]="parentTabTitle()"
+            >
+              <div class="card-inner-content">
+                <h4>📄 Nội dung bên trong Tab Body (Được chiếu qua ng-content)</h4>
+                <p>
+                  Báo cáo doanh số Q3 tăng trưởng <strong>+24.8%</strong> so với cùng kỳ năm ngoái.
+                  Mọi nghiệp vụ xử lý dữ liệu diễn ra hoàn toàn bình thường bất kể Header bên trên đang dùng Template mặc định hay Custom!
+                </p>
+                <div class="status-indicator">
+                  <span class="status-dot"></span> Hệ thống đang vận hành ổn định
+                </div>
+              </div>
+            </app-sub-tab-container>
+          </div>
+
+          <!-- Template tùy chỉnh do Parent định nghĩa -->
+          <ng-template #customHeaderTmpl let-parentTitle="title" let-tabsCount="totalTabs">
+            <div class="parent-custom-header">
+              <div class="custom-badge-chip">⚡ Custom Header (Được Inject từ Parent Component)</div>
+              <div class="custom-header-actions">
+                <h3 class="custom-title">💎 {{ parentTitle }}</h3>
+                <div class="custom-btn-group">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-indigo"
+                    (click)="onExecuteAction('parent_login', loginCustomText())"
+                  >
+                    {{ loginCustomText() }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-emerald"
+                    (click)="onExecuteAction('parent_signup', newAccountText())"
+                  >
+                    {{ newAccountText() }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </section>
+    }
+
+    <!-- ================================================================= -->
+    <!-- SECTION 5: ng-container vs Div Wrapper                            -->
+    <!-- ================================================================= -->
+    @if (currentTab() === 'all' || currentTab() === 'ng-container') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge rose">Phần 5</span>
+            <h2 class="card-title">ng-container vs Thẻ Div Rác (Bảo Vệ CSS Flexbox/Grid)</h2>
+          </div>
+          <span class="info-tag">Giải quyết vỡ giao diện</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner rose-theme">
+            <div class="concept-icon">🛡️</div>
+            <div class="concept-text">
+              <strong>Tại sao cần &lt;ng-container&gt;?</strong>
+              Khi gom nhóm các phần tử để gán directive (như <code>*ngIf</code> hoặc <code>*ngTemplateOutlet</code>), nếu bạn dùng thẻ <code>&lt;div&gt;</code> bọc ngoài, một thẻ HTML thật sẽ được sinh ra trên DOM. 
+              Thẻ thừa này sẽ <strong>phá vỡ hoàn toàn layout CSS Flexbox/Grid</strong> (vì các thẻ con không còn là con trực tiếp), hoặc làm hỏng bộ chọn <code>parent &gt; child</code>!
+            </div>
+          </div>
+
+          <!-- Toggle phá vỡ Flexbox -->
+          <div class="breaker-controls">
+            <div class="breaker-switch">
+              <button
+                type="button"
+                class="btn"
+                [class.btn-emerald]="!useDivBreaker()"
+                [class.btn-outline]="useDivBreaker()"
+                (click)="useDivBreaker.set(false)"
+              >
+                ✅ Dùng &lt;ng-container&gt; (Chuẩn - Zero DOM)
+              </button>
+              <button
+                type="button"
+                class="btn"
+                [class.btn-rose]="useDivBreaker()"
+                [class.btn-outline]="!useDivBreaker()"
+                (click)="useDivBreaker.set(true)"
+              >
+                ⚠️ Dùng Thẻ &lt;div class="extra-wrapper"&gt; (Gây Vỡ Layout)
+              </button>
+            </div>
+            <div class="layout-status-badge" [class.danger]="useDivBreaker()">
+              {{ useDivBreaker() ? '❌ CẢNH BÁO: Thẻ DIV thừa đã gom các item lại, Flexbox bị vỡ thành 1 khối!' : '✔️ HOÀN HẢO: ng-container không sinh thẻ, các nút dàn đều Flex hàng ngang.' }}
+            </div>
+          </div>
+
+          <!-- Khung Flexbox Demo -->
+          <div class="flex-test-container">
+            <div class="flex-header-bar">
+              <span>CSS: <code>display: flex; gap: 1rem; justify-content: space-between;</code></span>
+            </div>
+
+            <!-- Vùng Flexbox thực tế -->
+            <div class="flex-content-box">
+              <div class="flex-item static">Nút Cố Định 1 📌</div>
+
+              <!-- Trường hợp 1: Dùng DIV thừa -->
+              @if (useDivBreaker()) {
+                <div class="extra-wrapper-div">
+                  <div class="dom-tag-warning">&lt;div class="extra-wrapper"&gt; (Thẻ Rác Phá Layout)</div>
+                  @if (showItemA()) {
+                    <div class="flex-item dynamic">Nút Động A 📦</div>
+                  }
+                  @if (showItemB()) {
+                    <div class="flex-item dynamic">Nút Động B 📦</div>
+                  }
+                  @if (showItemC()) {
+                    <div class="flex-item dynamic">Nút Động C 📦</div>
+                  }
+                </div>
+              } @else {
+                <!-- Trường hợp 2: Dùng ng-container chuẩn -->
+                <ng-container>
+                  @if (showItemA()) {
+                    <div class="flex-item dynamic">Nút Động A 📦</div>
+                  }
+                  @if (showItemB()) {
+                    <div class="flex-item dynamic">Nút Động B 📦</div>
+                  }
+                  @if (showItemC()) {
+                    <div class="flex-item dynamic">Nút Động C 📦</div>
+                  }
+                </ng-container>
+              }
+
+              <div class="flex-item static">Nút Cố Định 2 📌</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- ================================================================= -->
+    <!-- SECTION 6: Advanced Generic Data List Template                    -->
+    <!-- ================================================================= -->
+    @if (currentTab() === 'all' || currentTab() === 'advanced-list') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge amber">Phần 6</span>
+            <h2 class="card-title">Ứng Dụng Nâng Cao: Generic Data List Với Template Đa Chế Độ</h2>
+          </div>
+          <span class="info-tag">Thực tế trong dự án</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner amber-theme">
+            <div class="concept-icon">📊</div>
+            <div class="concept-text">
+              <strong>Kịch bản:</strong> Cùng một danh sách nhân sự, người dùng có thể chuyển đổi hiển thị giữa <strong>Thẻ (Card Grid)</strong>, <strong>Bảng (Table)</strong>, hoặc <strong>Thu gọn (Compact)</strong>. Thay vì viết 3 vòng lặp riêng biệt, ta sử dụng <code>ngTemplateOutlet</code> để tráo đổi template hiển thị từng item linh hoạt!
+            </div>
+          </div>
+
+          <!-- Thanh điều khiển hiển thị -->
+          <div class="list-controls-bar">
+            <div class="view-mode-buttons">
+              <span class="bar-label">Chế độ hiển thị:</span>
+              <button
+                type="button"
+                class="view-btn"
+                [class.active]="viewMode() === 'grid'"
+                (click)="viewMode.set('grid')"
+              >
+                🎴 Thẻ Lưới (Card Grid)
+              </button>
+              <button
+                type="button"
+                class="view-btn"
+                [class.active]="viewMode() === 'table'"
+                (click)="viewMode.set('table')"
+              >
+                📑 Dạng Bảng (Table Rows)
+              </button>
+              <button
+                type="button"
+                class="view-btn"
+                [class.active]="viewMode() === 'compact'"
+                (click)="viewMode.set('compact')"
+              >
+                📋 Tinh Gọn (Compact List)
+              </button>
+            </div>
+
+            <div class="filter-role-group">
+              <span class="bar-label">Lọc phòng ban:</span>
+              <select
+                class="role-select"
+                [value]="filterRole()"
+                (change)="filterRole.set($any($event.target).value)"
+              >
+                <option value="all">Tất cả phòng ban</option>
+                <option value="Admin">Admin</option>
+                <option value="Developer">Developer</option>
+                <option value="Designer">Designer</option>
+                <option value="Tester">Tester</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Container danh sách data áp dụng ngTemplateOutlet -->
+          <div class="users-list-wrapper" [ngClass]="viewMode()">
+            @for (u of filteredUsers(); track u.id; let idx = $index; let isFirst = $first; let isLast = $last) {
+              <!-- Tráo đổi template tương ứng với viewMode() -->
+              <ng-container
+                [ngTemplateOutlet]="
+                  viewMode() === 'grid'
+                    ? userCardTmpl
+                    : (viewMode() === 'table' ? userTableTmpl : userCompactTmpl)
+                "
+                [ngTemplateOutletContext]="{
+                  $implicit: u,
+                  index: idx + 1,
+                  first: isFirst,
+                  last: isLast
+                }"
+              ></ng-container>
+            } @empty {
+              <div class="empty-list-notice">Không tìm thấy nhân viên phù hợp bộ lọc!</div>
+            }
+          </div>
+
+          <!-- ============================================== -->
+          <!-- TEMPLATE 1: User Card View                     -->
+          <!-- ============================================== -->
+          <ng-template #userCardTmpl let-user let-i="index">
+            <div class="user-card-item">
+              <div class="user-card-top">
+                <span class="user-avatar">{{ user.avatar }}</span>
+                <span class="user-index">#{{ i }}</span>
+              </div>
+              <h4 class="user-name">{{ user.name }}</h4>
+              <p class="user-email">{{ user.email }}</p>
+              <div class="user-card-meta">
+                <span class="role-badge" [ngClass]="user.role.toLowerCase()">{{ user.role }}</span>
+                <span class="badge-count-pill">{{ user.badgeCount }} tasks</span>
+              </div>
+            </div>
+          </ng-template>
+
+          <!-- ============================================== -->
+          <!-- TEMPLATE 2: User Table Row View                -->
+          <!-- ============================================== -->
+          <ng-template #userTableTmpl let-user let-i="index">
+            <div class="user-table-row">
+              <span class="tb-col idx">#{{ i }}</span>
+              <span class="tb-col avatar">{{ user.avatar }}</span>
+              <span class="tb-col name">
+                <strong>{{ user.name }}</strong>
+                <small>{{ user.email }}</small>
+              </span>
+              <span class="tb-col role">
+                <span class="role-badge" [ngClass]="user.role.toLowerCase()">{{ user.role }}</span>
+              </span>
+              <span class="tb-col tasks">{{ user.badgeCount }} nhiệm vụ</span>
+              <span class="tb-col status">
+                <span class="status-dot" [class.offline]="!user.isActive"></span>
+                {{ user.isActive ? 'Đang online' : 'Ngoại tuyến' }}
+              </span>
+            </div>
+          </ng-template>
+
+          <!-- ============================================== -->
+          <!-- TEMPLATE 3: User Compact View                  -->
+          <!-- ============================================== -->
+          <ng-template #userCompactTmpl let-user let-i="index">
+            <div class="user-compact-pill">
+              <span class="compact-avatar">{{ user.avatar }}</span>
+              <span class="compact-name">{{ user.name }}</span>
+              <span class="compact-role">({{ user.role }})</span>
+              <span class="compact-tasks">⚡ {{ user.badgeCount }}</span>
+            </div>
+          </ng-template>
+        </div>
+      </section>
+    }
+
+    <!-- ================================================================= -->
+    <!-- SECTION 7: Architectural Summary & Comparison Table               -->
+    <!-- ================================================================= -->
+    <section class="card summary-table-card">
+      <div class="card-header">
+        <h2 class="card-title">📖 Tóm Tắt So Sánh: ng-template, ngTemplateOutlet và ng-container</h2>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th>Khái Niệm</th>
+                <th>Bản Chất Kỹ Thuật</th>
+                <th>Có Sinh Thẻ DOM Thật?</th>
+                <th>Trường Hợp Dùng Tiêu Biểu</th>
+                <th>Lưu Ý Quan Trọng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong><code>&lt;ng-template&gt;</code></strong></td>
+                <td>Là một <code>TemplateRef</code> chứa khung HTML mẫu trong bộ nhớ.</td>
+                <td><span class="tag-no">❌ Không sinh thẻ</span> (chỉ xuất hiện khi render)</td>
+                <td>Dùng trong <code>*ngIf else</code>, tách khối UI tái sử dụng, truyền template vào con.</td>
+                <td>HTML bên trong không bao giờ tự hiển thị ở vị trí định nghĩa. Biến bên trong không có strict type-check.</td>
+              </tr>
+              <tr>
+                <td><strong><code>ngTemplateOutlet</code></strong></td>
+                <td>Chỉ thị (Directive) chịu trách nhiệm lấy <code>TemplateRef</code> để cắm vào DOM.</td>
+                <td>Phụ thuộc thẻ chứa nó (thường đi kèm <code>&lt;ng-container&gt;</code> để zero-tag)</td>
+                <td>Render động các template, truyền data qua <code>ngTemplateOutletContext</code>.</td>
+                <td>Cần truyền <code>$implicit</code> cho biến không tên, hoặc <code>let-key="key"</code> cho biến tường minh.</td>
+              </tr>
+              <tr>
+                <td><strong><code>&lt;ng-container&gt;</code></strong></td>
+                <td>Thẻ nhóm ảo (Virtual Grouping Element) do Angular cung cấp.</td>
+                <td><span class="tag-no">❌ Không sinh thẻ</span> (biến mất hoàn toàn khi render)</td>
+                <td>Gom nhóm để gán directive (*ngIf, *ngFor, ngTemplateOutlet), tránh phá Flex/Grid.</td>
+                <td>Tuyệt đối không gán class CSS trực tiếp lên <code>ng-container</code> vì nó không tồn tại trên DOM!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
 </div>

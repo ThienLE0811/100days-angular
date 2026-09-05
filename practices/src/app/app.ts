@@ -24,7 +24,7 @@ export class App {
   });
 
   hasBadge(dayNum: number): boolean {
-    return dayNum === 2 || dayNum === 3 || (dayNum >= 15 && dayNum <= 26);
+    return dayNum === 2 || dayNum === 3 || (dayNum >= 14 && dayNum <= 26);
   }
 
   onSearch(event: Event) {

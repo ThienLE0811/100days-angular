@@ -1,0 +1,476 @@
+<div class="day003-page">
+  <!-- Toast Notification -->
+  @if (showToast) {
+    <div class="toast-notification">
+      <span class="toast-icon">⚡</span>
+      <span class="toast-text">{{ toastMessage }}</span>
+      <button class="toast-close" (click)="showToast = false">✕</button>
+    </div>
+  }
+
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 03</span>
+        <span class="badge badge-syntax" ngNonBindable>Interpolation: &#123;&#123; &#125;&#125;</span>
+        <span class="badge badge-syntax" ngNonBindable>Property: [property]</span>
+        <span class="badge badge-syntax" ngNonBindable>Event: (event)</span>
+        <span class="badge badge-syntax" ngNonBindable>Two-Way: [(ngModel)]</span>
+      </div>
+      <h1 class="page-title">Angular Data Binding</h1>
+      <p class="page-subtitle">
+        Khám phá và thực hành 4 cơ chế ràng buộc dữ liệu cốt lõi trong Angular: từ hiển thị dữ liệu ra giao diện đến bắt sự kiện người dùng và đồng bộ hai chiều thời gian thực.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="resetProfile()" title="Khôi phục dữ liệu ban đầu">
+        <span class="icon">↺</span> Khôi phục mặc định
+      </button>
+      <a
+        class="btn btn-doc"
+        href="https://angular.dev/guide/templates/binding"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Xem Angular Docs chính thức"
+      >
+        <span>Docs ↗</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <div class="dashboard-grid">
+    <!-- Left Column: Interactive Profile Card & Action Log -->
+    <div class="dashboard-column preview-column">
+      <!-- Profile Card (Theo gợi ý bài tập trong docs/Day003-DataBinding.md) -->
+      <section class="card profile-card-wrapper" [class]="'theme-' + cardTheme">
+        <div class="profile-card-header">
+          <div class="header-top">
+            <span class="badge-card-type">Live Profile Card</span>
+            <div class="theme-picker">
+              <span class="theme-label">Giao diện:</span>
+              <button
+                class="theme-dot indigo"
+                [class.active]="cardTheme === 'indigo'"
+                (click)="setTheme('indigo')"
+                title="Tông Indigo"
+              ></button>
+              <button
+                class="theme-dot emerald"
+                [class.active]="cardTheme === 'emerald'"
+                (click)="setTheme('emerald')"
+                title="Tông Emerald"
+              ></button>
+              <button
+                class="theme-dot rose"
+                [class.active]="cardTheme === 'rose'"
+                (click)="setTheme('rose')"
+                title="Tông Rose"
+              ></button>
+              <button
+                class="theme-dot amber"
+                [class.active]="cardTheme === 'amber'"
+                (click)="setTheme('amber')"
+                title="Tông Amber"
+              ></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-card-body">
+          <div class="avatar-container">
+            <!-- Property Binding: [src], [alt] -->
+            <img
+              class="profile-avatar"
+              [src]="user.avatar"
+              [alt]="user.name"
+              (error)="user.avatar = defaultAvatar"
+            />
+            <span class="status-indicator" [title]="user.isFollowing ? 'Đã kết nối' : 'Trực tuyến'"></span>
+          </div>
+
+          <!-- Interpolation: {{ user.name }}, {{ user.role }} -->
+          <h2 class="profile-name">{{ user.name }}</h2>
+          <p class="profile-role">{{ user.role }}</p>
+
+          <div class="profile-chips">
+            <span class="chip chip-age">🎂 {{ user.age }} tuổi</span>
+            <span class="chip chip-year">📅 Sinh năm ~ {{ currentYear - user.age }}</span>
+            <span class="chip chip-status" [class.active]="user.isFollowing">
+              {{ user.isFollowing ? '✓ Đang theo dõi' : '+ Chưa theo dõi' }}
+            </span>
+          </div>
+
+          <!-- Interpolation: {{ user.bio }} -->
+          <p class="profile-bio">{{ user.bio }}</p>
+
+          <!-- Stats with Interpolation -->
+          <div class="profile-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ user.followers | number }}</span>
+              <span class="stat-label">Followers</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-value">{{ user.likes | number }}</span>
+              <span class="stat-label">Lượt thích</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-value">{{ user.age > 22 ? user.age - 22 : 1 }}+</span>
+              <span class="stat-label">Năm Exp</span>
+            </div>
+          </div>
+
+          <!-- Event Binding: (click) -->
+          <div class="profile-actions">
+            <button
+              class="btn-card btn-like"
+              (click)="onLike()"
+              title="Click để tăng số lượt thích (Event Binding)"
+            >
+              ❤️ Thích ({{ user.likes }})
+            </button>
+
+            <button
+              class="btn-card btn-follow"
+              [class.active]="user.isFollowing"
+              (click)="onToggleFollow()"
+            >
+              {{ user.isFollowing ? '✓ Bỏ theo dõi' : '+ Theo dõi' }}
+            </button>
+
+            <button
+              class="btn-card btn-hello"
+              (click)="showInfo()"
+              title="Gọi method showInfo() từ tài liệu Day 3"
+            >
+              👋 Click me!
+            </button>
+          </div>
+
+          <div class="profile-footer-links">
+            <!-- Property Binding: [href], [title] -->
+            <a
+              class="profile-link"
+              [href]="user.website"
+              [title]="'Trang GitHub của ' + user.name"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              🌐 {{ user.website }}
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Activity Log (Ghi nhận các event và binding tức thì) -->
+      <section class="card log-card">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <span class="section-icon">📜</span>
+            <h3>Nhật ký Data Binding trực tiếp (Activity Log)</h3>
+          </div>
+          <button class="btn-text" (click)="clearLogs()" title="Xóa danh sách log">Xóa log</button>
+        </div>
+        <p class="section-desc">
+          Mỗi thao tác click, nhập liệu hay thay đổi trạng thái sẽ được Angular xử lý và ghi nhận tại đây:
+        </p>
+
+        <div class="log-stream">
+          @for (log of actionLogs; track log.id) {
+            <div class="log-item" [class]="'log-' + log.type">
+              <span class="log-time">{{ log.time }}</span>
+              <span class="log-badge">{{ log.action }}</span>
+              <span class="log-desc">{{ log.desc }}</span>
+            </div>
+          } @empty {
+            <div class="empty-logs">Chưa có tương tác nào. Hãy thử click các nút hoặc nhập liệu bên phải!</div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <!-- Right Column: 4 Core Data Binding Workshops -->
+    <div class="dashboard-column labs-column">
+      <!-- 1. INTERPOLATION -->
+      <section class="card lab-section">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <span class="step-tag">1</span>
+            <div>
+              <h3>Interpolation <code class="syntax-code" ngNonBindable>{{ expression }}</code></h3>
+              <p class="subtitle">Truy xuất dữ liệu từ TypeScript class và hiển thị ra template HTML</p>
+            </div>
+          </div>
+          <span class="badge-type">One-Way (Class ➔ View)</span>
+        </div>
+
+        <div class="lab-body">
+          <div class="doc-quote">
+            <strong>Trích dẫn Day 003:</strong> "Nó có thể hiểu là hãy tính toán cái <code>expression</code> này, nếu có trả về cái gì thì phun (display) nó ra ngay vị trí chỗ dấu <code ngNonBindable>{{}}</code> này cho tôi."
+          </div>
+
+          <div class="demo-table">
+            <div class="demo-row">
+              <div class="demo-label">
+                <code ngNonBindable>{{ user.name }}</code>
+                <small>Truy cập thuộc tính string</small>
+              </div>
+              <div class="demo-result">{{ user.name }}</div>
+            </div>
+
+            <div class="demo-row">
+              <div class="demo-label">
+                <code ngNonBindable>{{ user.age }}</code>
+                <small>Truy cập thuộc tính number</small>
+              </div>
+              <div class="demo-result">
+                {{ user.age }}
+                <div class="mini-stepper">
+                  <button class="btn-step" (click)="decreaseAge()" title="Giảm tuổi">-</button>
+                  <button class="btn-step" (click)="increaseAge()" title="Tăng tuổi">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="demo-row">
+              <div class="demo-label">
+                <code ngNonBindable>{{ user.age * 365 }}</code>
+                <small>Tính toán biểu thức số học</small>
+              </div>
+              <div class="demo-result">
+                <span class="highlight-number">{{ user.age * 365 | number }}</span> ngày đã sống
+              </div>
+            </div>
+
+            <div class="demo-row">
+              <div class="demo-label">
+                <code ngNonBindable>{{ user.name.toUpperCase() }}</code>
+                <small>Gọi hàm biến đổi JavaScript</small>
+              </div>
+              <div class="demo-result"><strong>{{ user.name.toUpperCase() }}</strong></div>
+            </div>
+
+            <div class="demo-row">
+              <div class="demo-label">
+                <code ngNonBindable>{{ user.age &gt;= 18 ? 'Thành niên' : 'Vị thành niên' }}</code>
+                <small>Toán tử 3 ngôi (Ternary operator)</small>
+              </div>
+              <div class="demo-result">
+                <span class="status-pill" [class.adult]="user.age >= 18">
+                  {{ user.age >= 18 ? 'Đã thành niên (>= 18)' : 'Vị thành niên (< 18)' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. PROPERTY BINDING -->
+      <section class="card lab-section">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <span class="step-tag">2</span>
+            <div>
+              <h3>Property Binding <code class="syntax-code" ngNonBindable>[property]="expression"</code></h3>
+              <p class="subtitle">Gán giá trị từ class vào property của DOM Node hoặc Component</p>
+            </div>
+          </div>
+          <span class="badge-type">One-Way (Class ➔ DOM)</span>
+        </div>
+
+        <div class="lab-body">
+          <div class="doc-quote">
+            <strong>Trích dẫn Day 003:</strong> "Dấu ngoặc vuông <code ngNonBindable>[property]="expression"</code> báo cho Angular gán giá trị của biểu thức vào thuộc tính của DOM Object. Khi dữ liệu ở class đổi, DOM tự cập nhật."
+          </div>
+
+          <div class="control-box">
+            <div class="control-header">
+              <label class="control-title">Thử nghiệm 1: Thuộc tính [disabled] của button và input</label>
+              <button class="btn btn-sm" [class.btn-active]="isInputDisabled" (click)="toggleDisabled()">
+                {{ isInputDisabled ? '🔓 Mở khóa lại' : '🔒 Khóa thuộc tính' }}
+              </button>
+            </div>
+            <div class="input-inline">
+              <!-- Property Binding: [value] & [disabled] -->
+              <input
+                type="text"
+                class="form-control"
+                [value]="user.name"
+                [disabled]="isInputDisabled"
+                placeholder="[value]=user.name"
+              />
+              <button class="btn btn-secondary" [disabled]="isInputDisabled">
+                Nút có [disabled]="{{ isInputDisabled }}"
+              </button>
+            </div>
+            <p class="control-hint">
+              💡 Lưu ý: Khi sửa chữ trong ô <code>[value]</code> ở trên, giá trị <code>user.name</code> trong class <strong>chưa đổi</strong> vì Property Binding chỉ truyền 1 chiều từ TS class ra DOM!
+            </p>
+          </div>
+
+          <div class="control-box mt-3">
+            <div class="control-header">
+              <label class="control-title">Thử nghiệm 2: Binding [src] &amp; [title] của hình ảnh</label>
+            </div>
+            <div class="avatar-edit-row">
+              <input
+                type="text"
+                class="form-control"
+                [value]="user.avatar"
+                (input)="user.avatar = $any($event.target).value"
+                placeholder="Nhập đường dẫn hình ảnh [src]..."
+              />
+              <button class="btn btn-sm btn-outline" (click)="user.avatar = defaultAvatar">
+                Avatar mặc định
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. EVENT BINDING -->
+      <section class="card lab-section">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <span class="step-tag">3</span>
+            <div>
+              <h3>Event Binding <code class="syntax-code" ngNonBindable>(event)="handler($event)"</code></h3>
+              <p class="subtitle">Lắng nghe sự kiện từ giao diện (click, input, keydown) để kích hoạt method trong class</p>
+            </div>
+          </div>
+          <span class="badge-type">One-Way (DOM ➔ Class)</span>
+        </div>
+
+        <div class="lab-body">
+          <div class="doc-quote">
+            <strong>Trích dẫn Day 003:</strong> "Để gắn event listener vào một phần tử trên template, chúng ta sử dụng cú pháp ngoặc tròn tròn <code ngNonBindable>(click)="showInfo()"</code>. Lúc này ta trỏ đến method trong Component."
+          </div>
+
+          <div class="event-demo-grid">
+            <!-- Click Event demo -->
+            <div class="event-box">
+              <span class="event-title">1. Sự kiện (click)</span>
+              <p class="event-desc">Nhấn để kích hoạt phương thức <code>showInfo()</code>:</p>
+              <div class="btn-group">
+                <button class="btn btn-primary" (click)="showInfo()">
+                  (click)="showInfo()"
+                </button>
+                <button class="btn btn-outline" (click)="showInfo(true)">
+                  Gọi alert() trình duyệt
+                </button>
+              </div>
+            </div>
+
+            <!-- Input & Keydown Event demo -->
+            <div class="event-box">
+              <span class="event-title">2. Sự kiện (input) &amp; (keydown) với $event</span>
+              <p class="event-desc">Bắt luồng dữ liệu gõ phím trực tiếp từ đối tượng sự kiện:</p>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Gõ thử bất kỳ ký tự nào..."
+                (input)="onKeyInput($event)"
+                (keydown)="onKeyDownCapture($event)"
+              />
+              <div class="event-feedback">
+                <span>Dữ liệu gõ: <strong>{{ lastKeystroke || '(chưa gõ)' }}</strong></span>
+                <span>Phím vừa ấn: <code>{{ lastKeyEventCode || 'None' }}</code></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. TWO-WAY BINDING -->
+      <section class="card lab-section highlight-lab">
+        <div class="card-header-bar">
+          <div class="card-title-group">
+            <span class="step-tag">4</span>
+            <div>
+              <h3>Two-Way Data Binding <code class="syntax-code" ngNonBindable>[(ngModel)]</code></h3>
+              <p class="subtitle">Đồng bộ hai chiều tức thời giữa TypeScript class và Template view (Banana in a box)</p>
+            </div>
+          </div>
+          <span class="badge-type badge-two-way">Two-Way (Class ⇄ View)</span>
+        </div>
+
+        <div class="lab-body">
+          <div class="doc-quote">
+            <strong>Trích dẫn Day 003:</strong> "Two-way binding chính là kết hợp của binding dữ liệu từ class ra template thông qua property binding, và từ template vào class thông qua event binding: <code ngNonBindable>[(ngModel)]="user.name"</code>."
+          </div>
+
+          <div class="two-way-form">
+            <div class="form-row">
+              <div class="form-group col-half">
+                <label class="form-label">
+                  Họ và tên <code ngNonBindable>[(ngModel)]="user.name"</code>:
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="user.name"
+                  placeholder="Nhập tên..."
+                />
+              </div>
+
+              <div class="form-group col-half">
+                <label class="form-label">
+                  Tuổi <code ngNonBindable>[(ngModel)]="user.age"</code>:
+                </label>
+                <input
+                  type="number"
+                  class="form-control"
+                  [(ngModel)]="user.age"
+                  min="1"
+                  max="120"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                Tiểu sử giới thiệu <code ngNonBindable>[(ngModel)]="user.bio"</code>:
+              </label>
+              <textarea
+                class="form-control"
+                rows="2"
+                [(ngModel)]="user.bio"
+                placeholder="Nhập giới thiệu..."
+              ></textarea>
+            </div>
+
+            <!-- Tách rời Two-Way Binding để người học hiểu sâu bản chất -->
+            <div class="deconstructed-box">
+              <div class="deconstructed-header">
+                <span class="deconstructed-title">
+                  🔬 Bản chất tách rời của Two-Way Binding:
+                </span>
+                <span class="syntax-badge" ngNonBindable>
+                  [ngModel]="user.role" (ngModelChange)="user.role = $event"
+                </span>
+              </div>
+              <p class="deconstructed-desc">
+                Cú pháp <code ngNonBindable>[(ngModel)]</code> thực chất là viết tắt của <code ngNonBindable>[ngModel]</code> (Property Binding) + <code ngNonBindable>(ngModelChange)</code> (Event Binding):
+              </p>
+              <div class="input-inline">
+                <input
+                  type="text"
+                  class="form-control"
+                  [ngModel]="user.role"
+                  (ngModelChange)="onDeconstructedRoleChange($event)"
+                  placeholder="Chỉnh sửa Chức danh qua tách rời..."
+                />
+              </div>
+              <div class="deconstructed-result">
+                <span>Giá trị hiện tại trong class: <strong>{{ user.role }}</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

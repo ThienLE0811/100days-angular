@@ -2,15 +2,7 @@
 
 > _English translation for this series is available at `./translations/EN` folder_
 
-Series độc quyền cung cấp bởi thành viên của Angular Vietnam về các chủ đề liên quan tới Angular trong vòng 100 ngày.
-
-## Ủng hộ/ Support
-
-- [Ủng hộ cho Chau Tran](https://github.com/sponsors/nartc)
-- [Ủng hộ cho Trung Vo](https://www.buymeacoffee.com/trungvose)
-- [Ủng hộ cho Tiep Phan](https://www.facebook.com/pttiep)
-
-Bọn mình chân thành cảm ơn sự ủng hộ và đóng góp của các bạn!
+Series bài học và thực hành về các chủ đề liên quan tới Angular trong vòng 100 ngày, thực hiện bởi **Thiện Lê**.
 
 ## Dự án thực tế để tham khảo
 
@@ -19,8 +11,8 @@ Bọn mình chân thành cảm ơn sự ủng hộ và đóng góp của các b�
 | [Spotify][spotify]                 | Spotify được thiết kế với Nx workspace với một kiến trúc hoàn chỉnh tối ưu hóa Single Component Per Module (SCAM). ngrx và ngrx/component-store để quản lý dữ liệu giữa các component. TailwindCSS và ng-zorro cho phần UI.  | Nx, ngrx, TailwindCSS, ng-zorro            | [Youtube][spotify-video] |
 | [Jira Clone][jira]                 | Jira clone có sử dụng Akita state management để quản lý data giữa các thành phần trong ứng dụng. Ngoài ra có dùng thêm TailwindCSS cho styling và ng-zorro để sử dụng các component có sẵn như modal, tooltip                | TailwindCSS, ng-zorro, Akita               | [Youtube][jira-video]    |
 | [Tetris][tetris]                   | Tetris là ví dụ về game đơn giản viết bằng Angular có sử dụng Akita làm state management. Trông đơn giản thôi nhưng nếu bạn mở React Devtools lên thì sẽ thấy rất nhiều data được cập nhật với mỗi chuyển động trên màn hình | Akita                                      | [Youtube][tetris-video]  |
-| [Authentication Flow][authen-flow] | Anh Châu có chia sẻ về Authentication Flow, Permission-based Flow                                                                                                                                                            | Authentication Flow, Permission-based Flow | [Youtube][avo3]          |
-| [MEAN - NestJS][nest-mean]         | Anh Châu có chia sẻ về MEAN stack - MongoDB, Express, Angular and NodeJS                                                                                                                                                     | NestJS, MongoDB                            | [Youtube][nest-video]    |
+| [Authentication Flow][authen-flow] | Chia sẻ về Authentication Flow, Permission-based Flow                                                                                                                                         | Authentication Flow, Permission-based Flow | [Youtube][avo3]          |
+| [MEAN - NestJS][nest-mean]         | Chia sẻ về MEAN stack - MongoDB, Express, Angular and NodeJS                                                                                                                                  | NestJS, MongoDB                            | [Youtube][nest-video]    |
 
 [jira]: https://jira.trungk18.com/
 [jira-video]: https://youtu.be/3dukbsRX0tc
@@ -33,7 +25,7 @@ Bọn mình chân thành cảm ơn sự ủng hộ và đóng góp của các b�
 [nest-video]: https://www.youtube.com/watch?v=Tj_MMY15g6w&list=PLVmX3uPQtp3uRu30YKw0v2VIPgZo45FUD
 [authen-flow]: https://github.com/nartc/ng-auth-example
 
-## Các chia sẻ tâm huyết của ban quản trị Angular Việt Nam và những khách mời
+## Các chia sẻ tâm huyết và kinh nghiệm thực tế
 
 | #   | Title                                                                                              | Nội dung                                                                                                                                                                                                                                                                                              |
 | --- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -99,68 +91,64 @@ https://www.youtube.com/playlist?list=PLMTyi4Bfd5pW73uXw-6jgRxDwdPYqwk0r
 
 ## Tác giả
 
-- [Tiep Phan][tieppt]
-- [Chau Tran][nartc]
-- [Trung Vo][trungk18]
-- [Tuan Le][ngoctuanle]
-- [Khanh Tiet][khanhtiet]
-- [Minh Tu Hoang][m1nhtu99-hoan9]
+- **Thiện Lê**
 
-[day1]: Day001-Installation.md
+[day1]: docs/Day001-Installation.md
 [day1-eng]: ./translations/EN/Day001-Installation.md
-[day2]: Day002-AngularApp.md
+[day2]: docs/Day002-AngularApp.md
 [day2-eng]: ./translations/EN/Day002-AngularApp.md
-[day3]: Day003-DataBinding.md
+[day3]: docs/Day003-DataBinding.md
 [day3-eng]: ./translations/EN/Day003-DataBinding.md
-[day4]: Day004-Structure-Directive-If-Else.md
-[day5]: Day005-Structure-Directive-NgFor.md
-[day6]: Day006-Attribute-Directive-Class-Style.md
-[day7]: Day007-Component-Interaction-01.md
-[day8]: Day008-Component-Interaction-02.md
-[day9]: Day009-two-way-binding.md
-[day10]: Day010-template-variable-viewchild-viewchildren.md
-[day11]: Day011-typescript-data-type.md
-[day12]: Day012-typescript-advanced-type.md
-[day13]: Day013-content-projection-in-angular.md
-[day14]: Day014-ng-template-ng-template-outlet-ng-container.md
-[day15]: Day015-introduction-dependency-injection-in-angular.md
-[day16]: Day016-dependency-injection-in-angular-part-2.md
-[day17]: Day017-contentchild-contentchildren.md
-[day18]: Day018-pipes.md
-[day19]: Day019-intro-rxjs-observable.md
-[day20]: Day020-rxjs-creation.md
-[day21]: Day021-rxjs-transformation.md
-[day22]: Day022-rxjs-filtering.md
-[day23]: Day023-rxjs-combination.md
-[day24]: Day024-rxjs-error-handling-conditional.md
-[day25]: Day025-rxjs-hoo-utility.md
-[day26]: Day026-rxjs-subject-multicast.md
-[day27]: Day027-router.md
-[day28]: Day028-router-feature-child-services.md
-[day29]: Day029-router-lazy-load.md
-[day30]: Day030-router-guards-resolvers.md
-[day31]: Day031-router-guards-resolvers-2.md
-[day32]: Day032-router-guards-resolvers-3.md
-[day33]: Day033-template-driven-forms.md
-[day34]: Day034-template-driven-forms-2.md
-[day35]: Day035-reactive-forms.md
-[day36]: Day036-reactive-forms-2.md
-[day37]: Day037-form-async-validator.md
-[day38]: Day038-dynamic-component.md
-[day39]: Day039-micro-frontends.md
-[day40]: Day040-jira-angular-01.md
+[day4]: docs/Day004-Structure-Directive-If-Else.md
+[day5]: docs/Day005-Structure-Directive-NgFor.md
+[day6]: docs/Day006-Attribute-Directive-Class-Style.md
+[day7]: docs/Day007-Component-Interaction-01.md
+[day8]: docs/Day008-Component-Interaction-02.md
+[day9]: docs/Day009-two-way-binding.md
+[day10]: docs/Day010-template-variable-viewchild-viewchildren.md
+[day11]: docs/Day011-typescript-data-type.md
+[day12]: docs/Day012-typescript-advanced-type.md
+[day13]: docs/Day013-content-projection-in-angular.md
+[day14]: docs/Day014-ng-template-ng-template-outlet-ng-container.md
+[day15]: docs/Day015-introduction-dependency-injection-in-angular.md
+[day16]: docs/Day016-dependency-injection-in-angular-part-2.md
+[day17]: docs/Day017-contentchild-contentchildren.md
+[day18]: docs/Day018-pipes.md
+[day19]: docs/Day019-intro-rxjs-observable.md
+[day20]: docs/Day020-rxjs-creation.md
+[day21]: docs/Day021-rxjs-transformation.md
+[day22]: docs/Day022-rxjs-filtering.md
+[day23]: docs/Day023-rxjs-combination.md
+[day24]: docs/Day024-rxjs-error-handling-conditional.md
+[day25]: docs/Day025-rxjs-hoo-utility.md
+[day26]: docs/Day026-rxjs-subject-multicast.md
+[day27]: docs/Day027-router.md
+[day28]: docs/Day028-router-feature-child-services.md
+[day29]: docs/Day029-router-lazy-load.md
+[day30]: docs/Day030-router-guards-resolvers.md
+[day31]: docs/Day031-router-guards-resolvers-2.md
+[day32]: docs/Day032-router-guards-resolvers-3.md
+[day33]: docs/Day033-template-driven-forms.md
+[day34]: docs/Day034-template-driven-forms-2.md
+[day35]: docs/Day035-reactive-forms.md
+[day36]: docs/Day036-reactive-forms-2.md
+[day37]: docs/Day037-form-async-validator.md
+[day38]: docs/Day038-dynamic-component.md
+[day39]: docs/Day039-micro-frontends.md
+[day40]: docs/Day040-jira-angular-01.md
 [day40-eng]: https://trungk18.com/experience/angular-jira-clone-tutorial-01-planning-and-set-up/
-[day41]: Day041-jira-angular-02.md
+[day41]: docs/Day041-jira-angular-02.md
 [day41-eng]: https://trungk18.com/experience/angular-jira-clone-tutorial-02-application-layout-tailwindcss-flex/
-[day42]: Day042-angular-cdk-coercion.md
-[day43]: Day043-angular-disable-control-directive.md
+[day42]: docs/Day042-angular-cdk-coercion.md
+[day43]: docs/Day043-angular-disable-control-directive.md
 [day43-eng]: https://trungk18.com/experience/disable-a-reactive-form-control-using-custom-directive/
-[day44]: Day044-output-observable.md
+[day44]: docs/Day044-output-observable.md
 [day44-eng]: https://trungk18.com/experience/observable-for-angular-output/
-[day45]: Day045-angular-observable-subscription-unsubscribe.md
-[day46]: Day046-javascript-widget-embedded-script.md
-[day47]: Day047-composition-form-datasource-with-directive.md
-[day48]: Day048-using-dependency-injection-to-get-data-from-activated-route.md
+[day45]: docs/Day045-angular-observable-subscription-unsubscribe.md
+[day46]: docs/Day046-javascript-widget-embedded-script.md
+[day47]: docs/Day047-composition-form-datasource-with-directive.md
+[day48]: docs/Day048-using-dependency-injection-to-get-data-from-activated-route.md
+
 [day1-video]: https://youtu.be/NS6P1fpU77o
 [day2-video]: https://youtu.be/jgFw8tAgKNs
 [day3-video]: https://youtu.be/WrMywdbnQfk
@@ -197,9 +185,4 @@ https://www.youtube.com/playlist?list=PLMTyi4Bfd5pW73uXw-6jgRxDwdPYqwk0r
 [day35-video]: https://youtu.be/oTwukyGa_qY
 [day36-video]: https://youtu.be/ozHU4MmRS1w
 [day37-video]: https://youtu.be/-ib5p8KbapQ
-[tieppt]: https://github.com/tieppt
-[nartc]: https://github.com/nartc
-[trungk18]: https://github.com/trungk18
-[ngoctuanle]: https://github.com/ngoctuanle
-[khanhtiet]: https://github.com/januaryofmine
-[m1nhtu99-hoan9]: https://github.com/m1nhtu99-hoan9
+

@@ -1,4 +1,248 @@
-<div class="day-container">
-  <h2>Day015-introduction-dependency-injection-in-angular</h2>
-  <p>day015-introduction-dependency-injection-in-angular works!</p>
+<div class="day015-page">
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 15</span>
+        <span class="badge badge-syntax">&#64;Injectable</span>
+        <span class="badge badge-syntax">providedIn: 'root'</span>
+        <span class="badge badge-syntax">Constructor Injection</span>
+        <span class="badge badge-syntax">Override Provider</span>
+        <span class="badge badge-syntax">useClass</span>
+      </div>
+      <h1 class="page-title">Introduction to Dependency Injection in Angular</h1>
+      <p class="page-subtitle">
+        Khám phá nguyên lý <strong>Inversion of Control (IoC)</strong> và <strong>Dependency Injection (DI)</strong>.
+        Hiểu rõ 3 thành phần cốt lõi (<em>Injector - Provider - Dependency</em>), sự khác biệt giữa <strong>Tight Coupling</strong> (dùng <code>new</code>)
+        và <strong>Loose Coupling</strong> (Constructor Injection), cùng khả năng tráo đổi implementation linh hoạt bằng <strong>Override Provider</strong>.
+      </p>
+    </div>
+
+    <!-- Quick Stats / Root Cart Status -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Giỏ hàng chung (Root Cart):</span>
+        <span class="stat-value">{{ rootCartService.selectedProducts.length }} món ({{ rootCartService.calculateTotal() | currency : 'USD' : 'symbol' : '1.0-0' }})</span>
+      </div>
+      <button class="btn-clear-cart" (click)="clearRootCart()" title="Làm trống giỏ hàng root">
+        Xóa giỏ ⌫
+      </button>
+    </div>
+  </header>
+
+  <!-- Product Picker Strip -->
+  <section class="card product-selector-strip">
+    <div class="strip-header">
+      <span class="strip-label">📦 Chọn sản phẩm mẫu để thử nghiệm tính năng giỏ hàng:</span>
+    </div>
+    <div class="products-row">
+      @for (prod of products; track prod.sku) {
+        <button
+          type="button"
+          class="product-pill"
+          [class.selected]="prod.sku === selectedProductForDemo.sku"
+          (click)="selectProduct(prod)"
+        >
+          <span class="prod-icon">{{ prod.image }}</span>
+          <div class="prod-info">
+            <span class="prod-name">{{ prod.name }}</span>
+            <span class="prod-price">{{ prod.price | currency : 'USD' : 'symbol' : '1.0-0' }}</span>
+          </div>
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Main Grid Layout -->
+  <div class="dashboard-grid">
+    <!-- Left Column: Core 3-Way Comparison -->
+    <div class="dashboard-column main-column">
+      
+      <!-- 3-Way Architectural Comparison Card -->
+      <section class="card comparison-section">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge architecture">So Sánh Kiến Trúc</span>
+            <h2 class="card-title">1. Đối Chiếu 3 Cách Tiếp Cận Quản Lý Phụ Thuộc</h2>
+          </div>
+          <span class="info-tag">Thực hành cốt lõi Day 15</span>
+        </div>
+
+        <div class="card-body">
+          <div class="three-columns-grid">
+            
+            <!-- Cột 1: Tight Coupling -->
+            <div class="column-item">
+              <div class="item-badge red">Không Khuyên Dùng</div>
+              <h3 class="col-title">1. Khởi Tạo Trực Tiếp (new)</h3>
+              <p class="col-desc">
+                Component tự <code>new CartService()</code>. Khi muốn đổi logic tính tiền hay viết test, bắt buộc phải sửa code của Component (<strong>Tight Coupling</strong>).
+              </p>
+              <app-tight-coupled-product [product]="selectedProductForDemo"></app-tight-coupled-product>
+            </div>
+
+            <!-- Cột 2: Standard DI -->
+            <div class="column-item">
+              <div class="item-badge blue">Khuyên Dùng Chuẩn</div>
+              <h3 class="col-title">2. Angular DI (Root Singleton)</h3>
+              <p class="col-desc">
+                Nhận service qua <code>constructor(public cartService: CartService)</code>. Cùng dùng chung 1 instance Singleton trong toàn app (<strong>Loose Coupling</strong>).
+              </p>
+              <app-standard-di-product [product]="selectedProductForDemo"></app-standard-di-product>
+            </div>
+
+            <!-- Cột 3: Override Provider -->
+            <div class="column-item">
+              <div class="item-badge green">Sức Mạnh Của DI</div>
+              <h3 class="col-title">3. Override với useClass</h3>
+              <p class="col-desc">
+                Khai báo <code>providers: [&#123; provide: CartService, useClass: CartExtService &#125;]</code>. Component không đổi 1 dòng code nhưng nhận logic VIP -10%!
+              </p>
+              <app-overridden-di-product [product]="selectedProductForDemo"></app-overridden-di-product>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 Thành phần cốt lõi của Angular DI -->
+      <section class="card di-pillars-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge pillars">Kiến Thức Nền Tảng</span>
+            <h2 class="card-title">2. Ba Thành Phần Cốt Lõi Của Angular DI</h2>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="pillars-grid">
+            <!-- Pillar 1 -->
+            <div class="pillar-box">
+              <div class="pillar-icon">⚙️</div>
+              <h4>1. Injector</h4>
+              <p>
+                Là đối tượng trung tâm chứa các API để tìm kiếm hoặc khởi tạo các instance. Khi component yêu cầu qua constructor, Injector sẽ kiểm tra xem đã có instance chưa hoặc dùng công thức để tạo mới.
+              </p>
+            </div>
+
+            <!-- Pillar 2 -->
+            <div class="pillar-box">
+              <div class="pillar-icon">📜</div>
+              <h4>2. Provider</h4>
+              <p>
+                Là <strong>"Công thức / Bản thiết kế"</strong> hướng dẫn Injector biết cách tạo instance. Ví dụ: <code>&#123; provide: CartService, useClass: CartExtService &#125;</code> hoặc <code>&#64;Injectable(&#123; providedIn: 'root' &#125;)</code>.
+              </p>
+            </div>
+
+            <!-- Pillar 3 -->
+            <div class="pillar-box">
+              <div class="pillar-icon">📦</div>
+              <h4>3. Dependency</h4>
+              <p>
+                Là đối tượng, giá trị hoặc hàm mà một class cần để thực thi nhiệm vụ của nó (ví dụ: đối tượng của class <code>CartService</code> mà <code>ProductComponent</code> cần dùng).
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Live Logs & Code Snippets -->
+    <div class="dashboard-column side-column">
+      
+      <!-- Root Cart Live View -->
+      <section class="card root-cart-card">
+        <div class="card-header">
+          <h3 class="side-card-title">🛒 Chi Tiết Giỏ Hàng Chung (Root Cart)</h3>
+          <span class="outside-badge">{{ rootCartService.serviceId }}</span>
+        </div>
+        <div class="card-body">
+          @if (rootCartService.selectedProducts.length === 0) {
+            <p class="empty-cart-text">Giỏ hàng chung đang trống. Hãy nhấn nút "+ Thêm vào giỏ hàng chung" ở component số 2!</p>
+          } @else {
+            <ul class="cart-items-list">
+              @for (item of rootCartService.selectedProducts; track item.product.sku) {
+                <li class="cart-item-row">
+                  <div class="item-title-group">
+                    <span class="item-name">{{ item.product.name }}</span>
+                    <span class="item-meta">{{ item.product.price | currency : 'USD' : 'symbol' : '1.0-0' }} x {{ item.quantity }}</span>
+                  </div>
+                  <span class="item-subtotal">{{ (item.product.price * item.quantity) | currency : 'USD' : 'symbol' : '1.0-0' }}</span>
+                </li>
+              }
+            </ul>
+            <div class="cart-total-row">
+              <strong>Tổng thanh toán:</strong>
+              <span class="total-amount">{{ rootCartService.calculateTotal() | currency : 'USD' : 'symbol' : '1.0-0' }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Activity Logs Stream -->
+      <section class="card logs-card">
+        <div class="card-header">
+          <div class="log-title-wrap">
+            <span class="live-dot"></span>
+            <h3 class="side-card-title">Nhật Ký Tương Tác DI</h3>
+          </div>
+          <button class="btn-clear-logs" (click)="clearLogs()" title="Xóa logs">Xóa</button>
+        </div>
+
+        <div class="card-body logs-body">
+          @if (logs.length === 0) {
+            <div class="no-logs">Chưa có nhật ký tương tác</div>
+          } @else {
+            <div class="log-stream">
+              @for (log of logs; track log.id) {
+                <div class="log-entry">
+                  <div class="log-meta">
+                    <span class="log-badge">{{ log.source }}</span>
+                    <span class="log-time">{{ log.time }}</span>
+                  </div>
+                  <div class="log-msg">{{ log.message }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Code Reference Card -->
+      <section class="card code-ref-card">
+        <div class="card-header">
+          <h3 class="side-card-title">Cú Pháp Chuẩn Từ Day 15</h3>
+        </div>
+        <div class="card-body code-ref-body">
+          <div class="code-snippet">
+            <span class="code-label">1. Khai báo Service Singleton</span>
+            <pre><code>&#64;Injectable(&#123;
+  providedIn: 'root'
+&#125;)
+export class CartService &#123; ... &#125;</code></pre>
+          </div>
+
+          <div class="code-snippet">
+            <span class="code-label">2. Constructor Injection (Angular)</span>
+            <pre><code>&#64;Component(...)
+export class ProductComponent &#123;
+  constructor(public cartService: CartService) &#123;&#125;
+&#125;</code></pre>
+          </div>
+
+          <div class="code-snippet">
+            <span class="code-label">3. Override Provider bằng useClass</span>
+            <pre><code>&#64;Component(&#123;
+  providers: [
+    &#123; provide: CartService, useClass: CartExtService &#125;
+  ]
+&#125;)
+export class ProductComponent &#123; ... &#125;</code></pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
 </div>

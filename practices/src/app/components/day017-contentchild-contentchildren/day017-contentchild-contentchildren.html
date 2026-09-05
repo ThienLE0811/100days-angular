@@ -1,4 +1,318 @@
-<div class="day-container">
-  <h2>Day017-contentchild-contentchildren</h2>
-  <p>day017-contentchild-contentchildren works!</p>
+<div class="day017-page">
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 17</span>
+        <span class="badge badge-syntax">&#64;ContentChild</span>
+        <span class="badge badge-syntax">&#64;ContentChildren</span>
+        <span class="badge badge-syntax">TemplateRef</span>
+        <span class="badge badge-syntax">QueryList</span>
+        <span class="badge badge-syntax">ngAfterContentInit</span>
+      </div>
+      <h1 class="page-title">ContentChild & ContentChildren trong Angular</h1>
+      <p class="page-subtitle">
+        Tìm hiểu kỹ thuật truy vấn các phần tử, component hoặc directive được project vào component thông qua cặp thẻ mở/đóng.
+        Giải quyết bài toán tối ưu hiệu năng với <strong>Lazy Content Projection</strong> và quản lý danh sách động với <strong>QueryList.changes</strong>.
+      </p>
+    </div>
+
+    <!-- Quick Stats Banner -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Tổng Counter Instances đã tạo:</span>
+        <span class="stat-value">{{ totalGlobalCounters }}</span>
+      </div>
+      <button class="btn-clear-logs" (click)="clearLogs()" title="Xóa lịch sử log">
+        Xóa Logs ⌫
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <div class="dashboard-grid">
+    <!-- Left Column: Core Demos -->
+    <div class="dashboard-column main-column">
+      
+      <!-- DEMO 1: Eager Initialization (Vấn đề) -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge eager">Vấn đề: Eager Projection</span>
+            <h2 class="card-title">1. Content Projection mặc định (Khởi tạo sẵn tất cả)</h2>
+          </div>
+          <span class="info-tag">Tốn tài nguyên</span>
+        </div>
+
+        <div class="card-body">
+          <div class="alert-box alert-warning">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-content">
+              <strong>Vấn đề được chỉ ra trong Day 17:</strong>
+              Khi component cha đặt các <code>&lt;app-counter&gt;</code> trực tiếp vào trong từng <code>&lt;app-tab-panel&gt;</code>,
+              mặc dù UI chỉ hiển thị Tab 1, nhưng <strong>toàn bộ Counter ở Tab 1, Tab 2, Tab 3 đều bị khởi tạo ngay lập tức</strong>!
+            </div>
+          </div>
+
+          <div class="component-demo-box">
+            <app-tab-group [tabActiveIndex]="eagerActiveTab" (tabActiveChange)="onEagerTabChange($event)">
+              <app-tab-panel title="Tab 1 (Eager)" icon="📌">
+                <div class="tab-panel-inner">
+                  <p class="desc-text">Nội dung của Tab 1. Bên dưới là Counter được project trực tiếp:</p>
+                  <app-counter label="Eager Counter 1"></app-counter>
+                </div>
+              </app-tab-panel>
+
+              <app-tab-panel title="Tab 2 (Eager)" icon="📌">
+                <div class="tab-panel-inner">
+                  <p class="desc-text">Nội dung của Tab 2. Instance này đã được tạo dù bạn chưa hề nhấn vào Tab 2:</p>
+                  <app-counter label="Eager Counter 2"></app-counter>
+                </div>
+              </app-tab-panel>
+
+              <app-tab-panel title="Tab 3 (Eager)" icon="📌">
+                <div class="tab-panel-inner">
+                  <p class="desc-text">Nội dung của Tab 3. Kiểm tra số Instance ID xem nó được tạo từ đầu:</p>
+                  <app-counter label="Eager Counter 3"></app-counter>
+                </div>
+              </app-tab-panel>
+            </app-tab-group>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 2: Lazy Initialization với @ContentChild (Giải pháp) -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge lazy">Giải pháp: Lazy Content Projection</span>
+            <h2 class="card-title">2. Tối ưu với &#64;ContentChild &amp; ng-template[tabPanelContent]</h2>
+          </div>
+          <span class="info-tag success">Tối ưu hiệu năng</span>
+        </div>
+
+        <div class="card-body">
+          <div class="alert-box alert-success">
+            <span class="alert-icon">💡</span>
+            <div class="alert-content">
+              <strong>Giải pháp tối ưu từ Day 17:</strong>
+              Bọc nội dung bên trong thẻ <code>&lt;ng-template tabPanelContent&gt;</code>.
+              <code>TabPanelComponent</code> dùng <code>&#64;ContentChild(TabPanelContentDirective, &#123; read: TemplateRef &#125;)</code> để lấy về <code>TemplateRef</code>.
+              Chỉ khi người dùng click vào Tab thì tab đó mới render template &rarr; <strong>Instance Counter chỉ được tạo khi active!</strong>
+            </div>
+          </div>
+
+          <div class="component-demo-box">
+            <app-tab-group [tabActiveIndex]="lazyActiveTab" (tabActiveChange)="onLazyTabChange($event)">
+              <app-tab-panel title="Tab 1 (Lazy)" icon="⚡" badge="Active">
+                <ng-template tabPanelContent>
+                  <div class="tab-panel-inner">
+                    <p class="desc-text">Nội dung Tab 1 (Lazy). Counter này được render ngay vì Tab 1 được active đầu tiên:</p>
+                    <app-counter label="Lazy Counter 1"></app-counter>
+                  </div>
+                </ng-template>
+              </app-tab-panel>
+
+              <app-tab-panel title="Tab 2 (Lazy)" icon="⚡" badge="On Demand">
+                <ng-template tabPanelContent>
+                  <div class="tab-panel-inner">
+                    <p class="desc-text">Nội dung Tab 2 (Lazy). Hãy để ý Instance ID: Nó chỉ mới được sinh ra KHI bạn bấm vào Tab 2!</p>
+                    <app-counter label="Lazy Counter 2"></app-counter>
+                  </div>
+                </ng-template>
+              </app-tab-panel>
+
+              <app-tab-panel title="Tab 3 (Lazy)" icon="⚡" badge="On Demand">
+                <ng-template tabPanelContent>
+                  <div class="tab-panel-inner">
+                    <p class="desc-text">Nội dung Tab 3 (Lazy). Khi chuyển tab khác và quay lại, một instance mới lại được khởi tạo theo nhu cầu:</p>
+                    <app-counter label="Lazy Counter 3"></app-counter>
+                  </div>
+                </ng-template>
+              </app-tab-panel>
+            </app-tab-group>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 3: ContentChildren & QueryList.changes -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge query">Dynamic Query: &#64;ContentChildren</span>
+            <h2 class="card-title">3. Quản lý danh sách động với QueryList &amp; changes Event</h2>
+          </div>
+          <div class="action-buttons-group">
+            <button class="btn btn-primary-sm" (click)="addDynamicTab()">
+              <span>+ Thêm Tab Mới</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <p class="desc-text">
+            <code>TabGroupComponent</code> dùng <code>&#64;ContentChildren(TabPanelComponent)</code> để tự động bắt tất cả các tab panel được project vào.
+            Khi thêm hoặc xóa tab, <code>tabPanelList.changes</code> sẽ phát sự kiện để cập nhật index an toàn, tránh lỗi index vượt quá giới hạn.
+          </p>
+
+          <div class="component-demo-box">
+            <app-tab-group
+              [tabActiveIndex]="dynamicActiveTab"
+              (tabActiveChange)="onDynamicTabChange($event)"
+              (tabListChanged)="onDynamicTabListChanged($event)"
+            >
+              @for (tabItem of dynamicTabs; track tabItem.id; let idx = $index) {
+                <app-tab-panel [title]="tabItem.title" [icon]="tabItem.icon" [badge]="'#' + tabItem.id">
+                  <div class="tab-panel-inner dynamic-inner">
+                    <div class="dynamic-header">
+                      <h3>{{ tabItem.icon }} {{ tabItem.title }}</h3>
+                      <button
+                        class="btn-delete-tab"
+                        (click)="removeDynamicTab(idx)"
+                        title="Xóa tab này"
+                        [disabled]="dynamicTabs.length <= 1"
+                      >
+                        ✕ Xóa tab này
+                      </button>
+                    </div>
+                    <p>{{ tabItem.description }}</p>
+                    <div class="dynamic-counter-wrapper">
+                      <app-counter [label]="'Counter của Tab ' + tabItem.id"></app-counter>
+                    </div>
+                  </div>
+                </app-tab-panel>
+              }
+            </app-tab-group>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 4: View vs Content Architecture Comparison -->
+      <section class="card comparison-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge architecture">Kiến Trúc Cốt Lõi</span>
+            <h2 class="card-title">4. Phân Biệt Chi Tiết: View vs Content trong Angular</h2>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="comparison-grid">
+            <!-- View Card -->
+            <div class="concept-card concept-view">
+              <div class="concept-head">
+                <span class="concept-icon">👁️</span>
+                <h3>VIEW (View DOM)</h3>
+              </div>
+              <p class="concept-desc">
+                Template do chính component <strong>tự sở hữu và quản lý</strong> trong <code>templateUrl</code> hoặc <code>template</code>.
+                Là "hộp đen" đối với các component bên ngoài.
+              </p>
+              <ul class="concept-list">
+                <li><strong>Truy vấn bằng:</strong> <code>&#64;ViewChild</code>, <code>&#64;ViewChildren</code></li>
+                <li><strong>Lifecycle Hook:</strong> <code>ngAfterViewInit</code>, <code>ngAfterViewChecked</code></li>
+                <li><strong>Phạm vi:</strong> Chỉ nhìn thấy các thẻ HTML / Component nằm trong template của chính nó.</li>
+              </ul>
+            </div>
+
+            <!-- Content Card -->
+            <div class="concept-card concept-content">
+              <div class="concept-head">
+                <span class="concept-icon">📦</span>
+                <h3>CONTENT (Light DOM / Projected)</h3>
+              </div>
+              <p class="concept-desc">
+                Template do <strong>bên ngoài (Component cha) truyền vào</strong> giữa cặp thẻ mở/đóng <code>&lt;app-tab-group&gt;...&lt;/app-tab-group&gt;</code>.
+              </p>
+              <ul class="concept-list">
+                <li><strong>Truy vấn bằng:</strong> <code>&#64;ContentChild</code>, <code>&#64;ContentChildren</code></li>
+                <li><strong>Lifecycle Hook:</strong> <code>ngAfterContentInit</code>, <code>ngAfterContentChecked</code></li>
+                <li><strong>Phạm vi:</strong> Nhận các element được chiếu vào qua <code>&lt;ng-content&gt;</code> hoặc <code>TemplateRef</code>.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Activity Logs & Documentation -->
+    <div class="dashboard-column side-column">
+      
+      <!-- Counter Outside Reference -->
+      <section class="card counter-outside-card">
+        <div class="card-header">
+          <h3 class="side-card-title">Counter Độc Lập Bên Ngoài</h3>
+          <span class="outside-badge">Standalone</span>
+        </div>
+        <div class="card-body">
+          <p class="desc-text-small">
+            Counter này nằm trực tiếp trong <code>Day017ContentchildContentchildren</code> (View của host) dùng để làm mốc đối chiếu Instance ID.
+          </p>
+          <app-counter label="Outside Counter"></app-counter>
+        </div>
+      </section>
+
+      <!-- Activity Logs Stream -->
+      <section class="card logs-card">
+        <div class="card-header">
+          <div class="log-title-wrap">
+            <span class="live-dot"></span>
+            <h3 class="side-card-title">Nhật Ký Tương Tác &amp; Lifecycle</h3>
+          </div>
+          <span class="log-count">{{ logs.length }} logs</span>
+        </div>
+
+        <div class="card-body logs-body">
+          @if (logs.length === 0) {
+            <div class="no-logs">Chưa có sự kiện nào được ghi nhận</div>
+          } @else {
+            <div class="log-stream">
+              @for (log of logs; track log.id) {
+                <div class="log-entry" [class]="'source-' + log.source.toLowerCase()">
+                  <div class="log-meta">
+                    <span class="log-badge" [class]="'badge-' + log.source.toLowerCase()">{{ log.source }}</span>
+                    <span class="log-time">{{ log.time }}</span>
+                  </div>
+                  <div class="log-msg">{{ log.message }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Code Reference Card -->
+      <section class="card code-ref-card">
+        <div class="card-header">
+          <h3 class="side-card-title">Cú Pháp Chuẩn Từ Day 17</h3>
+        </div>
+        <div class="card-body code-ref-body">
+          <div class="code-snippet">
+            <span class="code-label">1. Directive đánh dấu Template</span>
+            <pre><code>&#64;Directive(&#123;
+  selector: 'ng-template[tabPanelContent]'
+&#125;)
+export class TabPanelContentDirective &#123;&#125;</code></pre>
+          </div>
+
+          <div class="code-snippet">
+            <span class="code-label">2. Query TemplateRef với ContentChild</span>
+            <pre><code>&#64;ContentChild(TabPanelContentDirective, &#123;
+  static: true, 
+  read: TemplateRef 
+&#125;)
+explicitBody: TemplateRef&lt;unknown&gt;;</code></pre>
+          </div>
+
+          <div class="code-snippet">
+            <span class="code-label">3. Query nhiều con với ContentChildren</span>
+            <pre><code>&#64;ContentChildren(TabPanelComponent)
+tabPanelList: QueryList&lt;TabPanelComponent&gt;;</code></pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
 </div>

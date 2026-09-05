@@ -30,17 +30,17 @@ export interface ActionLog {
   styleUrl: './day003-data-binding.scss',
 })
 export class Day003DataBinding {
-  // 1. Data Model (Dữ liệu từ tài liệu Day 3: Tiep Phan, age 30)
+  // 1. Data Model (Dữ liệu người dùng: Thien Le, age 30)
   readonly defaultAvatar =
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
 
   user: UserProfile = {
-    name: 'Tiep Phan',
+    name: 'Thien Le',
     age: 30,
     role: 'Google Developer Expert & Fullstack Architect',
     avatar: this.defaultAvatar,
     bio: 'Đam mê chia sẻ kiến thức Angular và TypeScript cho cộng đồng lập trình viên Việt Nam. Tác giả chuỗi 100 Days of Angular.',
-    website: 'https://github.com/tieppt',
+    website: 'https://github.com/ThienLE0811',
     followers: 1250,
     likes: 384,
     isFollowing: false,
@@ -155,12 +155,12 @@ export class Day003DataBinding {
   // --- UTILITIES ---
   resetProfile(): void {
     this.user = {
-      name: 'Tiep Phan',
+      name: 'Thien Le',
       age: 30,
       role: 'Google Developer Expert & Fullstack Architect',
       avatar: this.defaultAvatar,
       bio: 'Đam mê chia sẻ kiến thức Angular và TypeScript cho cộng đồng lập trình viên Việt Nam. Tác giả chuỗi 100 Days of Angular.',
-      website: 'https://github.com/tieppt',
+      website: 'https://github.com/ThienLE0811',
       followers: 1250,
       likes: 384,
       isFollowing: false,

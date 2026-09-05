@@ -1,4 +1,303 @@
-<div class="day-container">
-  <h2>Day016-dependency-injection-in-angular-part-2</h2>
-  <p>day016-dependency-injection-in-angular-part-2 works!</p>
+<div class="day016-page">
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 16</span>
+        <span class="badge badge-syntax">Parent-to-Child DI</span>
+        <span class="badge badge-syntax">useExisting</span>
+        <span class="badge badge-syntax">forwardRef</span>
+        <span class="badge badge-syntax">useFactory</span>
+        <span class="badge badge-syntax">useValue</span>
+      </div>
+      <h1 class="page-title">Dependency Injection Nâng Cao &amp; Component Tree</h1>
+      <p class="page-subtitle">
+        Phá vỡ định kiến <em>"DI chỉ dùng cho Service"</em>. Khám phá sức mạnh của DI theo <strong>Component Tree (Hierarchical Injector)</strong>:
+        từ kỹ thuật <strong>Inject Parent vào Child</strong>, mở rộng UI đa hình với <strong>useExisting &amp; forwardRef</strong>,
+        đến làm chủ <strong>4 cú pháp Provider</strong> trong Angular.
+      </p>
+    </div>
+
+    <!-- Quick Stats Banner -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Số Panel đang đăng ký DI:</span>
+        <span class="stat-value">{{ dynamicPanels.length }} panels</span>
+      </div>
+      <button class="btn-clear-logs" (click)="clearLogs()" title="Xóa lịch sử logs">
+        Xóa Logs ⌫
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <div class="dashboard-grid">
+    <!-- Left Column: Core Demos -->
+    <div class="dashboard-column main-column">
+      
+      <!-- DEMO 1: Inject Parent Component to Child Component -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge parent-child">Kỹ Thuật 1: Component Tree DI</span>
+            <h2 class="card-title">1. Inject Parent Component vào Child Component</h2>
+          </div>
+          <div class="header-actions-group">
+            <button class="btn btn-primary-sm" (click)="addDynamicPanel()">
+              + Thêm Panel
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="alert-box alert-info">
+            <span class="alert-icon">💡</span>
+            <div class="alert-content">
+              <strong>Tư duy từ Day 16:</strong>
+              Thay vì truyền nhiều tầng <code>&#64;Output() EventEmitter</code> để báo cho cha biết khi nào con xuất hiện hoặc biến mất,
+              <code>TabPanelComponent</code> (con) trực tiếp inject <code>TabGroupComponent</code> (cha) qua constructor và tự gọi:
+              <br/>
+              &bull; <code>this.tabGroup.addTabPanel(this)</code> lúc <strong>ngOnInit</strong>.
+              <br/>
+              &bull; <code>this.tabGroup.removeTabPanel(this)</code> lúc <strong>ngOnDestroy</strong>.
+            </div>
+          </div>
+
+          <div class="component-demo-box">
+            <app-tab-group
+              [tabActiveIndex]="standardActiveTab"
+              (tabActiveChange)="onStandardTabChange($event)"
+              (panelListChanged)="onPanelListChanged($event, 'STANDARD_TAB')"
+            >
+              @for (item of dynamicPanels; track item.id; let idx = $index) {
+                <app-tab-panel [title]="item.title">
+                  <div class="panel-content-inner">
+                    <div class="panel-header-row">
+                      <h4>📌 {{ item.title }} (ID: {{ item.id }})</h4>
+                      <button
+                        class="btn-delete-panel"
+                        (click)="removeDynamicPanel(idx)"
+                        [disabled]="dynamicPanels.length <= 1"
+                        title="Xóa panel này (kiểm tra ngOnDestroy)"
+                      >
+                        ✕ Xóa Panel
+                      </button>
+                    </div>
+                    <p class="panel-text">{{ item.content }}</p>
+                  </div>
+                </app-tab-panel>
+              }
+            </app-tab-group>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 2: Provide TabGroup khác có cùng APIs (useExisting & forwardRef) -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge polymorphism">Kỹ Thuật 2: Đa Hình UI</span>
+            <h2 class="card-title">2. Override Parent bằng useExisting &amp; forwardRef</h2>
+          </div>
+          <span class="info-tag success">Tái sử dụng 100% Component Con</span>
+        </div>
+
+        <div class="card-body">
+          <div class="alert-box alert-success">
+            <span class="alert-icon">🚀</span>
+            <div class="alert-content">
+              <strong>Sức mạnh của useExisting:</strong>
+              Ta tạo <code>BsTabGroupComponent</code> với UI Bootstrap hoàn toàn mới.
+              Nhờ cấu hình <code>&#123; provide: TabGroupComponent, useExisting: forwardRef(() =&gt; BsTabGroupComponent) &#125;</code>,
+              các <code>&lt;app-tab-panel&gt;</code> con vẫn inject <code>TabGroupComponent</code> bình thường nhưng lại hoạt động trơn tru với giao diện Bootstrap này!
+            </div>
+          </div>
+
+          <div class="component-demo-box">
+            <app-bs-tab-group
+              [tabActiveIndex]="bsActiveTab"
+              (tabActiveChange)="onBsTabChange($event)"
+              (panelListChanged)="onPanelListChanged($event, 'BS_TAB')"
+            >
+              <app-tab-panel title="Hồ Sơ Cá Nhân">
+                <div class="panel-content-inner">
+                  <h4>👤 Tab Hồ Sơ Người Dùng (Bootstrap Theme)</h4>
+                  <p class="panel-text">
+                    Nội dung tab này sử dụng chung <code>TabPanelComponent</code> như Demo 1. Không hề phải sửa đổi bất kỳ dòng code nào của component con!
+                  </p>
+                </div>
+              </app-tab-panel>
+
+              <app-tab-panel title="Cấu Hình Bảo Mật">
+                <div class="panel-content-inner">
+                  <h4>🔒 Thiết Lập Bảo Mật Hai Lớp</h4>
+                  <p class="panel-text">
+                    Được render thông qua <code>*ngTemplateOutlet</code> của <code>BsTabGroupComponent</code>.
+                  </p>
+                </div>
+              </app-tab-panel>
+
+              <app-tab-panel title="Thông Báo Hệ Thống">
+                <div class="panel-content-inner">
+                  <h4>🔔 Nhật Ký Thông Báo</h4>
+                  <p class="panel-text">
+                    Kỹ thuật này được Angular áp dụng trực tiếp trong hệ thống Form (ví dụ <code>ngForm</code>, <code>ControlValueAccessor</code>).
+                  </p>
+                </div>
+              </app-tab-panel>
+            </app-bs-tab-group>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 3: 4 Loại Provider Syntax Trong Thực Tế -->
+      <section class="card providers-syntax-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge syntax">Tổng Hợp Cú Pháp</span>
+            <h2 class="card-title">3. Bốn Cú Pháp Cung Cấp Provider (Provider Syntax)</h2>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="syntax-grid">
+            
+            <!-- 1. useClass -->
+            <div class="syntax-card">
+              <div class="syntax-header">
+                <span class="type-tag blue">1. useClass</span>
+                <h4>Tráo đổi Class</h4>
+              </div>
+              <p class="syntax-desc">
+                Cung cấp một class khác thay thế cho token. Ví dụ: inject <code>LoggerService</code> nhưng nhận instance của <code>TimestampLoggerService</code>.
+              </p>
+              <div class="syntax-result">
+                <small>Kết quả log:</small>
+                <code>{{ logger.log('Kiểm tra useClass') }}</code>
+              </div>
+            </div>
+
+            <!-- 2. useExisting -->
+            <div class="syntax-card">
+              <div class="syntax-header">
+                <span class="type-tag purple">2. useExisting</span>
+                <h4>Tạo Alias / Bí danh</h4>
+              </div>
+              <p class="syntax-desc">
+                Trỏ một Token đến một instance đã tồn tại sẵn mà không tạo instance mới (như cách <code>BsTabGroupComponent</code> trỏ về <code>TabGroupComponent</code>).
+              </p>
+              <div class="syntax-result">
+                <small>Minh họa:</small>
+                <code>provide: TabGroupComponent, useExisting: BsTabGroupComponent</code>
+              </div>
+            </div>
+
+            <!-- 3. useFactory -->
+            <div class="syntax-card">
+              <div class="syntax-header">
+                <span class="type-tag green">3. useFactory</span>
+                <h4>Hàm tạo động</h4>
+              </div>
+              <p class="syntax-desc">
+                Gọi một hàm factory để tính toán và trả về giá trị (có thể inject thêm dependencies thông qua mảng <code>deps</code>).
+              </p>
+              <div class="syntax-result">
+                <small>Lời chào động theo giờ:</small>
+                <div class="greeting-text">{{ greeting.message }}</div>
+                <small class="time-sub">Tính lúc: {{ greeting.greetingTime }}</small>
+              </div>
+            </div>
+
+            <!-- 4. useValue -->
+            <div class="syntax-card">
+              <div class="syntax-header">
+                <span class="type-tag amber">4. useValue</span>
+                <h4>Giá trị tĩnh / Config</h4>
+              </div>
+              <p class="syntax-desc">
+                Cung cấp một giá trị cố định, object config hoặc hằng số thông qua một <code>InjectionToken</code>.
+              </p>
+              <div class="syntax-result">
+                <small>App Config:</small>
+                <code>{{ appConfig.appName }} (v{{ appConfig.version }})</code>
+                <br/>
+                <small>Môi trường: <strong>{{ appConfig.environment }}</strong></small>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Activity Logs & Documentation -->
+    <div class="dashboard-column side-column">
+      
+      <!-- Activity Logs Stream -->
+      <section class="card logs-card">
+        <div class="card-header">
+          <div class="log-title-wrap">
+            <span class="live-dot"></span>
+            <h3 class="side-card-title">Nhật Ký Tương Tác DI</h3>
+          </div>
+          <span class="log-count">{{ logs.length }} logs</span>
+        </div>
+
+        <div class="card-body logs-body">
+          @if (logs.length === 0) {
+            <div class="no-logs">Chưa có nhật ký nào được ghi lại</div>
+          } @else {
+            <div class="log-stream">
+              @for (log of logs; track log.id) {
+                <div class="log-entry" [class]="'source-' + log.source.toLowerCase()">
+                  <div class="log-meta">
+                    <span class="log-badge" [class]="'badge-' + log.source.toLowerCase()">{{ log.source }}</span>
+                    <span class="log-time">{{ log.time }}</span>
+                  </div>
+                  <div class="log-msg">{{ log.message }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Code Reference Card -->
+      <section class="card code-ref-card">
+        <div class="card-header">
+          <h3 class="side-card-title">Cú Pháp Trọng Tâm Day 16</h3>
+        </div>
+        <div class="card-body code-ref-body">
+          <div class="code-snippet">
+            <span class="code-label">1. Child injects Parent</span>
+            <pre><code>export class TabPanelComponent &#123;
+  constructor(private tabGroup: TabGroupComponent) &#123;&#125;
+  ngOnInit() &#123; this.tabGroup.addTabPanel(this); &#125;
+  ngOnDestroy() &#123; this.tabGroup.removeTabPanel(this); &#125;
+&#125;</code></pre>
+          </div>
+
+          <div class="code-snippet">
+            <span class="code-label">2. useExisting với forwardRef</span>
+            <pre><code>const BsTabGroupProvider = &#123;
+  provide: TabGroupComponent,
+  useExisting: forwardRef(() =&gt; BsTabGroupComponent),
+&#125;;</code></pre>
+          </div>
+
+          <div class="code-snippet">
+            <span class="code-label">3. Khai báo 4 Provider Syntax</span>
+            <pre><code>providers: [
+  &#123; provide: ClassA, useClass: ClassB &#125;,
+  &#123; provide: ClassA, useExisting: ClassC &#125;,
+  &#123; provide: TokenA, useFactory: myFactory &#125;,
+  &#123; provide: TokenB, useValue: configObj &#125;
+]</code></pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
 </div>

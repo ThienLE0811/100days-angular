@@ -20,7 +20,7 @@ describe('Day003DataBinding', () => {
   });
 
   it('should initialize with user from Day 3 docs', () => {
-    expect(component.user.name).toBe('Tiep Phan');
+    expect(component.user.name).toBe('Thien Le');
     expect(component.user.age).toBe(30);
   });
 
@@ -70,7 +70,7 @@ describe('Day003DataBinding', () => {
     component.isInputDisabled = true;
 
     component.resetProfile();
-    expect(component.user.name).toBe('Tiep Phan');
+    expect(component.user.name).toBe('Thien Le');
     expect(component.user.age).toBe(30);
     expect(component.isInputDisabled).toBe(false);
   });

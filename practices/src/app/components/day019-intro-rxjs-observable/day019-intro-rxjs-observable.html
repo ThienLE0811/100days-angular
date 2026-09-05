@@ -1,4 +1,667 @@
-<div class="day-container">
-  <h2>Day019-intro-rxjs-observable</h2>
-  <p>day019-intro-rxjs-observable works!</p>
+<div class="day019-page">
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 19</span>
+        <span class="badge badge-syntax">Observable</span>
+        <span class="badge badge-syntax">Observer</span>
+        <span class="badge badge-syntax">Subscription</span>
+        <span class="badge badge-syntax">Teardown / Cleanup</span>
+        <span class="badge badge-syntax">throttleTime(500)</span>
+      </div>
+      <h1 class="page-title">Reactive Programming, RxJS &amp; Observable</h1>
+      <p class="page-subtitle">
+        Khám phá tư duy lập trình phản ứng (<strong>Thinking in Streams</strong>): coi mọi luồng dữ liệu bất đồng bộ là <strong>dòng chảy theo thời gian</strong>.
+        Tìm hiểu bản chất của <strong>Observable</strong>, cơ chế <strong>Lazy Computation</strong>, vòng đời <strong>Next / Error / Complete</strong>,
+        kỹ thuật <strong>Teardown Cleanup</strong> chống rò rỉ bộ nhớ, và so sánh thực chiến <strong>Throttle</strong> giữa Pure JavaScript vs RxJS.
+      </p>
+    </div>
+
+    <!-- Quick Actions Banner -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Pure JS Throttle</span>
+        <span class="stat-value pure-val">{{ pureJsExecutedCount }} / {{ pureJsRawClicks }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">RxJS Throttle</span>
+        <span class="stat-value rxjs-val">{{ rxjsExecutedCount }} / {{ rxjsRawClicks }}</span>
+      </div>
+      <button class="btn-clear-logs" (click)="clearLogs()" title="Xóa lịch sử logs">
+        Xóa Logs ⌫
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <div class="dashboard-grid">
+    <!-- Left Column: Interactive Demos -->
+    <div class="dashboard-column main-column">
+
+      <!-- DEMO 1: Throttle Use-case (Pure JS vs RxJS) -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge throttle">Phần 1: Bài Toán Thực Tế</span>
+            <h2 class="card-title">1. Bài Toán Throttle Click: Pure JavaScript vs RxJS</h2>
+          </div>
+          <div class="header-actions">
+            <button
+              class="btn btn-warning-sm"
+              (click)="runAutoSpamSimulation()"
+              [disabled]="isAutoSpamming"
+            >
+              ⚡ {{ isAutoSpamming ? 'Đang Spam Click...' : 'Auto Spam 10 Clicks (100ms)' }}
+            </button>
+            <button class="btn btn-outline-sm" (click)="resetThrottleStats()">
+              ↺ Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="alert-box alert-info">
+            <span class="alert-icon">💡</span>
+            <div class="alert-content">
+              <strong>Mục tiêu:</strong> Người dùng bấm liên tục vào button (spam click), nhưng ứng dụng chỉ xử lý tối đa 1 lần trong mỗi <strong>500ms</strong>.
+              Xem sự khác biệt giữa việc tự quản lý biến toàn cục (<code>lastClick</code>, <code>Date.now()</code>) và việc sử dụng RxJS declarative với <code>throttleTime(500)</code> + <code>scan</code>.
+            </div>
+          </div>
+
+          <div class="throttle-comparison-grid">
+            <!-- Box 1: Pure JS Throttle -->
+            <div class="throttle-box pure-js-box">
+              <div class="box-head">
+                <div class="box-tag-wrap">
+                  <span class="engine-badge js-badge">Pure JS (Imperative)</span>
+                  <span class="method-tag">addEventListener + Date.now()</span>
+                </div>
+                <h3 class="box-title">Pure JS Throttle</h3>
+              </div>
+
+              <div class="box-body">
+                <div class="metrics-row">
+                  <div class="metric-pill">
+                    <span class="metric-label">Tổng Clicks:</span>
+                    <strong class="metric-val">{{ pureJsRawClicks }}</strong>
+                  </div>
+                  <div class="metric-pill highlight-pill">
+                    <span class="metric-label">Được Xử Lý:</span>
+                    <strong class="metric-val text-amber">{{ pureJsExecutedCount }}</strong>
+                  </div>
+                </div>
+
+                <!-- Cooldown Indicator -->
+                <div class="cooldown-track">
+                  <div
+                    class="cooldown-fill js-fill"
+                    [style.width.%]="(pureJsCooldownRemaining / throttleRateMs) * 100"
+                  ></div>
+                </div>
+                <div class="cooldown-meta">
+                  <small>Cooldown: {{ pureJsCooldownRemaining }}ms</small>
+                  <small class="status-indicator" [class.ready]="pureJsCooldownRemaining === 0">
+                    {{ pureJsCooldownRemaining === 0 ? '● Sẵn sàng' : '⏳ Đang chặn spam' }}
+                  </small>
+                </div>
+
+                <button
+                  type="button"
+                  id="jsThrottle"
+                  class="btn-trigger js-btn"
+                  (click)="onPureJsButtonClick()"
+                >
+                  🖱️ Click Thử Nghiệm (Pure JS)
+                </button>
+              </div>
+
+              <div class="code-preview-footer">
+                <small class="code-comment">// Quản lý state thủ công với biến lastClick và rate</small>
+                <code ngNonBindable>if (Date.now() - lastClick >= rate) &#123; count++; lastClick = Date.now(); &#125;</code>
+              </div>
+            </div>
+
+            <!-- Box 2: RxJS Throttle -->
+            <div class="throttle-box rxjs-box">
+              <div class="box-head">
+                <div class="box-tag-wrap">
+                  <span class="engine-badge rxjs-badge">RxJS (Declarative Stream)</span>
+                  <span class="method-tag">fromEvent + throttleTime(500)</span>
+                </div>
+                <h3 class="box-title">RxJS Throttle</h3>
+              </div>
+
+              <div class="box-body">
+                <div class="metrics-row">
+                  <div class="metric-pill">
+                    <span class="metric-label">Tổng Clicks:</span>
+                    <strong class="metric-val">{{ rxjsRawClicks }}</strong>
+                  </div>
+                  <div class="metric-pill highlight-pill">
+                    <span class="metric-label">Được Xử Lý:</span>
+                    <strong class="metric-val text-indigo">{{ rxjsExecutedCount }}</strong>
+                  </div>
+                </div>
+
+                <!-- Cooldown Indicator -->
+                <div class="cooldown-track">
+                  <div
+                    class="cooldown-fill rxjs-fill"
+                    [style.width.%]="(rxjsCooldownRemaining / throttleRateMs) * 100"
+                  ></div>
+                </div>
+                <div class="cooldown-meta">
+                  <small>Cooldown: {{ rxjsCooldownRemaining }}ms</small>
+                  <small class="status-indicator" [class.ready]="rxjsCooldownRemaining === 0">
+                    {{ rxjsCooldownRemaining === 0 ? '● Sẵn sàng' : '⏳ Đang chặn spam' }}
+                  </small>
+                </div>
+
+                <button
+                  #rxjsThrottleBtn
+                  type="button"
+                  id="rxjsThrottle"
+                  class="btn-trigger rxjs-btn"
+                  (click)="onRxjsRawClick()"
+                >
+                  🚀 Click Thử Nghiệm (RxJS)
+                </button>
+              </div>
+
+              <div class="code-preview-footer">
+                <small class="code-comment">// Khai báo luồng dữ liệu sạch sẽ, không cần biến toàn cục</small>
+                <code ngNonBindable>fromEvent(btn, 'click').pipe(throttleTime(500), scan(c => c + 1, 0))</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 2: Promise vs Observable Comparison -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge architecture">Bản Chất Bất Đồng Bộ</span>
+            <h2 class="card-title">2. So Sánh Bản Chất: Promise vs Observable</h2>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Tiêu chí</th>
+                  <th>Promise</th>
+                  <th>Observable (RxJS)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Số lượng giá trị</strong></td>
+                  <td>Chỉ phát ra <strong>1 giá trị duy nhất</strong> (Single value).</td>
+                  <td>Phát ra <strong>nhiều giá trị theo thời gian</strong> (0 đến vô hạn).</td>
+                </tr>
+                <tr>
+                  <td><strong>Thời điểm thực thi</strong></td>
+                  <td><span class="perf-tag low">Eager</span> (Chạy ngay khi tạo `new Promise`).</td>
+                  <td><span class="perf-tag high">Lazy</span> (Chỉ chạy khi có người gọi `.subscribe()`).</td>
+                </tr>
+                <tr>
+                  <td><strong>Khả năng hủy (Cancellation)</strong></td>
+                  <td>Không thể hủy giữa chừng một cách dễ dàng.</td>
+                  <td>Dễ dàng hủy bất kỳ lúc nào bằng <code>subscription.unsubscribe()</code>.</td>
+                </tr>
+                <tr>
+                  <td><strong>Khả năng biến đổi</strong></td>
+                  <td>Chỉ có `.then()`, `.catch()`, `.finally()`.</td>
+                  <td>Hơn 100+ Operators phong phú (map, filter, switchMap, debounce...).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Interactive Test Box -->
+          <div class="promise-vs-obs-playground">
+            <div class="test-panel promise-panel">
+              <div class="panel-head">
+                <h4>Thử Nghiệm Promise (1 Giá Trị Duy Nhất)</h4>
+                <button
+                  class="btn btn-primary-sm"
+                  (click)="runPromiseDemo()"
+                  [disabled]="promiseState === 'PENDING'"
+                >
+                  ▶ Chạy Promise
+                </button>
+              </div>
+              <div class="panel-result-box">
+                <span class="state-tag" [class]="'state-' + promiseState.toLowerCase()">
+                  Trạng thái: {{ promiseState }}
+                </span>
+                <p class="result-text">{{ promiseResult || 'Bấm nút "Chạy Promise" để xem kết quả sau 1.5s' }}</p>
+              </div>
+            </div>
+
+            <div class="test-panel obs-panel">
+              <div class="panel-head">
+                <h4>Thử Nghiệm Observable (Stream Nhiều Giá Trị &amp; Hủy Được)</h4>
+                <div class="panel-btn-group">
+                  <button
+                    class="btn btn-success-sm"
+                    (click)="subscribeObservableDemo()"
+                    [disabled]="observableState === 'STREAMING'"
+                  >
+                    ▶ Subscribe (Chạy)
+                  </button>
+                  <button
+                    class="btn btn-danger-sm"
+                    (click)="unsubscribeObservableDemo()"
+                    [disabled]="observableState !== 'STREAMING'"
+                  >
+                    ⏹ Unsubscribe (Hủy)
+                  </button>
+                </div>
+              </div>
+              <div class="panel-result-box">
+                <div class="obs-status-row">
+                  <span class="state-tag" [class]="'state-' + observableState.toLowerCase()">
+                    Trạng thái: {{ observableState }}
+                  </span>
+                  <small class="obs-hint">Mỗi 600ms phát 1 giá trị (1, 2, 3...)</small>
+                </div>
+                <div class="stream-values-list">
+                  @if (observableStreamValues.length === 0) {
+                    <span class="empty-stream-text">Chưa có giá trị nào được phát</span>
+                  } @else {
+                    @for (val of observableStreamValues; track $index) {
+                      <span class="stream-pill">{{ val }}</span>
+                    }
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 3: Custom Observable & Teardown Mechanics -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge custom">Tạo Observable Thủ Công</span>
+            <h2 class="card-title">3. Khởi Tạo Observable &amp; Cơ Chế Teardown (Cleanup)</h2>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="alert-box alert-warning">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-content">
+              <strong>Nguyên tắc vàng từ Day 19:</strong>
+              Nếu bạn tự tạo Observable bằng <code>new Observable(observer => &#123; ... &#125;)</code>,
+              bạn <strong>bắt buộc phải trả về một hàm teardown</strong> (thông qua <code>return () => &#123; ... &#125;</code>)
+              để dọn dẹp tài nguyên (ví dụ: <code>clearInterval</code>, đóng WebSocket, removeEventListener).
+              Khi ai đó gọi <code>subscription.unsubscribe()</code>, hàm teardown này sẽ tự động được gọi.
+            </div>
+          </div>
+
+          <!-- 2 Independent Subscribers Demo -->
+          <div class="subscribers-grid">
+            <!-- Subscriber A -->
+            <div class="subscriber-box">
+              <div class="sub-head">
+                <div class="sub-title-wrap">
+                  <span class="sub-avatar">A</span>
+                  <h4>Subscriber A</h4>
+                </div>
+                <span class="status-badge" [class.active]="subAState === 'ACTIVE'">
+                  {{ subAState === 'ACTIVE' ? 'Đang lắng nghe' : 'Đã hủy (Unsubscribed)' }}
+                </span>
+              </div>
+
+              <div class="sub-metric">
+                <span class="metric-lbl">Giá trị nhận được:</span>
+                <strong class="metric-data">{{ subACurrentValue !== null ? subACurrentValue : '--' }}</strong>
+              </div>
+
+              <div class="sub-actions">
+                <button
+                  class="btn btn-sub"
+                  (click)="subscribeSubscriberA()"
+                  [disabled]="subAState === 'ACTIVE'"
+                >
+                  ▶ Subscribe A
+                </button>
+                <button
+                  class="btn btn-unsub"
+                  (click)="unsubscribeSubscriberA()"
+                  [disabled]="subAState !== 'ACTIVE'"
+                >
+                  ⏹ Unsubscribe A
+                </button>
+              </div>
+              <small class="sub-note">Mỗi Subscriber kích hoạt một <strong>Execution độc lập</strong> riêng biệt.</small>
+            </div>
+
+            <!-- Subscriber B -->
+            <div class="subscriber-box">
+              <div class="sub-head">
+                <div class="sub-title-wrap">
+                  <span class="sub-avatar avatar-b">B</span>
+                  <h4>Subscriber B</h4>
+                </div>
+                <span class="status-badge" [class.active]="subBState === 'ACTIVE'">
+                  {{ subBState === 'ACTIVE' ? 'Đang lắng nghe' : 'Đã hủy (Unsubscribed)' }}
+                </span>
+              </div>
+
+              <div class="sub-metric">
+                <span class="metric-lbl">Giá trị nhận được:</span>
+                <strong class="metric-data text-emerald">{{ subBCurrentValue !== null ? subBCurrentValue : '--' }}</strong>
+              </div>
+
+              <div class="sub-actions">
+                <button
+                  class="btn btn-sub btn-sub-b"
+                  (click)="subscribeSubscriberB()"
+                  [disabled]="subBState === 'ACTIVE'"
+                >
+                  ▶ Subscribe B
+                </button>
+                <button
+                  class="btn btn-unsub"
+                  (click)="unsubscribeSubscriberB()"
+                  [disabled]="subBState !== 'ACTIVE'"
+                >
+                  ⏹ Unsubscribe B
+                </button>
+              </div>
+              <small class="sub-note">Khi B hủy, chỉ Producer của B dừng lại, không ảnh hưởng tới A!</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 4: Stream Lifecycle Simulator (Next / Error / Complete) -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge experiment">Mô Phỏng Vòng Đời Stream</span>
+            <h2 class="card-title">4. Vòng Đời Observable: Next, Error, Complete &amp; Quy Tắc Đóng Stream</h2>
+          </div>
+          <button class="btn btn-outline-sm" (click)="startNewLifecycleStream()">
+            ↺ Khởi Tạo Stream Mới
+          </button>
+        </div>
+
+        <div class="card-body">
+          <p class="section-lead-text">
+            Theo đặc tả của RxJS: Trong một Observable Execution, có thể có từ <strong>0 đến vô hạn Next notifications</strong>.
+            Nhưng chỉ có thể có <strong>duy nhất 1 Error HOẶC 1 Complete notification</strong>.
+            Một khi Error hoặc Complete đã được gửi đi, stream sẽ <strong>đóng vĩnh viễn</strong> và không có dữ liệu nào được phát tiếp nữa.
+          </p>
+
+          <!-- Controls Row -->
+          <div class="lifecycle-controls-row">
+            <div class="input-emit-group">
+              <input
+                type="text"
+                class="form-input"
+                placeholder="Nhập payload (ví dụ: User Profile, Data Packet)..."
+                [(ngModel)]="nextPayloadInput"
+                [disabled]="lifecycleState !== 'ACTIVE'"
+              />
+              <button
+                class="btn btn-emit-next"
+                (click)="emitLifecycleNext()"
+                [disabled]="lifecycleState !== 'ACTIVE'"
+                title="Gửi dữ liệu qua observer.next()"
+              >
+                + Phát Next(val)
+              </button>
+            </div>
+
+            <div class="terminal-btn-group">
+              <button
+                class="btn btn-emit-complete"
+                (click)="emitLifecycleComplete()"
+                [disabled]="lifecycleState !== 'ACTIVE'"
+                title="Báo hoàn tất qua observer.complete()"
+              >
+                ✔ Gửi Complete()
+              </button>
+              <button
+                class="btn btn-emit-error"
+                (click)="emitLifecycleError()"
+                [disabled]="lifecycleState !== 'ACTIVE'"
+                title="Báo lỗi qua observer.error()"
+              >
+                ✖ Gửi Error()
+              </button>
+              <button
+                class="btn btn-unsub-stream"
+                (click)="unsubscribeLifecycle()"
+                [disabled]="lifecycleState === 'IDLE'"
+              >
+                ⏹ Hủy (Unsubscribe)
+              </button>
+            </div>
+          </div>
+
+          <!-- Current Stream State Banner -->
+          <div class="stream-state-banner" [class]="'state-is-' + lifecycleState.toLowerCase()">
+            <div class="banner-left">
+              <span class="state-dot"></span>
+              <span>Trạng thái Execution: <strong>{{ lifecycleState }}</strong></span>
+            </div>
+            @if (lifecycleState === 'COMPLETED') {
+              <span class="state-msg">Stream đã hoàn thành thành công (không nhận thêm dữ liệu).</span>
+            }
+            @if (lifecycleState === 'ERROR') {
+              <span class="state-msg">Stream đã gặp lỗi: {{ lifecycleErrorMessage }}.</span>
+            }
+            @if (lifecycleState === 'ACTIVE') {
+              <span class="state-msg">Stream đang mở, Observer sẵn sàng tiếp nhận thông báo.</span>
+            }
+            @if (lifecycleState === 'IDLE') {
+              <span class="state-msg">Nhấn "Khởi Tạo Stream Mới" để bắt đầu thử nghiệm.</span>
+            }
+          </div>
+
+          <!-- Live Marbles Timeline -->
+          <div class="marble-timeline-container">
+            <span class="timeline-label">Dòng Chảy Marbles (Values over time):</span>
+            <div class="marble-axis">
+              <div class="axis-line"></div>
+              <div class="marbles-wrapper">
+                @if (marbles.length === 0) {
+                  <span class="timeline-empty-hint">Chưa có tín hiệu nào trên dòng thời gian...</span>
+                }
+                @for (m of marbles; track m.id) {
+                  <div class="marble-item" [class]="'type-' + m.type.toLowerCase()">
+                    <span class="marble-bubble">{{ m.value }}</span>
+                    <span class="marble-time">{{ m.timestamp }}</span>
+                    <span class="marble-type-tag">{{ m.type }}</span>
+                  </div>
+                }
+              </div>
+              <div class="axis-arrow">▶</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 5: Composite Subscriptions (subscription.add) -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge composite">Gom Nhóm Subscriptions</span>
+            <h2 class="card-title">5. Quản Lý Nhiều Luồng: Gom Nhóm Subscriptions với subscription.add()</h2>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="alert-box alert-info">
+            <span class="alert-icon">💡</span>
+            <div class="alert-content">
+              <strong>Kỹ thuật từ Day 19:</strong>
+              Một Subscription cha có thể gom nhiều Subscription con thông qua phương thức <code>parentSubscription.add(childSub)</code>.
+              Khi Subscription cha gọi <code>unsubscribe()</code>, <strong>toàn bộ các Subscription con phụ thuộc cũng sẽ tự động được hủy</strong>!
+            </div>
+          </div>
+
+          <div class="composite-demo-grid">
+            <div class="stream-gauge parent-gauge">
+              <span class="gauge-label">Parent Stream: interval(500)</span>
+              <strong class="gauge-count">{{ parentStreamCount }}</strong>
+              <small>Chạy mỗi 500ms</small>
+            </div>
+
+            <div class="stream-gauge child-gauge">
+              <span class="gauge-label">Child Stream: interval(800)</span>
+              <strong class="gauge-count">{{ childStreamCount }}</strong>
+              <small>Chạy mỗi 800ms (Được gắn vào Parent qua .add())</small>
+            </div>
+          </div>
+
+          <div class="composite-action-row">
+            <button
+              class="btn btn-primary-sm"
+              (click)="startCompositeStreams()"
+              [disabled]="compositeState === 'RUNNING'"
+            >
+              ▶ Chạy Đồng Thời Cả 2 Luồng
+            </button>
+            <button
+              class="btn btn-danger-sm"
+              (click)="unsubscribeCompositeStreams()"
+              [disabled]="compositeState !== 'RUNNING'"
+            >
+              ⏹ parentSubscription.unsubscribe() (Hủy Cả Hai Cùng Lúc)
+            </button>
+            <span class="state-pill" [class.running]="compositeState === 'RUNNING'">
+              State: {{ compositeState }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 6: 6 Core Concepts of RxJS Infographic -->
+      <section class="card concepts-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge architecture">RxJS Core Pillars</span>
+            <h2 class="card-title">6. Sáu Khái Niệm Cốt Lõi (RxJS 6 Core Concepts)</h2>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="concepts-grid">
+            @for (concept of coreConcepts; track concept.name) {
+              <div class="concept-item">
+                <div class="concept-head">
+                  <span class="concept-name">{{ concept.name }}</span>
+                  <span class="concept-badge">{{ concept.badge }}</span>
+                </div>
+                <p class="concept-summary">{{ concept.summary }}</p>
+                <div class="concept-code">
+                  <code>{{ concept.signature }}</code>
+                </div>
+                <div class="concept-angular">
+                  <small><strong>Trong Angular:</strong> {{ concept.angularUsage }}</small>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Sidebar (Logs & Code Reference) -->
+    <div class="dashboard-column side-column">
+
+      <!-- Real-time Activity Logs -->
+      <section class="card logs-card">
+        <div class="card-header">
+          <div class="log-title-wrap">
+            <span class="live-dot"></span>
+            <h3 class="side-card-title">Nhật Ký Sự Kiện Real-time</h3>
+          </div>
+          <span class="log-count">{{ logs.length }} logs</span>
+        </div>
+
+        <div class="card-body logs-body">
+          @if (logs.length === 0) {
+            <div class="no-logs">Chưa có sự kiện nào được ghi nhận</div>
+          } @else {
+            <div class="log-stream">
+              @for (log of logs; track log.id) {
+                <div class="log-entry" [class]="'source-' + log.type.toLowerCase()">
+                  <div class="log-meta">
+                    <span class="log-badge" [class]="'badge-' + log.type.toLowerCase()">{{ log.type }}</span>
+                    <span class="log-time">{{ log.time }}</span>
+                  </div>
+                  <div class="log-msg">{{ log.message }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Code Reference Card -->
+      <section class="card code-ref-card">
+        <div class="card-header">
+          <h3 class="side-card-title">Cú Pháp Trọng Tâm Day 19</h3>
+        </div>
+        <div class="card-body code-ref-body">
+          <!-- Snippet 1 -->
+          <div class="code-snippet">
+            <span class="code-label">1. Tạo Observable với Teardown</span>
+            <pre><code>const obs = new Observable(observer => &#123;
+  const id = setTimeout(() => &#123;
+    observer.next('Hello RxJS');
+    observer.complete();
+  &#125;, 1000);
+  return function unsubscribe() &#123;
+    clearTimeout(id);
+  &#125;;
+&#125;);</code></pre>
+          </div>
+
+          <!-- Snippet 2 -->
+          <div class="code-snippet">
+            <span class="code-label">2. Throttle Event với RxJS</span>
+            <pre><code>fromEvent(btn, 'click').pipe(
+  throttleTime(500),
+  scan(count => count + 1, 0)
+).subscribe(c => console.log(c));</code></pre>
+          </div>
+
+          <!-- Snippet 3 -->
+          <div class="code-snippet">
+            <span class="code-label">3. Observer Callbacks Object</span>
+            <pre><code>obs.subscribe(&#123;
+  next: (val) => console.log(val),
+  error: (err) => console.error(err),
+  complete: () => console.log('Done')
+&#125;);</code></pre>
+          </div>
+
+          <!-- Snippet 4 -->
+          <div class="code-snippet">
+            <span class="code-label">4. Gộp Subscription bằng .add()</span>
+            <pre><code>const parent = interval(500).subscribe();
+const child = interval(700).subscribe();
+parent.add(child);
+// Hủy cả hai cùng lúc:
+parent.unsubscribe();</code></pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
 </div>

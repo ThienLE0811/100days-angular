@@ -1,4 +1,586 @@
-<div class="day-container">
-  <h2>Day018-pipes</h2>
-  <p>day018-pipes works!</p>
+<div class="day018-page">
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 18</span>
+        <span class="badge badge-syntax">PipeTransform</span>
+        <span class="badge badge-syntax">&#64;Pipe</span>
+        <span class="badge badge-syntax">Pure vs Impure</span>
+        <span class="badge badge-syntax">Pipe Chaining</span>
+        <span class="badge badge-syntax">AsyncPipe</span>
+      </div>
+      <h1 class="page-title">Transform Data with Angular Pipes</h1>
+      <p class="page-subtitle">
+        Khám phá kỹ thuật biến đổi dữ liệu (Data Transformation) trước khi hiển thị lên giao diện:
+        từ các <strong>Built-in Pipes</strong>, kỹ thuật <strong>Pipe Chaining</strong>, tự viết <strong>Custom Pipe có Parameters</strong>,
+        đến bản chất <strong>Change Detection</strong> của <strong>Pure Pipe vs Impure Pipe</strong>.
+      </p>
+    </div>
+
+    <!-- Quick Stats Banner -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Số lần Pure Pipe chạy:</span>
+        <span class="stat-value pure-val">{{ pureExecutions }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Số lần Impure Pipe chạy:</span>
+        <span class="stat-value impure-val">{{ impureExecutions }}</span>
+      </div>
+      <button class="btn-clear-logs" (click)="clearLogs()" title="Xóa lịch sử logs">
+        Xóa Logs ⌫
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <div class="dashboard-grid">
+    <!-- Left Column: Core Demos -->
+    <div class="dashboard-column main-column">
+      
+      <!-- DEMO 1: Built-in Pipes Showcase & Chaining -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge builtin">Phần 1: Built-in Pipes</span>
+            <h2 class="card-title">1. Các Pipe Có Sẵn &amp; Kỹ Thuật Nối Pipe (Pipe Chaining)</h2>
+          </div>
+          <span class="info-tag">CommonModule</span>
+        </div>
+
+        <div class="card-body">
+          <div class="pipes-showcase-grid">
+            
+            <!-- DatePipe & Chaining -->
+            <div class="pipe-box">
+              <div class="pipe-header">
+                <span class="pipe-name">DatePipe &amp; Chaining</span>
+                <span class="pipe-tag">date | uppercase</span>
+              </div>
+              <div class="pipe-content">
+                <div class="field-row">
+                  <span class="lbl">Dữ liệu gốc (ISO):</span>
+                  <code class="val">{{ isoDateString }}</code>
+                </div>
+                <div class="field-row">
+                  <span class="lbl">now | date:</span>
+                  <strong class="val-res">{{ isoDateString | date }}</strong>
+                </div>
+                <div class="field-row">
+                  <span class="lbl">now | date:'medium':</span>
+                  <strong class="val-res">{{ isoDateString | date : 'medium' }}</strong>
+                </div>
+                <div class="field-row highlight-row">
+                  <span class="lbl">Chaining (| date | uppercase):</span>
+                  <strong class="val-res primary">{{ isoDateString | date : 'medium' | uppercase }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- CurrencyPipe & DecimalPipe -->
+            <div class="pipe-box">
+              <div class="pipe-header">
+                <span class="pipe-name">Currency &amp; Decimal</span>
+                <span class="pipe-tag">currency | number</span>
+              </div>
+              <div class="pipe-content">
+                <div class="field-row">
+                  <span class="lbl">Số gốc:</span>
+                  <code class="val">{{ samplePrice }} USD &bull; {{ sampleDecimal }}</code>
+                </div>
+                <div class="field-row">
+                  <span class="lbl">price | currency:'USD':'symbol':'1.0-0':</span>
+                  <strong class="val-res green">{{ samplePrice | currency : 'USD' : 'symbol' : '1.0-0' }}</strong>
+                </div>
+                <div class="field-row">
+                  <span class="lbl">price | currency:'VND':'code':</span>
+                  <strong class="val-res green">{{ (samplePrice * 25400) | currency : 'VND' : 'code' : '1.0-0' }}</strong>
+                </div>
+                <div class="field-row">
+                  <span class="lbl">decimal | number:'1.2-2':</span>
+                  <strong class="val-res">{{ sampleDecimal | number : '1.2-2' }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- UpperCase, LowerCase & Percent -->
+            <div class="pipe-box">
+              <div class="pipe-header">
+                <span class="pipe-name">Text &amp; Percent</span>
+                <span class="pipe-tag">uppercase | percent</span>
+              </div>
+              <div class="pipe-content">
+                <div class="field-row">
+                  <span class="lbl">Text gốc:</span>
+                  <code class="val">{{ sampleText }}</code>
+                </div>
+                <div class="field-row">
+                  <span class="lbl">text | uppercase:</span>
+                  <strong class="val-res">{{ sampleText | uppercase }}</strong>
+                </div>
+                <div class="field-row">
+                  <span class="lbl">Tỷ lệ (0.8564) | percent:'1.1-1':</span>
+                  <strong class="val-res amber">{{ sampleRatio | percent : '1.1-1' }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- AsyncPipe -->
+            <div class="pipe-box">
+              <div class="pipe-header">
+                <span class="pipe-name">AsyncPipe (Observable)</span>
+                <span class="pipe-tag">async</span>
+              </div>
+              <div class="pipe-content">
+                <div class="field-row">
+                  <span class="lbl">Đếm ngược thời gian:</span>
+                  <strong class="val-res countdown">{{ countdownTimer$ | async }} giây</strong>
+                </div>
+                <p class="pipe-note">
+                  AsyncPipe tự động <code>subscribe</code> khi template render và tự động <code>unsubscribe</code> khi component bị hủy, tránh rò rỉ bộ nhớ.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 2: Custom Pipe with Parameters (AppTitlePipe) -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge custom">Phần 2: Custom Pipe</span>
+            <h2 class="card-title">2. Tự Viết Custom Pipe: AppTitlePipe với Parameters</h2>
+          </div>
+          <div class="header-actions-group">
+            <button class="btn btn-outline-sm" (click)="toggleUserId()">
+              ⇄ Đổi State: {{ userIdChangeAfterFiveSeconds ? 'Thành Trống (Add)' : 'Có ID (Edit)' }}
+            </button>
+            <button class="btn btn-primary-sm" (click)="resetTimer()">
+              ↺ Đếm Ngược 5s
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="alert-box alert-info">
+            <span class="alert-icon">💡</span>
+            <div class="alert-content">
+              <strong>Tình huống thực tế từ Day 18:</strong>
+              Tránh lỗi typo (ví dụ gõ nhầm <code>Adđ</code> do Unikey) khi render tiêu đề form Add/Edit:
+              <code ngNonBindable>{{ resourceId | appTitle }}</code> &rarr; Nếu có ID trả về <strong>Edit</strong>, nếu không trả về <strong>Add</strong>.
+              Hỗ trợ truyền parameters tùy biến: <code ngNonBindable>{{ resourceId | appTitle:'Set':'Change' }}</code>.
+            </div>
+          </div>
+
+          <div class="app-title-demo-grid">
+            <div class="demo-card-inner">
+              <span class="sub-label">1. Cú pháp mặc định (Add / Edit):</span>
+              <div class="rendered-title-box">
+                <h3 class="form-title">
+                  {{ userIdChangeAfterFiveSeconds | appTitle }} User Form
+                </h3>
+                <span class="status-badge" [class.edit]="userIdChangeAfterFiveSeconds" [class.add]="!userIdChangeAfterFiveSeconds">
+                  userId: {{ userIdChangeAfterFiveSeconds || '(rỗng)' }}
+                </span>
+              </div>
+              <code class="code-preview" ngNonBindable>{{ userId | appTitle }} User Form</code>
+            </div>
+
+            <div class="demo-card-inner">
+              <span class="sub-label">2. Cú pháp truyền Parameters tùy biến:</span>
+              <div class="rendered-title-box">
+                <h3 class="form-title">
+                  {{ userIdChangeAfterFiveSeconds | appTitle : customAddText : customEditText }} User Form
+                </h3>
+                <span class="status-badge custom-badge">
+                  Parameters: '{{ customAddText }}' : '{{ customEditText }}'
+                </span>
+              </div>
+              <code class="code-preview" ngNonBindable>{{ userId | appTitle:'Set':'Change' }}</code>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 3: Pure vs Impure Pipe & Change Detection Experiment -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge experiment">Phần 3: Thí Nghiệm Cốt Lõi</span>
+            <h2 class="card-title">3. Pure vs Impure Pipe &amp; Cơ Chế Change Detection</h2>
+          </div>
+          <button class="btn btn-outline-sm" (click)="resetUserList()">
+            ↺ Khôi Phục Mặc Định
+          </button>
+        </div>
+
+        <div class="card-body">
+          <div class="alert-box alert-warning">
+            <span class="alert-icon">⚠️</span>
+            <div class="alert-content">
+              <strong>Quy tắc quan trọng từ Day 18:</strong>
+              Mặc định Pipe luôn là <strong>Pure</strong> (<code>pure: true</code>). Angular chỉ chạy lại Pure Pipe khi có sự thay đổi giá trị nguyên thủy (Primitive) hoặc <strong>thay đổi Reference của Object/Array</strong>.
+              Nếu bạn dùng <code>users.push()</code> (mutate mảng), reference không đổi &rarr; <strong>Pure Pipe sẽ KHÔNG chạy lại!</strong>
+            </div>
+          </div>
+
+          <!-- Form thêm User -->
+          <div class="add-user-box">
+            <h4>Thêm Người Dùng Mới (Tuổi &ge; 18 để test filter người lớn):</h4>
+            <div class="input-form-row">
+              <input
+                type="text"
+                class="form-input"
+                placeholder="Tên thành viên..."
+                [(ngModel)]="newUserName"
+              />
+              <input
+                type="number"
+                class="form-input age-input"
+                placeholder="Tuổi..."
+                [(ngModel)]="newUserAge"
+                min="1"
+                max="120"
+              />
+              <button
+                class="btn btn-mutate"
+                (click)="addUserMutate()"
+                [disabled]="!newUserName.trim()"
+                title="Dùng users.push() - Reference mảng giữ nguyên"
+              >
+                1. Thêm bằng .push() (Mutate)
+              </button>
+              <button
+                class="btn btn-immutable"
+                (click)="addUserImmutable()"
+                [disabled]="!newUserName.trim()"
+                title="Dùng [...this.users] - Tạo Reference mới"
+              >
+                2. Thêm bằng [...users] (Immutable)
+              </button>
+            </div>
+          </div>
+
+          <!-- 3 Cột so sánh thực tế -->
+          <div class="three-users-columns">
+            
+            <!-- Cột 1: Full List -->
+            <div class="user-column">
+              <div class="col-head">
+                <span class="badge-col default">Toàn Bộ Danh Sách</span>
+                <h4>Danh Sách Gốc ({{ users.length }})</h4>
+              </div>
+              <ul class="user-list">
+                @for (u of users; track u.id) {
+                  <li class="user-item">
+                    <span class="user-avatar">👤</span>
+                    <div class="user-info">
+                      <span class="user-name">{{ u.name }}</span>
+                      <span class="user-meta">{{ u.role }} &bull; {{ u.age }} tuổi</span>
+                    </div>
+                  </li>
+                }
+              </ul>
+            </div>
+
+            <!-- Cột 2: Pure Pipe (isAdult) -->
+            <div class="user-column pure-col">
+              <div class="col-head">
+                <span class="badge-col pure">Pure Pipe (pure: true)</span>
+                <h4>Người Lớn (&ge; 18)</h4>
+              </div>
+              <ul class="user-list">
+                @for (u of (users | isAdult); track u.id) {
+                  <li class="user-item">
+                    <span class="user-avatar adult">✔️</span>
+                    <div class="user-info">
+                      <span class="user-name">{{ u.name }}</span>
+                      <span class="user-meta">{{ u.role }} &bull; {{ u.age }} tuổi</span>
+                    </div>
+                  </li>
+                }
+              </ul>
+              <div class="col-footer">
+                <small>Chỉ update khi <strong>đổi reference</strong> ([...users]).</small>
+              </div>
+            </div>
+
+            <!-- Cột 3: Impure Pipe (isAdultImpure) -->
+            <div class="user-column impure-col">
+              <div class="col-head">
+                <span class="badge-col impure">Impure Pipe (pure: false)</span>
+                <h4>Người Lớn (&ge; 18)</h4>
+              </div>
+              <ul class="user-list">
+                @for (u of (users | isAdultImpure); track u.id) {
+                  <li class="user-item">
+                    <span class="user-avatar adult">✔️</span>
+                    <div class="user-info">
+                      <span class="user-name">{{ u.name }}</span>
+                      <span class="user-meta">{{ u.role }} &bull; {{ u.age }} tuổi</span>
+                    </div>
+                  </li>
+                }
+              </ul>
+              <div class="col-footer">
+                <small>Update <strong>mọi Change Detection cycle</strong> (kể cả khi .push()).</small>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 4: So Sánh Chi Tiết Pure vs Impure -->
+      <section class="card comparison-table-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge architecture">Bản Chất Kỹ Thuật</span>
+            <h2 class="card-title">4. So Sánh Bản Chất: Pure Pipe vs Impure Pipe</h2>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Đặc điểm</th>
+                  <th>Pure Pipe (Mặc định)</th>
+                  <th>Impure Pipe (pure: false)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Cú pháp khai báo</strong></td>
+                  <td><code>&#64;Pipe(&#123; name: '...', pure: true &#125;)</code></td>
+                  <td><code>&#64;Pipe(&#123; name: '...', pure: false &#125;)</code></td>
+                </tr>
+                <tr>
+                  <td><strong>Điều kiện kích hoạt</strong></td>
+                  <td>Chỉ khi giá trị nguyên thủy hoặc <strong>Object Reference</strong> thay đổi.</td>
+                  <td>Kích hoạt trong <strong>MỌI chu kỳ Change Detection</strong> (bấm phím, click, timer,...).</td>
+                </tr>
+                <tr>
+                  <td><strong>Hiệu năng (Performance)</strong></td>
+                  <td><span class="perf-tag high">Rất cao</span> (Check reference siêu nhanh)</td>
+                  <td><span class="perf-tag low">Tốn kém</span> (Nếu data lớn sẽ làm giật lag giao diện)</td>
+                </tr>
+                <tr>
+                  <td><strong>Khuyến nghị từ Angular</strong></td>
+                  <td>Ưu tiên sử dụng 99% trường hợp kết hợp với Immutability.</td>
+                  <td>Hết sức cẩn trọng, chỉ dùng khi bất khả kháng hoặc với AsyncPipe.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- DEMO 5: 6 Tác Dụng Vượt Trội Của Pipes (Beyond Data Transformation) -->
+      <section class="card architectural-benefits-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge architecture">Kiến Trúc Chuyên Sâu</span>
+            <h2 class="card-title">5. Sáu Tác Dụng Vượt Trội Của Pipes Trong Angular</h2>
+          </div>
+          <span class="info-tag">Tư duy Senior Angular</span>
+        </div>
+
+        <div class="card-body">
+          <p class="section-lead-text">
+            Ngoài việc nhận input và trả ra output hiển thị, Pipe là giải pháp kiến trúc cốt lõi giúp ứng dụng Angular đạt hiệu năng tối đa và sạch sẽ:
+          </p>
+
+          <div class="benefits-grid">
+            
+            <!-- Benefit 1 -->
+            <div class="benefit-item">
+              <div class="benefit-icon">⚡</div>
+              <div class="benefit-body">
+                <h4>1. Tối Ưu Hiệu Năng (Memoization / Caching)</h4>
+                <p>
+                  Pure Pipe tự động lưu đệm (cache) kết quả. Phương thức <code>transform()</code> <strong>chỉ chạy lại khi Input thay đổi tham chiếu</strong>.
+                  Tránh hoàn toàn việc hàm bị chạy lại hàng trăm lần trong mỗi chu kỳ Change Detection.
+                </p>
+              </div>
+            </div>
+
+            <!-- Benefit 2 -->
+            <div class="benefit-item">
+              <div class="benefit-icon">🛡️</div>
+              <div class="benefit-body">
+                <h4>2. Quản Lý Async &amp; Chống Rò Rỉ Bộ Nhớ (Memory Leak)</h4>
+                <p>
+                  <code>AsyncPipe</code> tự động <code>subscribe</code> khi render và <strong>tự động <code>unsubscribe</code></strong> khi component destroy.
+                  Không cần viết <code>ngOnDestroy</code> hay quản lý Subscription thủ công.
+                </p>
+              </div>
+            </div>
+
+            <!-- Benefit 3 -->
+            <div class="benefit-item">
+              <div class="benefit-icon">🎯</div>
+              <div class="benefit-body">
+                <h4>3. Tách Biệt Trách Nhiệm (Separation of Concerns - SRP)</h4>
+                <p>
+                  Component chỉ tập trung vào Logic nghiệp vụ (gọi API, State Management), còn Pipe chịu trách nhiệm riêng về định dạng hiển thị (Presentation Formatting).
+                </p>
+              </div>
+            </div>
+
+            <!-- Benefit 4 -->
+            <div class="benefit-item">
+              <div class="benefit-icon">🔄</div>
+              <div class="benefit-body">
+                <h4>4. Tái Sử Dụng Cao &amp; Chuẩn DRY (Don't Repeat Yourself)</h4>
+                <p>
+                  Viết một lần, sử dụng ở bất kỳ template nào trong toàn bộ ứng dụng mà không cần copy-paste hàm helper vào từng component.
+                </p>
+              </div>
+            </div>
+
+            <!-- Benefit 5 -->
+            <div class="benefit-item">
+              <div class="benefit-icon">🔗</div>
+              <div class="benefit-body">
+                <h4>5. Ghép Nối Linh Hoạt (Pipe Chaining)</h4>
+                <p>
+                  Dễ dàng kết hợp nhiều bộ lọc từ trái qua phải: <code>isoDate | date:'medium' | uppercase</code> mà không phải lồng ghép hàm phức tạp như <code>uppercase(date(val))</code>.
+                </p>
+              </div>
+            </div>
+
+            <!-- Benefit 6 -->
+            <div class="benefit-item">
+              <div class="benefit-icon">🧪</div>
+              <div class="benefit-body">
+                <h4>6. Cực Kỳ Dễ Viết Unit Test (Testability)</h4>
+                <p>
+                  Pipe là Class thuần túy (POJO) với method <code>transform()</code>. Viết Unit Test trực tiếp bằng <code>new MyPipe().transform(...)</code> mà không cần khởi tạo DOM hay TestBed.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Benchmark Box: Method Call vs Pure Pipe -->
+          <div class="benchmark-box">
+            <div class="benchmark-header">
+              <h4>🔥 Thử Nghiệm Trực Quan: Gọi Hàm Trong HTML vs Pure Pipe</h4>
+              <button class="btn btn-trigger-cd" (click)="triggerChangeDetection()">
+                Kích Hoạt Change Detection (Click / Hover)
+              </button>
+            </div>
+            <div class="benchmark-grid">
+              
+              <div class="benchmark-col bad">
+                <span class="benchmark-badge bad-badge">Gọi Method trong HTML (Bad Practice)</span>
+                <p class="benchmark-code"><code>&#123;&#123; formatPriceWithMethod(samplePrice) &#125;&#125;</code></p>
+                <div class="metric-row">
+                  <span>Kết quả: <strong>{{ formatPriceWithMethod(samplePrice) }}</strong></span>
+                  <span class="count-pill red">Đã chạy: <strong>{{ methodExecutionCount }} lần</strong></span>
+                </div>
+                <small class="warn-note">&bull; Bị gọi lại trong MỌI chu kỳ Change Detection (dù dữ liệu không hề đổi)!</small>
+              </div>
+
+              <div class="benchmark-col good">
+                <span class="benchmark-badge good-badge">Dùng Pure Pipe (Best Practice)</span>
+                <p class="benchmark-code"><code>&#123;&#123; samplePrice | currency:'USD' &#125;&#125;</code></p>
+                <div class="metric-row">
+                  <span>Kết quả: <strong>{{ samplePrice | currency : 'USD' : 'symbol' : '1.2-2' }}</strong></span>
+                  <span class="count-pill green">Memoized: <strong>Tối ưu cache</strong></span>
+                </div>
+                <small class="good-note">&bull; Chỉ chạy khi tham chiếu giá trị thay đổi, tiết kiệm tài nguyên CPU!</small>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Activity Logs & Documentation -->
+    <div class="dashboard-column side-column">
+      
+      <!-- JsonPipe Live Viewer -->
+      <section class="card json-card">
+        <div class="card-header">
+          <h3 class="side-card-title">JsonPipe Debugger</h3>
+          <span class="outside-badge">sampleObject | json</span>
+        </div>
+        <div class="card-body json-body">
+          <pre><code>{{ sampleObject | json }}</code></pre>
+        </div>
+      </section>
+
+      <!-- Activity Logs Stream -->
+      <section class="card logs-card">
+        <div class="card-header">
+          <div class="log-title-wrap">
+            <span class="live-dot"></span>
+            <h3 class="side-card-title">Nhật Ký Tương Tác &amp; Pipes</h3>
+          </div>
+          <span class="log-count">{{ logs.length }} logs</span>
+        </div>
+
+        <div class="card-body logs-body">
+          @if (logs.length === 0) {
+            <div class="no-logs">Chưa có nhật ký nào được ghi lại</div>
+          } @else {
+            <div class="log-stream">
+              @for (log of logs; track log.id) {
+                <div class="log-entry" [class]="'source-' + log.type.toLowerCase()">
+                  <div class="log-meta">
+                    <span class="log-badge" [class]="'badge-' + log.type.toLowerCase()">{{ log.type }}</span>
+                    <span class="log-time">{{ log.time }}</span>
+                  </div>
+                  <div class="log-msg">{{ log.message }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Code Reference Card -->
+      <section class="card code-ref-card">
+        <div class="card-header">
+          <h3 class="side-card-title">Cú Pháp Trọng Tâm Day 18</h3>
+        </div>
+        <div class="card-body code-ref-body">
+          <div class="code-snippet">
+            <span class="code-label">1. Khai báo Custom Pipe</span>
+            <pre><code>&#64;Pipe(&#123;
+  name: 'appTitle',
+  standalone: true
+&#125;)
+export class AppTitlePipe implements PipeTransform &#123;
+  transform(val: string, add = 'Add', edit = 'Edit'): string &#123;
+    return val ? edit : add;
+  &#125;
+&#125;</code></pre>
+          </div>
+
+          <div class="code-snippet">
+            <span class="code-label">2. Pipe Chaining</span>
+            <pre><code>&#123;&#123; isoDateString | date:'medium' | uppercase &#125;&#125;</code></pre>
+          </div>
+
+          <div class="code-snippet">
+            <span class="code-label">3. Khai báo Impure Pipe</span>
+            <pre><code>&#64;Pipe(&#123;
+  name: 'isAdult',
+  pure: false
+&#125;)</code></pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
 </div>

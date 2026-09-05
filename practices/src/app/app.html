@@ -27,6 +27,9 @@
         >
           <span class="day-badge">D{{ item.dayNum }}</span>
           <span class="day-name">{{ item.title }}</span>
+          @if (hasBadge(item.dayNum)) {
+            <span class="badge-dot" title="Đã có nội dung thực hành"></span>
+          }
         </a>
       } @empty {
         <div class="empty-state">Không tìm thấy bài học phù hợp</div>

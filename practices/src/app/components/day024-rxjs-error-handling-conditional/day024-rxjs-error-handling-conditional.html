@@ -1,4 +1,547 @@
 <div class="day-container">
-  <h2>Day024-rxjs-error-handling-conditional</h2>
-  <p>day024-rxjs-error-handling-conditional works!</p>
+  <!-- Header Section -->
+  <header class="day-header">
+    <div class="badge-row">
+      <span class="badge primary">Day 24</span>
+      <span class="badge accent">RxJS 7+</span>
+      <span class="badge info">Error Handling & Conditional Operators</span>
+    </div>
+    <h1>RxJS Error Handling & Conditional Operators</h1>
+    <p class="subtitle">
+      Khám phá kỹ thuật bắt và phục hồi lỗi (<code>catchError</code>, <code>retry</code>, <code>retryBackoff</code>) và các toán tử xử lý điều kiện (<code>defaultIfEmpty</code>, <code>throwIfEmpty</code>, <code>every</code>, <code>iif</code>) trong Angular.
+    </p>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs-nav" aria-label="Day 24 Sections">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'catch-error'"
+      (click)="activeTab = 'catch-error'"
+    >
+      🛡️ 1. catchError & Safe forkJoin
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'retry'"
+      (click)="activeTab = 'retry'"
+    >
+      🔄 2. retry & Exponential Backoff
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'empty-conditional'"
+      (click)="activeTab = 'empty-conditional'"
+    >
+      ⏳ 3. defaultIfEmpty & throwIfEmpty
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'every-iif'"
+      (click)="activeTab = 'every-iif'"
+    >
+      ⚖️ 4. every & iif
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'cheatsheet'"
+      (click)="activeTab = 'cheatsheet'"
+    >
+      📚 5. Cheatsheet & Quy tắc chọn
+    </button>
+  </nav>
+
+  <!-- TAB 1: catchError & Safe forkJoin -->
+  @if (activeTab === 'catch-error') {
+    <section class="tab-pane">
+      <div class="card-grid">
+        <!-- Demo 1A: Basic Catch & Fallback -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>1A. catchError() - Phục Hồi Luồng Khi Có Lỗi</h3>
+            <span class="tag">Pipeable Operator</span>
+          </div>
+          <p class="card-desc">
+            Dãy số phát: <code>[1, 2, 3, 4, 5]</code>. Các số <code>[4, 5]</code> nằm trong cache trùng lặp nên sẽ quăng lỗi <code>throw new Error(...)</code>.
+          </p>
+
+          <div class="btn-group">
+            <button
+              type="button"
+              class="action-btn danger"
+              (click)="runCatchErrorDemo('without-catch')"
+              [disabled]="isCatchRunning"
+            >
+              1. Không dùng catchError (Chết stream)
+            </button>
+            <button
+              type="button"
+              class="action-btn success"
+              (click)="runCatchErrorDemo('catch-and-fallback')"
+              [disabled]="isCatchRunning"
+            >
+              2. catchError ➡️ Trả Fallback (An toàn)
+            </button>
+            <button
+              type="button"
+              class="action-btn warning"
+              (click)="runCatchErrorDemo('catch-retry-limit')"
+              [disabled]="isCatchRunning"
+            >
+              3. catchError(caught) + take(8)
+            </button>
+          </div>
+
+          <!-- Status / Execution View -->
+          <div class="execution-box">
+            <div class="status-header">
+              <span>Chế độ: <strong>{{ catchMode }}</strong></span>
+              @if (catchTerminalStatus) {
+                <span class="status-badge" [class.danger]="catchTerminalStatus.includes('hủy')">
+                  {{ catchTerminalStatus }}
+                </span>
+              }
+            </div>
+
+            <div class="stream-marbles">
+              @for (item of catchExecutionItems; track $index) {
+                <div class="marble-chip" [class.error-chip]="item.isError">
+                  <span class="val">{{ item.value }}</span>
+                  <span class="subtext">{{ item.note }}</span>
+                </div>
+              }
+              @if (catchExecutionItems.length === 0) {
+                <div class="empty-hint">Bấm một trong 3 nút trên để xem cách catchError hoạt động.</div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo 1B: Safe forkJoin Dashboard -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>1B. forkJoin() & catchError - Tránh Sập Toàn Bộ Trang</h3>
+            <span class="tag">Thực tế Angular</span>
+          </div>
+          <p class="card-desc">
+            Mô phỏng gọi 3 API đồng thời khi tải trang: Profile (600ms), Notifications (800ms), Recommendations (Lỗi 401 sau 700ms).
+          </p>
+
+          <div class="btn-group">
+            <button
+              type="button"
+              class="action-btn danger"
+              (click)="runForkJoinResilienceDemo('unsafe')"
+              [disabled]="isForkJoinLoading"
+            >
+              🚨 Unsafe forkJoin (Không bọc catchError)
+            </button>
+            <button
+              type="button"
+              class="action-btn success"
+              (click)="runForkJoinResilienceDemo('safe')"
+              [disabled]="isForkJoinLoading"
+            >
+              🛡️ Safe forkJoin (Bọc catchError cho API lỗi)
+            </button>
+          </div>
+
+          @if (isForkJoinLoading) {
+            <div class="loading-state">
+              <span class="spinner"></span> Đang thực hiện 3 cuộc gọi API song song...
+            </div>
+          }
+
+          @if (forkJoinErrorMessage) {
+            <div class="alert-banner error-banner">
+              <strong>SẬP TOÀN BỘ TRANG!</strong>
+              <p>{{ forkJoinErrorMessage }}</p>
+            </div>
+          }
+
+          @if (forkJoinResults.length > 0) {
+            <div class="dashboard-preview">
+              @for (item of forkJoinResults; track item.name) {
+                <div class="dashboard-widget" [class.widget-error]="item.status === 'ERROR'">
+                  <div class="widget-header">
+                    <h4>{{ item.name }}</h4>
+                    <span class="badge" [class.success]="item.status === 'SUCCESS'" [class.danger]="item.status === 'ERROR'">
+                      {{ item.status }}
+                    </span>
+                  </div>
+                  <div class="widget-body">
+                    @if (item.status === 'SUCCESS') {
+                      <pre class="json-code">{{ item.data | json }}</pre>
+                    } @else {
+                      <div class="fallback-warning">
+                        ⚠️ {{ item.errorMsg || 'Không thể kết nối dịch vụ gợi ý' }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 2: retry & Exponential Backoff -->
+  @if (activeTab === 'retry') {
+    <section class="tab-pane">
+      <div class="card-grid">
+        <!-- Demo 2A: Fixed Count Retry -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>2A. retry(count) - Tự Động Thử Lại Request Thất Bại</h3>
+            <span class="tag">retry(3)</span>
+          </div>
+          <p class="card-desc">
+            Khi HTTP GET gặp sự cố đường truyền tạm thời (Network Glitch / 503), <code>retry(N)</code> tự động resubscribe mà người dùng không cần bấm F5.
+          </p>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="maxRetryInput">Số lần thử tối đa (count):</label>
+              <input
+                id="maxRetryInput"
+                type="number"
+                min="1"
+                max="5"
+                [(ngModel)]="retryMaxCount"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label for="failCountInput">Số lần giả lập lỗi trước khi OK:</label>
+              <input
+                id="failCountInput"
+                type="number"
+                min="0"
+                max="5"
+                [(ngModel)]="failTimesBeforeSuccess"
+                class="form-control"
+              />
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button
+              type="button"
+              class="action-btn primary"
+              (click)="runFixedRetryDemo()"
+              [disabled]="retryState === 'ATTEMPTING'"
+            >
+              🚀 Chạy Mô Phỏng retry({{ retryMaxCount }})
+            </button>
+          </div>
+
+          <div class="retry-status-box" [class.success]="retryState === 'SUCCESS'" [class.failed]="retryState === 'FAILED'">
+            <div class="status-title">{{ retryStatusText }}</div>
+            <div class="timeline-list">
+              @for (item of retryHistory; track item.attempt) {
+                <div class="timeline-item" [class.fail]="item.status === 'FAIL'" [class.ok]="item.status === 'SUCCESS'">
+                  <span class="timeline-time">[{{ item.time }}]</span>
+                  <span class="timeline-msg">{{ item.detail }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo 2B: Exponential Backoff Retry -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>2B. retryBackoff() - Tăng Thời Gian Nghỉ Cấp Số Nhân</h3>
+            <span class="tag">Tránh nghẽn server</span>
+          </div>
+          <p class="card-desc">
+            Thay vì retry dồn dập làm sập server (Thundering Herd), thời gian chờ tăng theo hàm số mũ: <code>300ms ➡️ 600ms ➡️ 1200ms</code>.
+          </p>
+
+          <div class="btn-group">
+            <button
+              type="button"
+              class="action-btn accent"
+              (click)="runExponentialBackoffDemo()"
+              [disabled]="isBackoffRunning"
+            >
+              📈 Chạy Mô Phỏng Exponential Backoff
+            </button>
+          </div>
+
+          @if (backoffAttempts.length > 0 || isBackoffRunning) {
+            <div class="backoff-visualizer">
+              <div class="backoff-timeline">
+                @for (item of backoffAttempts; track item.attempt) {
+                  <div class="backoff-step">
+                    <div class="step-badge">Lần {{ item.attempt }}</div>
+                    <div class="step-delay">Delay: {{ item.delayMs }}ms</div>
+                    <div class="step-time">{{ item.time }}</div>
+                  </div>
+                }
+              </div>
+              @if (backoffFinalMessage) {
+                <div class="backoff-final">{{ backoffFinalMessage }}</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 3: defaultIfEmpty & throwIfEmpty -->
+  @if (activeTab === 'empty-conditional') {
+    <section class="tab-pane">
+      <div class="card-grid">
+        <!-- Demo 3A: defaultIfEmpty -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>3A. defaultIfEmpty() - Giá Trị Dự Phòng Cho Stream Rỗng</h3>
+            <span class="tag">Conditional Operator</span>
+          </div>
+          <p class="card-desc">
+            Nếu source Observable complete mà <strong>chưa từng phát ra giá trị nào</strong>, <code>defaultIfEmpty</code> sẽ phát giá trị dự phòng trước khi complete.
+          </p>
+
+          <div class="form-group">
+            <label for="searchInput">Tìm kiếm từ khóa:</label>
+            <div class="input-with-action">
+              <input
+                id="searchInput"
+                type="text"
+                [(ngModel)]="searchQuery"
+                (ngModelChange)="runFilterSearchDemo()"
+                placeholder="Nhập từ khóa (vd: Ruby, Angular, Go...)"
+                class="form-control"
+              />
+              <button type="button" class="action-btn secondary" (click)="searchQuery = 'Ruby'; runFilterSearchDemo()">
+                Thử từ khóa không có (Ruby)
+              </button>
+              <button type="button" class="action-btn secondary" (click)="searchQuery = 'Angular'; runFilterSearchDemo()">
+                Thử từ khóa có (Angular)
+              </button>
+            </div>
+          </div>
+
+          <div class="result-display-box">
+            <h4>Kết quả trả về cho giao diện:</h4>
+            <div class="output-text" [class.fallback]="filteredResults.length === 0">
+              {{ defaultIfEmptyResult }}
+            </div>
+            <div class="meta-info">
+              Số mục gốc tìm thấy: <strong>{{ filteredResults.length }}</strong> mục.
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo 3B: throwIfEmpty (Timeout Confirmation) -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>3B. throwIfEmpty() - Hạn Chót Xác Nhận Giao Dịch</h3>
+            <span class="tag">takeUntil(timer) + throwIfEmpty</span>
+          </div>
+          <p class="card-desc">
+            Theo ví dụ tài liệu Day 24: Yêu cầu người dùng xác nhận OTP / Transaction trong vòng 5 giây. Nếu không bấm, <code>throwIfEmpty</code> quăng lỗi hủy giao dịch!
+          </p>
+
+          <div class="btn-group">
+            <button
+              type="button"
+              class="action-btn primary"
+              (click)="startTransactionWithTimeout()"
+              [disabled]="isTransactionActive"
+            >
+              💳 Khởi Tạo Giao Dịch ($500)
+            </button>
+            <button
+              type="button"
+              class="action-btn success"
+              (click)="confirmTransactionNow()"
+              [disabled]="!isTransactionActive"
+            >
+              ✅ Bấm Xác Nhận Ngay!
+            </button>
+          </div>
+
+          <!-- Transaction Countdown View -->
+          <div class="transaction-box" [class.active]="isTransactionActive" [class.success]="transactionStatus === 'SUCCESS'" [class.expired]="transactionStatus === 'EXPIRED'">
+            <div class="timer-display">
+              @if (isTransactionActive) {
+                <span class="countdown-badge">⏱️ Còn lại: {{ transactionCountdown }}s</span>
+              } @else {
+                <span class="state-label">Trạng thái: {{ transactionStatus }}</span>
+              }
+            </div>
+            <div class="transaction-msg">{{ transactionMessage }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 4: every & iif -->
+  @if (activeTab === 'every-iif') {
+    <section class="tab-pane">
+      <div class="card-grid">
+        <!-- Demo 4A: every vs some -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>4A. every() vs some - Kiểm Tra Điều Kiện Tập Dữ Liệu</h3>
+            <span class="tag">every & first</span>
+          </div>
+          <p class="card-desc">
+            <code>every(predicate)</code>: Kiểm tra <strong>tất cả</strong> điểm thi có đạt ngưỡng (>= {{ scoreThreshold }}) không. Mô phỏng <code>some</code> bằng <code>first(predicate, false).pipe(map(Boolean))</code>.
+          </p>
+
+          <div class="scores-list">
+            <span class="score-label">Danh sách điểm:</span>
+            @for (score of studentScores; track $index) {
+              <span class="score-pill" [class.fail]="score < scoreThreshold" [class.top]="score >= 90">
+                {{ score }}
+              </span>
+            }
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="action-btn secondary" (click)="addScore(95)">
+              ➕ Thêm điểm 95 (Đạt)
+            </button>
+            <button type="button" class="action-btn danger" (click)="addScore(35)">
+              ➕ Thêm điểm 35 (Liệt)
+            </button>
+            <button type="button" class="action-btn warning" (click)="resetScores()">
+              ↺ Đặt lại danh sách
+            </button>
+          </div>
+
+          <div class="evaluation-grid">
+            <div class="eval-card" [class.pass]="everyResult" [class.fail]="everyResult === false">
+              <div class="eval-title">every(x &gt;= {{ scoreThreshold }})</div>
+              <div class="eval-value">{{ everyResult }}</div>
+              <div class="eval-desc">
+                {{ everyResult ? '✅ Toàn bộ học sinh đều trên ngưỡng điểm đạt!' : '❌ Có ít nhất một học sinh dưới ngưỡng điểm đạt.' }}
+              </div>
+            </div>
+
+            <div class="eval-card" [class.pass]="someResult" [class.fail]="someResult === false">
+              <div class="eval-title">some(x &gt;= 90) [via first]</div>
+              <div class="eval-value">{{ someResult }}</div>
+              <div class="eval-desc">
+                {{ someResult ? '🌟 Có ít nhất một học sinh đạt điểm xuất sắc (>= 90)!' : 'Chưa có ai đạt từ 90 điểm trở lên.' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demo 4B: iif -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>4B. iif() - Quyết Định Nhánh Stream Tại Lúc Subscribe</h3>
+            <span class="tag">Subscription Decision</span>
+          </div>
+          <p class="card-desc">
+            <code>iif(() =&gt; condition, trueResult$, falseResult$)</code>: Đánh giá điều kiện đúng thời điểm gọi subscribe để chọn luồng dữ liệu tương ứng.
+          </p>
+
+          <div class="toggle-row">
+            <span class="toggle-label">Vai trò hiện tại:</span>
+            <button
+              type="button"
+              class="action-btn"
+              [class.primary]="isUserVip"
+              [class.secondary]="!isUserVip"
+              (click)="toggleVipMode()"
+            >
+              {{ isUserVip ? '👑 Thành viên VIP' : '👤 Người dùng Khách (Guest)' }} (Bấm để chuyển đổi)
+            </button>
+          </div>
+
+          @if (iifResult) {
+            <div class="offer-card" [class.vip-theme]="isUserVip">
+              <div class="offer-header">
+                <h4>{{ iifResult.title }}</h4>
+                <span class="discount-badge">{{ iifResult.discount }}</span>
+              </div>
+              <p class="access-info"><strong>Quyền lợi:</strong> {{ iifResult.accessLevel }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 5: Cheatsheet -->
+  @if (activeTab === 'cheatsheet') {
+    <section class="tab-pane">
+      <div class="cheatsheet-card">
+        <div class="card-title-bar">
+          <h3>Bảng Tra Cứu Toán Tử RxJS Error Handling & Conditional</h3>
+          <span class="tag">RxJS 7+ CheatSheet</span>
+        </div>
+        <div class="table-container">
+          <table class="spec-table">
+            <thead>
+              <tr>
+                <th>Operator</th>
+                <th>Phân loại</th>
+                <th>Hành vi khi có Lỗi / Stream Rỗng</th>
+                <th>Cú pháp mẫu</th>
+                <th>Angular Use-Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (spec of cheatsheetSpecs; track spec.operator) {
+                <tr>
+                  <td><code>{{ spec.operator }}</code></td>
+                  <td>
+                    <span class="category-badge" [class.error-cat]="spec.category === 'Error Handling'">
+                      {{ spec.category }}
+                    </span>
+                  </td>
+                  <td>{{ spec.behaviorOnErrorOrEmpty }}</td>
+                  <td><code class="syntax-code">{{ spec.syntax }}</code></td>
+                  <td>{{ spec.angularUseCase }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Real-time Activity Log Terminal -->
+  <section class="activity-log-section">
+    <div class="log-header">
+      <div class="log-title">
+        <span class="pulse-dot"></span>
+        <span>RxJS Stream Activity Console</span>
+        <span class="log-count">({{ logs.length }} logs)</span>
+      </div>
+      <button type="button" class="clear-btn" (click)="clearLogs()">
+        🗑️ Xóa logs
+      </button>
+    </div>
+    <div class="terminal-body">
+      @for (log of logs; track log.id) {
+        <div class="log-row">
+          <span class="log-time">{{ log.time }}</span>
+          <span class="badge-type" [class]="log.type.toLowerCase()">{{ log.type }}</span>
+          <span class="log-op">[{{ log.operator }}]</span>
+          <span class="log-msg">{{ log.message }}</span>
+        </div>
+      }
+      @if (logs.length === 0) {
+        <div class="log-empty">Chưa có sự kiện nào. Hãy tương tác với các demo ở trên!</div>
+      }
+    </div>
+  </section>
 </div>

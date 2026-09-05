@@ -1,4 +1,551 @@
 <div class="day-container">
-  <h2>Day025-rxjs-hoo-utility</h2>
-  <p>day025-rxjs-hoo-utility works!</p>
+  <!-- Header Section -->
+  <header class="day-header">
+    <div class="badge-row">
+      <span class="badge primary">Day 25</span>
+      <span class="badge accent">RxJS 7+</span>
+      <span class="badge info">HOOs & Utility Operators</span>
+    </div>
+    <h1>RxJS Higher Order Observables & Utility Operators</h1>
+    <p class="subtitle">
+      Làm chủ 4 toán tử biến đổi luồng lồng nhau (<code>switchMap</code>, <code>mergeMap</code>, <code>concatMap</code>, <code>exhaustMap</code>), tránh bẫy <em>Nested Subscriptions</em>, cùng các tiện ích thiết yếu (<code>tap</code>, <code>finalize</code>, <code>timeInterval</code>, <code>timeout</code>, <code>partition</code>).
+    </p>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs-nav" aria-label="Day 25 Sections">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'big-four'"
+      (click)="activeTab = 'big-four'"
+    >
+      🔀 1. The Big Four (HOOs)
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'origin-partition'"
+      (click)="activeTab = 'origin-partition'"
+    >
+      🧩 2. Nguồn gốc HOO & partition()
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'tap-finalize'"
+      (click)="activeTab = 'tap-finalize'"
+    >
+      ⚡ 3. tap(), finalize(), repeat()
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'timing-utility'"
+      (click)="activeTab = 'timing-utility'"
+    >
+      ⏱️ 4. timeInterval() & timeout()
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'cheatsheet'"
+      (click)="activeTab = 'cheatsheet'"
+    >
+      📚 5. Cheatsheet & Quy tắc chọn
+    </button>
+  </nav>
+
+  <!-- TAB 1: The Big Four HOOs -->
+  @if (activeTab === 'big-four') {
+    <section class="tab-pane">
+      <div class="card-grid">
+        <!-- Interactive Simulator -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>1A. Mô Phỏng So Sánh 4 HOOs Khi Có Request Mới</h3>
+            <span class="tag">Interactive Simulator</span>
+          </div>
+          <p class="card-desc">
+            Chọn một toán tử bên dưới rồi bấm <strong>"Gửi 3 Request dồn dập"</strong> để trực quan hóa cách từng toán tử xử lý các request đến sau:
+          </p>
+
+          <!-- Operator Selector Buttons -->
+          <div class="operator-selector-row">
+            <button
+              type="button"
+              class="op-select-btn"
+              [class.active]="selectedHoo === 'switchMap'"
+              (click)="onHooOperatorChange('switchMap')"
+            >
+              🔄 switchMap (Hủy cũ - Lấy mới)
+            </button>
+            <button
+              type="button"
+              class="op-select-btn"
+              [class.active]="selectedHoo === 'mergeMap'"
+              (click)="onHooOperatorChange('mergeMap')"
+            >
+              ⚡ mergeMap (Chạy song song)
+            </button>
+            <button
+              type="button"
+              class="op-select-btn"
+              [class.active]="selectedHoo === 'concatMap'"
+              (click)="onHooOperatorChange('concatMap')"
+            >
+              📋 concatMap (Xếp hàng tuần tự)
+            </button>
+            <button
+              type="button"
+              class="op-select-btn"
+              [class.active]="selectedHoo === 'exhaustMap'"
+              (click)="onHooOperatorChange('exhaustMap')"
+            >
+              🛡️ exhaustMap (Bỏ qua khi bận)
+            </button>
+          </div>
+
+          <!-- Action Controls -->
+          <div class="btn-group">
+            <button type="button" class="action-btn primary" (click)="triggerNewRequest(1500)">
+              ➕ Gửi 1 Request đơn lẻ (1.5s)
+            </button>
+            <button type="button" class="action-btn warning" (click)="triggerRapidRequests()">
+              ⚡ Gửi 3 Request dồn dập (800ms, 1.2s, 600ms)
+            </button>
+            <button type="button" class="action-btn secondary" (click)="clearRequests()">
+              🗑️ Xóa danh sách
+            </button>
+          </div>
+
+          <!-- Request Status Board -->
+          <div class="requests-board">
+            <h4>Hàng đợi / Trạng thái xử lý (Toán tử: <code>{{ selectedHoo }}</code>):</h4>
+            <div class="request-cards-container">
+              @for (req of hooRequests; track req.id) {
+                <div class="request-item-card" [class]="req.status.toLowerCase()">
+                  <div class="req-header">
+                    <span class="req-id">{{ req.label }}</span>
+                    <span class="req-badge" [class]="req.status.toLowerCase()">
+                      {{ req.status }}
+                    </span>
+                  </div>
+                  @if (req.result) {
+                    <div class="req-result">{{ req.result }}</div>
+                  }
+                </div>
+              }
+              @if (hooRequests.length === 0) {
+                <div class="empty-hint">Chưa có request nào được gửi. Hãy bấm các nút hành động phía trên!</div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-world Autocomplete Search with switchMap -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>1B. Thực Tế: Autocomplete Search Với switchMap()</h3>
+            <span class="tag">Tránh Race Condition</span>
+          </div>
+          <p class="card-desc">
+            Khi người dùng gõ tìm kiếm, <code>switchMap()</code> tự động <strong>hủy bỏ request tìm kiếm của từ khóa cũ</strong> nếu request đó chưa kịp phản hồi, đảm bảo dữ liệu hiển thị luôn khớp với từ khóa mới nhất.
+          </p>
+
+          <div class="form-group">
+            <label for="searchHooInput">Nhập từ khóa khóa học:</label>
+            <input
+              id="searchHooInput"
+              type="text"
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="onSearchInputChange()"
+              placeholder="Gõ: Angular, RxJS, Forms, Signals..."
+              class="form-control"
+            />
+          </div>
+
+          <div class="search-status-bar">
+            @if (isSearching) {
+              <span class="searching-badge">⏳ Đang tìm kiếm API (switchMap đang lắng nghe)...</span>
+            } @else {
+              <span class="search-done-badge">✅ Đã tải xong kết quả cho: "{{ searchQuery }}"</span>
+            }
+          </div>
+
+          <ul class="search-result-list">
+            @for (course of searchResult; track course) {
+              <li class="course-item">📘 {{ course }}</li>
+            }
+            @if (searchResult.length === 0 && !isSearching) {
+              <li class="no-result">Không tìm thấy khóa học nào phù hợp.</li>
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 2: Origin of HOOs & partition() -->
+  @if (activeTab === 'origin-partition') {
+    <section class="tab-pane">
+      <div class="card-grid">
+        <!-- Origin of HOOs -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>2A. Nguồn Gốc: map() + *All() ➡️ *Map()</h3>
+            <span class="tag">Lý Thuyết Cốt Lõi</span>
+          </div>
+          <p class="card-desc">
+            Khi <code>map()</code> trả về 1 Observable (tạo ra <code>Observable&lt;Observable&gt;</code>), các toán tử <code>switchAll()</code>, <code>mergeAll()</code>, <code>concatAll()</code> giúp làm phẳng (flatten) về 1 stream duy nhất.
+          </p>
+
+          <div class="btn-group">
+            <button
+              type="button"
+              class="action-btn"
+              [class.primary]="originFlattenMode === 'switchAll'"
+              (click)="runOriginDemo('switchAll')"
+            >
+              1. map() + switchAll()
+            </button>
+            <button
+              type="button"
+              class="action-btn"
+              [class.primary]="originFlattenMode === 'mergeAll'"
+              (click)="runOriginDemo('mergeAll')"
+            >
+              2. map() + mergeAll()
+            </button>
+            <button
+              type="button"
+              class="action-btn"
+              [class.primary]="originFlattenMode === 'concatAll'"
+              (click)="runOriginDemo('concatAll')"
+            >
+              3. map() + concatAll()
+            </button>
+          </div>
+
+          <div class="origin-output-box">
+            <h4>Kết quả làm phẳng từ {{ originFlattenMode }}():</h4>
+            @for (line of originLogs; track $index) {
+              <div class="log-line">➡️ {{ line }}</div>
+            }
+            @if (originLogs.length === 0) {
+              <div class="empty-hint">Bấm một trong 3 nút trên để chạy mô phỏng làm phẳng stream.</div>
+            }
+          </div>
+        </div>
+
+        <!-- partition() Demo -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>2B. partition() - Chia 1 Stream Thành 2 Nhánh</h3>
+            <span class="tag">Higher Order Function</span>
+          </div>
+          <p class="card-desc">
+            <code>partition(source$, predicate)</code> phân chia danh sách thông báo thành 2 Observables độc lập: <strong>Chưa đọc (Pass$)</strong> và <strong>Đã đọc (Fail$)</strong>.
+          </p>
+
+          <div class="partition-columns">
+            <!-- Unread Column -->
+            <div class="partition-col unread-col">
+              <h4>🔴 Chưa Đọc ({{ unreadList.length }})</h4>
+              <div class="notif-cards">
+                @for (item of unreadList; track item.id) {
+                  <div class="notif-card" (click)="toggleNotificationStatus(item)">
+                    <span class="notif-title">{{ item.title }}</span>
+                    <span class="notif-action">Bấm để đánh dấu Đã Đọc ➡️</span>
+                  </div>
+                }
+                @if (unreadList.length === 0) {
+                  <div class="empty-hint">Không còn thông báo chưa đọc.</div>
+                }
+              </div>
+            </div>
+
+            <!-- Read Column -->
+            <div class="partition-col read-col">
+              <h4>⚪ Đã Đọc ({{ readList.length }})</h4>
+              <div class="notif-cards">
+                @for (item of readList; track item.id) {
+                  <div class="notif-card read" (click)="toggleNotificationStatus(item)">
+                    <span class="notif-title">{{ item.title }}</span>
+                    <span class="notif-action">⬅️ Đánh dấu Chưa Đọc</span>
+                  </div>
+                }
+                @if (readList.length === 0) {
+                  <div class="empty-hint">Chưa có thông báo nào đã đọc.</div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 3: tap(), finalize(), repeat() -->
+  @if (activeTab === 'tap-finalize') {
+    <section class="tab-pane">
+      <div class="card-grid">
+        <!-- tap & finalize -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>3A. tap() & finalize() - Quản Lý Loading Spinner An Toàn</h3>
+            <span class="tag">Utility Operators</span>
+          </div>
+          <p class="card-desc">
+            <code>tap()</code> thực thi side-effect không làm đổi stream. <code>finalize()</code> luôn chạy khi Observable kết thúc (kể cả <strong>Complete</strong> hay <strong>Error</strong>), là nơi lý tưởng để tắt loading spinner!
+          </p>
+
+          <div class="form-row">
+            <div class="toggle-box">
+              <label>Kịch bản phản hồi API:</label>
+              <button
+                type="button"
+                class="action-btn"
+                [class.success]="apiSuccessToggle"
+                [class.danger]="!apiSuccessToggle"
+                (click)="apiSuccessToggle = !apiSuccessToggle"
+              >
+                {{ apiSuccessToggle ? '✅ Mô phỏng Thành Công (200)' : '❌ Mô phỏng Lỗi (500 Error)' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button
+              type="button"
+              class="action-btn primary"
+              (click)="runTapAndFinalizeDemo()"
+              [disabled]="isLoadingApi"
+            >
+              🚀 Gọi API Ngay (Mất 800ms)
+            </button>
+          </div>
+
+          <div class="spinner-display-box" [class.loading]="isLoadingApi">
+            @if (isLoadingApi) {
+              <div class="spinner-content">
+                <span class="loading-spin"></span>
+                <span>Đang tải dữ liệu... (Spinner bật qua tap/cờ state)</span>
+              </div>
+            } @else {
+              <div class="spinner-idle">
+                <span class="status-icon">⏹️</span>
+                <span>{{ apiStatusMessage }}</span>
+              </div>
+            }
+            <div class="finalize-stats">
+              Số lần <code>finalize()</code> đã chạy thành công: <strong>{{ finalizeExecutedCount }}</strong> lần.
+            </div>
+          </div>
+        </div>
+
+        <!-- repeat -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>3B. repeat(count) - Lặp Lại Khi Complete</h3>
+            <span class="tag">repeat(N)</span>
+          </div>
+          <p class="card-desc">
+            <code>repeat(N)</code> tự động resubscribe vào Source Observable sau khi nó phát tín hiệu <code>complete</code>. Hữu ích cho polling dữ liệu định kỳ.
+          </p>
+
+          <div class="form-group">
+            <label for="repeatInput">Số lần lặp (repeat count):</label>
+            <input
+              id="repeatInput"
+              type="number"
+              min="1"
+              max="5"
+              [(ngModel)]="repeatCount"
+              class="form-control"
+            />
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="action-btn accent" (click)="runRepeatDemo()">
+              🔄 Chạy stream repeat({{ repeatCount }})
+            </button>
+          </div>
+
+          <div class="repeat-output-box">
+            <h4>Danh sách các lần phát tín hiệu:</h4>
+            @for (msg of repeatedEmissions; track $index) {
+              <div class="repeat-chip">{{ msg }} (Lần {{ $index + 1 }})</div>
+            }
+            @if (repeatedEmissions.length === 0) {
+              <div class="empty-hint">Bấm nút trên để quan sát repeat() hoạt động.</div>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 4: timeInterval() & timeout() -->
+  @if (activeTab === 'timing-utility') {
+    <section class="tab-pane">
+      <div class="card-grid">
+        <!-- timeInterval -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>4A. timeInterval() - Đo Tốc Độ & Khoảng Cách Click</h3>
+            <span class="tag">Timing Measurement</span>
+          </div>
+          <p class="card-desc">
+            <code>timeInterval()</code> đo khoảng thời gian (ms) trôi qua giữa 2 lần emit liên tiếp. Bấm nút dưới nhiều lần để kiểm tra tốc độ thao tác:
+          </p>
+
+          <div class="click-tester-area">
+            <button type="button" class="click-target-btn" (click)="onUserClickTester()">
+              🖱️ BẤM VÀO ĐÂY LIÊN TỤC!
+            </button>
+            @if (lastClickIntervalMs !== null) {
+              <div class="speed-stat-badge">
+                Khoảng cách lần click vừa rồi: <strong>{{ lastClickIntervalMs }}ms</strong>
+              </div>
+            }
+          </div>
+
+          <div class="click-history-list">
+            <h4>Lịch sử đo tốc độ click:</h4>
+            @for (item of clickHistory; track item.clickIndex) {
+              <div class="history-item">
+                <span class="idx">Click #{{ item.clickIndex }}</span>
+                <span class="ms">{{ item.intervalMs }}ms</span>
+                <span class="level">{{ item.speedLevel }}</span>
+              </div>
+            }
+            @if (clickHistory.length === 0) {
+              <div class="empty-hint">Chưa có click nào. Hãy bấm nút lớn ở trên!</div>
+            }
+          </div>
+        </div>
+
+        <!-- timeout & fallback -->
+        <div class="demo-card">
+          <div class="card-title-bar">
+            <h3>4B. timeout() - Ngắt Kết Nối Request Quá Chậm</h3>
+            <span class="tag">timeout with Fallback</span>
+          </div>
+          <p class="card-desc">
+            Nếu Source Observable không phát giá trị trong <code>{{ timeoutThresholdMs }}ms</code>, <code>timeout()</code> sẽ tự động hủy bỏ và chuyển hướng sang Observable dự phòng.
+          </p>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Độ trễ phản hồi API:</label>
+              <div class="btn-group">
+                <button
+                  type="button"
+                  class="action-btn"
+                  [class.success]="apiDelaySettingMs === 800"
+                  (click)="apiDelaySettingMs = 800"
+                >
+                  ⚡ Nhanh (800ms &lt; 1200ms Timeout)
+                </button>
+                <button
+                  type="button"
+                  class="action-btn"
+                  [class.danger]="apiDelaySettingMs === 2000"
+                  (click)="apiDelaySettingMs = 2000"
+                >
+                  🐢 Chậm (2000ms &gt; 1200ms Timeout)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button
+              type="button"
+              class="action-btn primary"
+              (click)="runTimeoutDemo()"
+              [disabled]="isTimeoutRunning"
+            >
+              🚀 Chạy Kiểm Tra Timeout
+            </button>
+          </div>
+
+          <div class="timeout-result-box" [class.running]="isTimeoutRunning">
+            <div class="result-title">Kết quả phản hồi:</div>
+            <div class="result-content">{{ timeoutResult || 'Chưa chạy kiểm tra timeout.' }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 5: Cheatsheet -->
+  @if (activeTab === 'cheatsheet') {
+    <section class="tab-pane">
+      <div class="cheatsheet-card">
+        <div class="card-title-bar">
+          <h3>Bảng Tra Cứu Toàn Diện: HOOs & Utility Operators</h3>
+          <span class="tag">RxJS 7+ CheatSheet</span>
+        </div>
+        <div class="table-container">
+          <table class="spec-table">
+            <thead>
+              <tr>
+                <th>Operator</th>
+                <th>Phân loại</th>
+                <th>Cơ chế xử lý Inner Observable</th>
+                <th>Cú pháp mẫu</th>
+                <th>Angular Use-Case</th>
+                <th>Lưu ý & Rủi ro</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (spec of cheatsheetSpecs; track spec.operator) {
+                <tr>
+                  <td><code>{{ spec.operator }}</code></td>
+                  <td>
+                    <span class="type-badge" [class.hoo-badge]="spec.type.includes('HOO')">
+                      {{ spec.type }}
+                    </span>
+                  </td>
+                  <td>{{ spec.innerHandling }}</td>
+                  <td><code class="syntax-code">{{ spec.syntax }}</code></td>
+                  <td>{{ spec.angularUseCase }}</td>
+                  <td class="risk-col">{{ spec.riskOrGotcha }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Real-time Activity Log Terminal -->
+  <section class="activity-log-section">
+    <div class="log-header">
+      <div class="log-title">
+        <span class="pulse-dot"></span>
+        <span>RxJS Stream Activity Console</span>
+        <span class="log-count">({{ logs.length }} logs)</span>
+      </div>
+      <button type="button" class="clear-btn" (click)="clearLogs()">
+        🗑️ Xóa logs
+      </button>
+    </div>
+    <div class="terminal-body">
+      @for (log of logs; track log.id) {
+        <div class="log-row">
+          <span class="log-time">{{ log.time }}</span>
+          <span class="badge-type" [class]="log.type.toLowerCase()">{{ log.type }}</span>
+          <span class="log-op">[{{ log.operator }}]</span>
+          <span class="log-msg">{{ log.message }}</span>
+        </div>
+      }
+      @if (logs.length === 0) {
+        <div class="log-empty">Chưa có sự kiện nào. Hãy tương tác với các demo ở trên!</div>
+      }
+    </div>
+  </section>
 </div>

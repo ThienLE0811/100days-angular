@@ -7,6 +7,12 @@ export interface DayItem {
 
 export const DAYS_DATA: DayItem[] = [
   {
+    "dayNum": 2,
+    "path": "day002-hooks",
+    "title": "Lifecycle-Hooks",
+    "fullName": "Day002-Lifecycle-Hooks"
+  },
+  {
     "dayNum": 3,
     "path": "day003-data-binding",
     "title": "DataBinding",

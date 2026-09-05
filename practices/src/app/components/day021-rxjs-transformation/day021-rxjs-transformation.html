@@ -1,4 +1,632 @@
-<div class="day-container">
-  <h2>Day021-rxjs-transformation</h2>
-  <p>day021-rxjs-transformation works!</p>
+<div class="day021-page">
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 21</span>
+        <span class="badge badge-syntax">.pipe()</span>
+        <span class="badge badge-syntax">map()</span>
+        <span class="badge badge-syntax">pluck()</span>
+        <span class="badge badge-syntax">mapTo()</span>
+        <span class="badge badge-syntax">scan()</span>
+        <span class="badge badge-syntax">reduce()</span>
+        <span class="badge badge-syntax">toArray()</span>
+        <span class="badge badge-syntax">buffer()</span>
+        <span class="badge badge-syntax">bufferTime()</span>
+      </div>
+      <h1 class="page-title">RxJS Transformation Operators</h1>
+      <p class="page-subtitle">
+        Khám phá các <strong>Pipeable Transformation Operators</strong> bên trong phương thức <code>.pipe()</code>.
+        Chúng là các pure functions nhận vào một Observable và trả về một Observable mới, cho phép biến đổi (transform),
+        trích xuất (pluck), tích lũy (accumulate) hoặc gom cụm (buffer) các dòng chảy dữ liệu bất đồng bộ theo thời gian.
+      </p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="header-quick-stats">
+      <div class="stat-pill">
+        <span class="stat-name">Active Buffers</span>
+        <strong class="stat-num text-cyan">
+          {{ (isBufferActive ? 1 : 0) + (isBufferTimeActive ? 1 : 0) }}
+        </strong>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-name">Logs</span>
+        <strong class="stat-num text-violet">{{ logs.length }}</strong>
+      </div>
+      <button class="btn-action-ghost" (click)="clearLogs()" title="Xóa logs">
+        <span>Xóa Logs</span> ⌫
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'map-pluck-mapto'"
+      (click)="activeTab = 'map-pluck-mapto'"
+    >
+      <span class="tab-icon">🔄</span>
+      <span class="tab-text">1. map, pluck & mapTo</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'scan-vs-reduce'"
+      (click)="activeTab = 'scan-vs-reduce'"
+    >
+      <span class="tab-icon">📊</span>
+      <span class="tab-text">2. scan() vs reduce()</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'toarray'"
+      (click)="activeTab = 'toarray'"
+    >
+      <span class="tab-icon">📦</span>
+      <span class="tab-text">3. toArray()</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'buffer'"
+      (click)="activeTab = 'buffer'"
+    >
+      <span class="tab-icon">⏳</span>
+      <span class="tab-text">4. buffer & bufferTime</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'cheatsheet'"
+      (click)="activeTab = 'cheatsheet'"
+    >
+      <span class="tab-icon">📖</span>
+      <span class="tab-text">5. Cheat Sheet & Evolution</span>
+    </button>
+  </nav>
+
+  <!-- Dashboard Grid -->
+  <div class="dashboard-grid">
+    <!-- Main Content Column -->
+    <div class="dashboard-column main-column">
+
+      <!-- ================================================================= -->
+      <!-- TAB 1: map(), pluck(), mapTo() -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'map-pluck-mapto'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">Biến Đổi Từng Giá Trị</span>
+              <h2 class="card-title">map(), pluck() & mapTo()</h2>
+            </div>
+            <div class="header-actions">
+              <button
+                class="btn btn-primary"
+                (click)="runMapDemo()"
+                [disabled]="isMapStreaming"
+              >
+                {{ isMapStreaming ? '⏳ Đang truyền stream...' : '▶ Chạy Stream User Login' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-info">
+              <span class="alert-icon">💡</span>
+              <div class="alert-content">
+                <strong>Bài toán từ tài liệu:</strong>
+                Hệ thống phát ra từng đối tượng <code>User</code> khi họ đăng nhập theo thời gian.
+                Chúng ta sử dụng <code>map()</code> để thêm trường <code>fullname: firstname + lastname</code>,
+                hoặc <code>pluck('id')</code> để trích xuất trường <code>id</code>.
+              </div>
+            </div>
+
+            <!-- Transformation Mode Selector -->
+            <div class="mode-selector-wrap">
+              <label class="section-label">Chọn chế độ Operator để biến đổi:</label>
+              <div class="radio-group">
+                <label class="radio-pill" [class.selected]="mapMode === 'fullname'">
+                  <input type="radio" [(ngModel)]="mapMode" value="fullname" />
+                  <strong>map() Thêm fullname</strong>
+                  <span>&#123; ...user, fullname &#125;</span>
+                </label>
+                <label class="radio-pill" [class.selected]="mapMode === 'id'">
+                  <input type="radio" [(ngModel)]="mapMode" value="id" />
+                  <strong>map(u =&gt; u.id)</strong>
+                  <span>Lấy id theo arrow fn</span>
+                </label>
+                <label class="radio-pill" [class.selected]="mapMode === 'pluck-id'">
+                  <input type="radio" [(ngModel)]="mapMode" value="pluck-id" />
+                  <strong>pluck('id')</strong>
+                  <span>Trích xuất thuộc tính</span>
+                </label>
+                <label class="radio-pill" [class.selected]="mapMode === 'username-upper'">
+                  <input type="radio" [(ngModel)]="mapMode" value="username-upper" />
+                  <strong>map(custom format)</strong>
+                  <span>@USERNAME (posts)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Output Visualizer -->
+            <div class="stream-visualizer">
+              <div class="vis-header">
+                <span>Dòng chảy User phát ra theo thời gian ({{ mapResults.length }}/{{ initialUsers.length }})</span>
+                <span class="badge-source">Source: Observable&lt;User&gt;</span>
+              </div>
+              <div class="vis-body">
+                <div *ngIf="mapResults.length === 0" class="empty-state">
+                  Nhấn nút "Chạy Stream User Login" ở trên để xem các giá trị được transform khi phát ra!
+                </div>
+                <div class="results-cards-grid" *ngIf="mapResults.length > 0">
+                  <div *ngFor="let item of mapResults" class="user-trans-card">
+                    <div class="raw-data">
+                      <span class="raw-label">Dữ liệu gốc #{{ item.id }}:</span>
+                      <code>{{ item.raw.firstname }} {{ item.raw.lastname }} ({{ item.raw.username }})</code>
+                    </div>
+                    <div class="arrow-down">⬇️ {{ mapMode.includes('pluck') ? 'pluck()' : 'map()' }}</div>
+                    <div class="trans-data">
+                      <span class="trans-label">Sau khi Transform:</span>
+                      <pre>{{ item.transformed | json }}</pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Demo mapTo() with Hover Box -->
+            <div class="subcard hover-subcard">
+              <div class="subcard-header">
+                <div class="badge-row">
+                  <span class="tech-badge mapto-badge">Operator mapTo()</span>
+                  <span class="count-tag">Events: {{ hoverEventCount }}</span>
+                </div>
+                <h3>Ví dụ thực tế của mapTo(): Lắng nghe Mouse Hover</h3>
+                <p class="subcard-desc">
+                  Kết hợp <code>mouseenter.pipe(mapTo(true))</code> và <code>mouseleave.pipe(mapTo(false))</code> qua <code>merge()</code>.
+                </p>
+              </div>
+
+              <div
+                #hoverTargetBox
+                class="hover-interactive-box"
+                [class.is-hover]="isHovered"
+              >
+                <div class="hover-icon">{{ isHovered ? '🔥' : '🧊' }}</div>
+                <div class="hover-msg">{{ hoverStatusText }}</div>
+                <div class="hover-state-pill">
+                  Stream emit: <strong>{{ isHovered ? 'true' : 'false' }}</strong>
+                </div>
+              </div>
+
+              <div class="code-preview">
+                <pre>const hover$ = merge(
+  fromEvent(el, 'mouseenter').pipe(mapTo(true)),
+  fromEvent(el, 'mouseleave').pipe(mapTo(false))
+); // RxJS 7+ khuyến nghị: map(() =&gt; true), map(() =&gt; false)</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 2: scan() vs reduce() -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'scan-vs-reduce'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge accent">So Sánh Trọng Tâm</span>
+              <h2 class="card-title">scan() vs reduce() - Tích Lũy Giá Trị</h2>
+            </div>
+            <div class="header-actions">
+              <button
+                class="btn btn-accent"
+                (click)="runScanVsReduceDemo()"
+                [disabled]="isAccumulating"
+              >
+                {{ isAccumulating ? '⏳ Đang tích lũy...' : '▶ Chạy Đối Chiếu scan() vs reduce()' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-warning">
+              <span class="alert-icon">⚖️</span>
+              <div class="alert-content">
+                <strong>Sự khác biệt cốt lõi:</strong>
+                <ul>
+                  <li><code>scan((acc, curr) =&gt; acc + curr, seed)</code>: Phát ra giá trị tích lũy <strong>ngay sau mỗi lần</strong> source emit một item (Running Total).</li>
+                  <li><code>reduce((acc, curr) =&gt; acc + curr, seed)</code>: Âm thầm cộng dồn, <strong>chỉ emit 1 giá trị duy nhất</strong> khi source stream đã <strong>COMPLETE</strong>!</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Two Columns Side-by-Side -->
+            <div class="comparison-grid">
+              <!-- scan() Column -->
+              <div class="subcard scan-box">
+                <div class="subcard-header">
+                  <div class="badge-row">
+                    <span class="tech-badge scan-badge">scan()</span>
+                    <span class="type-pill">Emit Liên Tục ✅</span>
+                  </div>
+                  <h3>scan(): Tích lũy theo từng bước</h3>
+                  <p class="subcard-desc">Cộng dồn postCount của users ngay khi từng người đăng nhập.</p>
+                </div>
+
+                <div class="step-list">
+                  <div *ngIf="scanStepResults.length === 0" class="empty-step">
+                    Bấm "Chạy Đối Chiếu" để xem scan() cập nhật liên tục từng bước.
+                  </div>
+                  <div *ngFor="let s of scanStepResults" class="step-item">
+                    <div class="step-head">
+                      <span class="step-num">Bước {{ s.step }}</span>
+                      <span class="step-user">{{ s.user }} (+{{ s.postCount }} posts)</span>
+                    </div>
+                    <div class="step-val">
+                      Tổng tích lũy hiện tại: <strong>{{ s.currentTotal }}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="code-preview">
+                  <code>users$.pipe(scan((acc, curr) =&gt; acc + curr.postCount, 0))</code>
+                </div>
+              </div>
+
+              <!-- reduce() Column -->
+              <div class="subcard reduce-box">
+                <div class="subcard-header">
+                  <div class="badge-row">
+                    <span class="tech-badge reduce-badge">reduce()</span>
+                    <span class="type-pill">Chỉ Emit Khi Complete 🛑</span>
+                  </div>
+                  <h3>reduce(): Chỉ phát kết quả cuối cùng</h3>
+                  <p class="subcard-desc">Chờ tất cả users phát xong và stream complete rồi mới tính ra tổng.</p>
+                </div>
+
+                <div class="reduce-result-container">
+                  <div *ngIf="isAccumulating" class="waiting-state">
+                    <div class="spinner"></div>
+                    <p>Đang chờ stream phát hết các users và COMPLETE...</p>
+                  </div>
+
+                  <div *ngIf="!isAccumulating && reduceFinalResult === null" class="empty-step">
+                    Chưa có dữ liệu. Bấm nút để bắt đầu.
+                  </div>
+
+                  <div *ngIf="reduceFinalResult !== null" class="final-result-card">
+                    <span class="final-label">Kết Quả Cuối Cùng (Khi Complete):</span>
+                    <strong class="final-val">{{ reduceFinalResult }} posts</strong>
+                    <span class="complete-badge">Đã nhận tín hiệu COMPLETE</span>
+                  </div>
+                </div>
+
+                <div class="code-preview">
+                  <code>users$.pipe(reduce((acc, curr) =&gt; acc + curr.postCount, 0))</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Click Counter using scan() -->
+            <div class="subcard click-counter-box">
+              <div class="subcard-header">
+                <h3>Thực hành nhanh: Đếm số lần bấm nút với scan()</h3>
+                <p class="subcard-desc">Cú pháp kinh điển: <code>click$.pipe(scan(count =&gt; count + 1, 0))</code></p>
+              </div>
+
+              <div class="click-action-row">
+                <button class="btn btn-primary" (click)="onScanClickCounterIncrement()">
+                  🎯 Nhấp vào tôi để tăng bộ đếm (+1)
+                </button>
+                <div class="counter-display">
+                  <span>Số lần click:</span>
+                  <strong>{{ scanClickCounter }}</strong>
+                </div>
+                <button class="btn btn-outline-sm" (click)="resetScanClickCounter()">
+                  ↺ Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 3: toArray() -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'toarray'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">Gom Dữ Liệu Thành Mảng</span>
+              <h2 class="card-title">toArray() - Thu Thập Toàn Bộ Dữ Liệu</h2>
+            </div>
+            <div class="header-actions">
+              <button
+                class="btn btn-primary"
+                (click)="runToArrayDemo()"
+                [disabled]="toArrayStatus === 'EMITTING'"
+              >
+                {{ toArrayStatus === 'EMITTING' ? '⏳ Đang phát các items...' : '▶ Chạy Demo toArray()' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-info">
+              <span class="alert-icon">💡</span>
+              <div class="alert-content">
+                <strong>Bản chất của toArray():</strong>
+                <code>toArray()</code> lắng nghe tất cả các giá trị phát ra từ source và tích lũy chúng vào một mảng nội bộ.
+                Khi source gửi tín hiệu <strong>COMPLETE</strong>, <code>toArray()</code> phát ra toàn bộ mảng đó và cũng complete.
+                Nó tương đương với viết: <code>reduce((acc, curr) =&gt; [...acc, curr], [])</code>.
+              </div>
+            </div>
+
+            <!-- Two Stages Display -->
+            <div class="toarray-stages-grid">
+              <div class="stage-box source-stage">
+                <h4>Giai đoạn 1: Source phát từng phần tử theo thời gian</h4>
+                <div class="items-stream">
+                  <span *ngFor="let item of toArrayEmittedItems" class="stream-pill">
+                    {{ item }}
+                  </span>
+                  <span *ngIf="toArrayEmittedItems.length === 0" class="empty-hint">
+                    Chưa có phần tử nào phát ra.
+                  </span>
+                </div>
+                <div class="status-tag">
+                  Trạng thái: <strong>{{ toArrayStatus }}</strong>
+                </div>
+              </div>
+
+              <div class="stage-box result-stage">
+                <h4>Giai đoạn 2: toArray() gom lại thành 1 mảng duy nhất khi complete</h4>
+                <div *ngIf="!toArrayFinalArray" class="waiting-box">
+                  {{ toArrayStatus === 'EMITTING' ? '⏳ Đang thu thập dữ liệu vào bộ đệm mảng...' : 'Bấm nút để chạy thử nghiệm' }}
+                </div>
+                <div *ngIf="toArrayFinalArray" class="array-output-card">
+                  <span class="output-label">Mảng hoàn chỉnh emit bởi toArray():</span>
+                  <pre class="json-box">{{ toArrayFinalArray | json }}</pre>
+                  <span class="length-badge">Độ dài mảng: {{ toArrayFinalArray.length }} phần tử</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="code-preview">
+              <pre>// Cách viết ngắn gọn với toArray():
+source$.pipe(toArray()).subscribe(array =&gt; console.log(array));
+
+// Cách viết tương đương bằng reduce():
+source$.pipe(reduce((acc, curr) =&gt; [...acc, curr], [])).subscribe(array =&gt; console.log(array));</pre>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 4: buffer() & bufferTime() -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'buffer'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge warning">Gom Cụm Dữ Liệu</span>
+              <h2 class="card-title">buffer() & bufferTime()</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-info">
+              <span class="alert-icon">💡</span>
+              <div class="alert-content">
+                <strong>So sánh:</strong>
+                <ul>
+                  <li><code>buffer(closingNotifier$)</code>: Gom các giá trị vào bộ đệm và chỉ phát ra mảng gom khi Observable <code>closingNotifier$</code> phát tín hiệu (do sự kiện kích hoạt).</li>
+                  <li><code>bufferTime(timeSpanMs)</code>: Gom các giá trị phát ra theo từng khoảng thời gian định kỳ (cứ mỗi X milliseconds lại emit 1 chunk).</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="buffer-comparison-grid">
+              <!-- Buffer Event-Driven -->
+              <div class="subcard buffer-event-card">
+                <div class="subcard-header">
+                  <span class="tech-badge buffer-badge">buffer(closingNotifier$)</span>
+                  <h3>Gom cụm kích hoạt bằng Sự Kiện (Click)</h3>
+                  <p class="subcard-desc">interval(600ms) phát số liên tục vào buffer. Bấm nút để xả buffer!</p>
+                </div>
+
+                <div class="btn-cluster">
+                  <button
+                    class="btn"
+                    [ngClass]="isBufferActive ? 'btn-danger' : 'btn-primary'"
+                    (click)="isBufferActive ? stopBufferDemo() : startBufferDemo()"
+                  >
+                    {{ isBufferActive ? '⏹ Dừng Stream' : '▶ Bắt Đầu Stream' }}
+                  </button>
+                  <button
+                    class="btn btn-accent"
+                    (click)="triggerBufferFlush()"
+                    [disabled]="!isBufferActive"
+                  >
+                    ⚡ Trigger Flush (closingNotifier$)
+                  </button>
+                </div>
+
+                <div class="chunks-feed">
+                  <div class="feed-title">Các gói buffer đã được xả:</div>
+                  <div *ngIf="flushedBufferChunks.length === 0" class="empty-feed">
+                    {{ isBufferActive ? 'Stream đang tích lũy số... Nhấn "Trigger Flush" để xả!' : 'Nhấn "Bắt Đầu Stream" trước.' }}
+                  </div>
+                  <div *ngFor="let chunk of flushedBufferChunks" class="chunk-item">
+                    <span class="chunk-time">{{ chunk.time }}</span>
+                    <span class="chunk-array">[{{ chunk.chunk.join(', ') }}]</span>
+                    <span class="chunk-count">({{ chunk.chunk.length }} số)</span>
+                  </div>
+                </div>
+
+                <div class="code-preview">
+                  <code>interval(600).pipe(buffer(click$)).subscribe(...)</code>
+                </div>
+              </div>
+
+              <!-- Buffer Time-Driven -->
+              <div class="subcard buffer-time-card">
+                <div class="subcard-header">
+                  <span class="tech-badge buffertime-badge">bufferTime(timeSpan)</span>
+                  <h3>Gom cụm tự động theo Thời Gian</h3>
+                  <p class="subcard-desc">Tự động xả buffer sau mỗi chu kỳ {{ bufferTimeSpanMs }}ms.</p>
+                </div>
+
+                <div class="time-config-row">
+                  <label>Chu kỳ xả (ms):</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="bufferTimeSpanMs"
+                    min="500"
+                    step="500"
+                    class="short-input"
+                    [disabled]="isBufferTimeActive"
+                  />
+                  <button
+                    class="btn"
+                    [ngClass]="isBufferTimeActive ? 'btn-danger' : 'btn-primary'"
+                    (click)="isBufferTimeActive ? stopBufferTimeDemo() : startBufferTimeDemo()"
+                  >
+                    {{ isBufferTimeActive ? '⏹ Dừng bufferTime' : '▶ Bắt Đầu bufferTime' }}
+                  </button>
+                </div>
+
+                <div class="chunks-feed">
+                  <div class="feed-title">Các mảng được emit mỗi {{ bufferTimeSpanMs }}ms:</div>
+                  <div *ngIf="bufferTimeChunks.length === 0" class="empty-feed">
+                    {{ isBufferTimeActive ? 'Đang tích lũy theo cửa sổ thời gian...' : 'Nhấn "Bắt Đầu bufferTime" để chạy.' }}
+                  </div>
+                  <div *ngFor="let chunk of bufferTimeChunks" class="chunk-item time-chunk">
+                    <span class="chunk-time">{{ chunk.time }}</span>
+                    <span class="chunk-array">[{{ chunk.chunk.join(', ') }}]</span>
+                    <span class="chunk-count">({{ chunk.chunk.length }} số)</span>
+                  </div>
+                </div>
+
+                <div class="code-preview">
+                  <code>interval(400).pipe(bufferTime({{ bufferTimeSpanMs }})).subscribe(...)</code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 5: CHEATSHEET & SPECS -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'cheatsheet'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">Bảng Tra Cứu Toàn Diện</span>
+              <h2 class="card-title">Bảng Đặc Tả & Tiến Hóa RxJS 7/8</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="specs-table">
+                <thead>
+                  <tr>
+                    <th>Operator</th>
+                    <th>Cú Pháp Chuẩn</th>
+                    <th>Thời Điểm Emit</th>
+                    <th>Trạng Thái RxJS</th>
+                    <th>Mục Đích & Ứng Dụng Trong Angular</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let op of specsList">
+                    <td>
+                      <strong class="op-name">{{ op.name }}</strong>
+                      <span class="op-cat">{{ op.category }}</span>
+                    </td>
+                    <td><code class="op-code">{{ op.signature }}</code></td>
+                    <td>
+                      <span class="emit-pill">{{ op.emitsWhen }}</span>
+                    </td>
+                    <td>
+                      <span
+                        class="status-pill"
+                        [class.status-good]="op.rxjsStatus === 'Khuyên dùng'"
+                        [class.status-deprecated]="op.rxjsStatus.includes('Deprecated')"
+                      >
+                        {{ op.rxjsStatus }}
+                      </span>
+                    </td>
+                    <td>
+                      <p class="op-summary">{{ op.summary }}</p>
+                      <small class="op-angular"><strong>Angular:</strong> {{ op.angularExample }}</small>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Why Pluck and MapTo were deprecated -->
+            <div class="alert-box alert-warning">
+              <span class="alert-icon">⚠️</span>
+              <div class="alert-content">
+                <strong>Tại sao <code>pluck()</code> và <code>mapTo()</code> bị deprecated trong RxJS 7/8?</strong>
+                <ul>
+                  <li><code>pluck('prop')</code> dùng chuỗi string để trích xuất thuộc tính, làm mất tính Type-Safety (không được TypeScript kiểm tra compile-time hoặc autocomplete khi refactor code). Dùng <code>map(x =&gt; x.prop)</code> vừa an toàn kiểu vừa hỗ trợ optional chaining <code>x?.prop</code>.</li>
+                  <li><code>mapTo(value)</code> chỉ là trường hợp con của <code>map(() =&gt; value)</code>. Việc loại bỏ nó giúp giảm kích thước bundle và thống nhất tư duy functional.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- Right Sidebar: Activity Log Console -->
+    <aside class="dashboard-column sidebar-column">
+      <div class="card logs-card">
+        <div class="card-header">
+          <div class="log-title-wrap">
+            <span class="card-badge logs-badge">Stream Terminal</span>
+            <h3 class="logs-heading">Nhật Ký Stream Trực Tiếp</h3>
+          </div>
+          <button class="btn-clear-ghost" (click)="clearLogs()" title="Xóa logs">
+            Xóa ⌫
+          </button>
+        </div>
+
+        <div class="logs-body">
+          <div *ngIf="logs.length === 0" class="no-logs">
+            Chưa có sự kiện nào. Hãy chọn tab và tương tác với các nút trên giao diện!
+          </div>
+
+          <div class="log-stream" *ngIf="logs.length > 0">
+            <div
+              *ngFor="let log of logs"
+              class="log-entry"
+              [ngClass]="'log-type-' + log.type.toLowerCase()"
+            >
+              <div class="log-meta">
+                <span class="log-tag" [ngClass]="'badge-' + log.type.toLowerCase()">
+                  {{ log.type }}
+                </span>
+                <span class="log-operator">{{ log.operator }}</span>
+                <span class="log-time">{{ log.time }}</span>
+              </div>
+              <div class="log-msg">{{ log.message }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
 </div>

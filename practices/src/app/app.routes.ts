@@ -7,6 +7,11 @@ export const routes: Routes = [
     redirectTo: 'day003-data-binding'
   },
   {
+    path: 'day002-hooks',
+    title: 'Day002-Lifecycle-Hooks',
+    loadComponent: () => import('./components/day002-hooks/day002-hooks').then(m => m.Day002Hooks)
+  },
+  {
     path: 'day003-data-binding',
     title: 'Day003-DataBinding',
     loadComponent: () => import('./components/day003-data-binding/day003-data-binding').then(m => m.Day003DataBinding)

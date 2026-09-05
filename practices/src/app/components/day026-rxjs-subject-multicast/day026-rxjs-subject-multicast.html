@@ -1,4 +1,522 @@
 <div class="day-container">
-  <h2>Day026-rxjs-subject-multicast</h2>
-  <p>day026-rxjs-subject-multicast works!</p>
+  <!-- Header Section -->
+  <header class="day-header">
+    <div class="badge-row">
+      <span class="badge primary">Day 26</span>
+      <span class="badge accent">RxJS 7+</span>
+      <span class="badge info">Subject & Multicasting</span>
+    </div>
+    <h1>RxJS Subject and Multicasting</h1>
+    <p class="subtitle">
+      Hiểu rõ sự khác biệt giữa <strong>Unicast</strong> và <strong>Multicast</strong>, làm chủ 4 biến thể của Subject (<code>Subject</code>, <code>BehaviorSubject</code>, <code>ReplaySubject</code>, <code>AsyncSubject</code>), cùng kỹ thuật caching dữ liệu đỉnh cao với <code>shareReplay()</code> trong Angular.
+    </p>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="tabs-nav" aria-label="Day 26 Sections">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'subject-types'"
+      (click)="activeTab = 'subject-types'"
+    >
+      🎭 1. Bốn Biến Thể Subject
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'unicast-multicast'"
+      (click)="activeTab = 'unicast-multicast'"
+    >
+      📡 2. Unicast vs Multicast (YouTube Live)
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'share-replay'"
+      (click)="activeTab = 'share-replay'"
+    >
+      💾 3. HTTP Caching với shareReplay()
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'event-bus'"
+      (click)="activeTab = 'event-bus'"
+    >
+      🛒 4. State Service & Event Bus
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab === 'cheatsheet'"
+      (click)="activeTab = 'cheatsheet'"
+    >
+      📚 5. Cheatsheet & Quy tắc chọn
+    </button>
+  </nav>
+
+  <!-- TAB 1: The 4 Subject Types -->
+  @if (activeTab === 'subject-types') {
+    <section class="tab-pane">
+      <div class="demo-card full-width">
+        <div class="card-title-bar">
+          <h3>Phòng Thí Nghiệm: So Sánh 4 Biến Thể Subject</h3>
+          <span class="tag">Interactive Lab</span>
+        </div>
+        <p class="card-desc">
+          Chọn loại Subject, bấm <strong>"1. Subscribe Observer A"</strong>, phát một vài giá trị, rồi bấm <strong>"3. Subscribe Observer B (Trễ)"</strong> để thấy sự khác biệt về cách các Subject đối xử với Late Subscriber:
+        </p>
+
+        <!-- Subject Variant Selector -->
+        <div class="subject-variant-tabs">
+          <button
+            type="button"
+            class="variant-btn"
+            [class.active]="selectedSubjectType === 'Subject'"
+            (click)="onSubjectTypeSelect('Subject')"
+          >
+            📢 Subject
+          </button>
+          <button
+            type="button"
+            class="variant-btn"
+            [class.active]="selectedSubjectType === 'BehaviorSubject'"
+            (click)="onSubjectTypeSelect('BehaviorSubject')"
+          >
+            🎯 BehaviorSubject (Current Value)
+          </button>
+          <button
+            type="button"
+            class="variant-btn"
+            [class.active]="selectedSubjectType === 'ReplaySubject'"
+            (click)="onSubjectTypeSelect('ReplaySubject')"
+          >
+            📼 ReplaySubject (Buffer 3)
+          </button>
+          <button
+            type="button"
+            class="variant-btn"
+            [class.active]="selectedSubjectType === 'AsyncSubject'"
+            (click)="onSubjectTypeSelect('AsyncSubject')"
+          >
+            🏁 AsyncSubject (Last on Complete)
+          </button>
+        </div>
+
+        <!-- Action Toolbar -->
+        <div class="toolbar-row">
+          <button
+            type="button"
+            class="action-btn primary"
+            (click)="subscribeObserverA()"
+            [disabled]="isObserverASubscribed"
+          >
+            {{ isObserverASubscribed ? '✅ Observer A Đã Lắng Nghe' : '1. Subscribe Observer A (Ban Đầu)' }}
+          </button>
+
+          <button
+            type="button"
+            class="action-btn success"
+            (click)="emitNextValue()"
+            [disabled]="isSubjectCompleted"
+          >
+            ➕ next({{ subjectEmissionCounter }}) - Phát Giá Trị
+          </button>
+
+          <button
+            type="button"
+            class="action-btn warning"
+            (click)="subscribeObserverB()"
+            [disabled]="isObserverBSubscribed"
+          >
+            {{ isObserverBSubscribed ? '✅ Observer B Đã Lắng Nghe' : '2. Subscribe Observer B (Đến Trễ)' }}
+          </button>
+
+          <button
+            type="button"
+            class="action-btn danger"
+            (click)="completeSubject()"
+            [disabled]="isSubjectCompleted"
+          >
+            🏁 complete() - Kết Thúc
+          </button>
+
+          <button type="button" class="action-btn secondary" (click)="resetSubjectSimulator()">
+            🔄 Đặt Lại Thí Nghiệm
+          </button>
+        </div>
+
+        <!-- Comparative Output Grid -->
+        <div class="observers-comparison-grid">
+          <!-- Observer A Panel -->
+          <div class="observer-panel">
+            <div class="panel-header">
+              <h4>Observer A (Đăng ký từ đầu)</h4>
+              <span class="status-pill" [class.subscribed]="isObserverASubscribed">
+                {{ isObserverASubscribed ? 'Đang Lắng Nghe' : 'Chưa Subscribe' }}
+              </span>
+            </div>
+            <div class="emissions-list">
+              @for (item of observerALogs; track $index) {
+                <div class="emission-item">
+                  <span class="em-time">[{{ item.time }}]</span>
+                  <span class="em-val">{{ item.value }}</span>
+                  <span class="em-note">{{ item.note }}</span>
+                </div>
+              }
+              @if (observerALogs.length === 0) {
+                <div class="empty-hint">Chưa có dữ liệu nào nhận được.</div>
+              }
+            </div>
+          </div>
+
+          <!-- Observer B Panel -->
+          <div class="observer-panel late-panel">
+            <div class="panel-header">
+              <h4>Observer B (Đăng ký sau khi đã emit)</h4>
+              <span class="status-pill" [class.subscribed]="isObserverBSubscribed">
+                {{ isObserverBSubscribed ? 'Đang Lắng Nghe' : 'Chưa Subscribe' }}
+              </span>
+            </div>
+            <div class="emissions-list">
+              @for (item of observerBLogs; track $index) {
+                <div class="emission-item highlight">
+                  <span class="em-time">[{{ item.time }}]</span>
+                  <span class="em-val">{{ item.value }}</span>
+                  <span class="em-note">{{ item.note }}</span>
+                </div>
+              }
+              @if (observerBLogs.length === 0) {
+                <div class="empty-hint">
+                  {{ isObserverBSubscribed ? 'Chưa nhận được giá trị nào' : 'Bấm nút "Subscribe Observer B" để kiểm tra dữ liệu nhận được!' }}
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 2: Unicast vs Multicast -->
+  @if (activeTab === 'unicast-multicast') {
+    <section class="tab-pane">
+      <div class="demo-card full-width">
+        <div class="card-title-bar">
+          <h3>Mô Phỏng Ẩn Dụ: Xem Video Thu Sẵn (Unicast) vs Xem Trực Tiếp (Multicast)</h3>
+          <span class="tag">The YouTube Metaphor</span>
+        </div>
+        <p class="card-desc">
+          <strong>Unicast:</strong> Mỗi người xem kích hoạt 1 execution riêng biệt từ đầu.
+          <strong>Multicast (với share()):</strong> Tất cả người xem cùng hòa vào 1 buổi phát sóng trực tiếp duy nhất đang diễn ra.
+        </p>
+
+        <div class="mode-toggle-bar">
+          <label>Chế độ phát sóng:</label>
+          <button
+            type="button"
+            class="action-btn"
+            [class.primary]="unicastMode"
+            [class.secondary]="!unicastMode"
+            (click)="toggleUnicastMode(true)"
+          >
+            📼 1. Unicast (Cold Observable - Độc lập)
+          </button>
+          <button
+            type="button"
+            class="action-btn"
+            [class.accent]="!unicastMode"
+            [class.secondary]="unicastMode"
+            (click)="toggleUnicastMode(false)"
+          >
+            📡 2. Multicast (Hot stream với share())
+          </button>
+        </div>
+
+        <div class="btn-group">
+          <button
+            type="button"
+            class="action-btn success"
+            (click)="startLiveSimulation()"
+            [disabled]="isLiveRunning"
+          >
+            ▶️ Bắt Đầu Phát Sóng (Người A xem tại 0s, Người B vào sau 1.8s)
+          </button>
+          <button
+            type="button"
+            class="action-btn danger"
+            (click)="stopLiveSimulation()"
+            [disabled]="!isLiveRunning"
+          >
+            ⏹️ Dừng
+          </button>
+        </div>
+
+        <!-- Live Simulation Timeline -->
+        <div class="broadcast-screens-grid">
+          <!-- Viewer A Screen -->
+          <div class="screen-card">
+            <div class="screen-header">
+              <span>👤 Người xem A (Bắt đầu xem lúc 0.0s)</span>
+              <span class="badge info">Khởi động ngay</span>
+            </div>
+            <div class="frames-row">
+              @for (frame of unicastViewerAValues; track $index) {
+                <div class="frame-box">Giây {{ frame }}</div>
+              }
+              @if (unicastViewerAValues.length === 0) {
+                <div class="empty-hint">Chưa bấm phát sóng.</div>
+              }
+            </div>
+          </div>
+
+          <!-- Viewer B Screen -->
+          <div class="screen-card">
+            <div class="screen-header">
+              <span>👤 Người xem B (Tham gia muộn sau 1.8s)</span>
+              <span class="badge warning">Đến muộn</span>
+            </div>
+            <div class="frames-row">
+              @for (frame of unicastViewerBValues; track $index) {
+                <div class="frame-box" [class.sync-frame]="!unicastMode">Giây {{ frame }}</div>
+              }
+              @if (unicastViewerBValues.length === 0) {
+                <div class="empty-hint">Đang chờ đến mốc 1.8 giây để người B tham gia...</div>
+              }
+            </div>
+            <div class="screen-footer">
+              @if (unicastMode && unicastViewerBValues.length > 0) {
+                <span class="explain-text">❌ Unicast: Người B phát lại từ đầu (Giây 0, 1, 2...) vì là execution mới!</span>
+              } @else if (!unicastMode && unicastViewerBValues.length > 0) {
+                <span class="explain-text success">✅ Multicast: Người B bắt kịp ngay nhịp hiện tại của trận đấu đang phát trực tiếp!</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 3: share() vs shareReplay() (HTTP Caching) -->
+  @if (activeTab === 'share-replay') {
+    <section class="tab-pane">
+      <div class="demo-card full-width">
+        <div class="card-title-bar">
+          <h3>Kỹ Thuật Caching Dữ Liệu API với shareReplay()</h3>
+          <span class="tag">Angular Best Practice</span>
+        </div>
+        <p class="card-desc">
+          Khi nhiều component hoặc nhiều <code>AsyncPipe</code> cùng subscribe vào một request HTTP, nếu không dùng <code>shareReplay()</code>, mỗi component sẽ kích hoạt một request mạng riêng làm lãng phí băng thông và chậm ứng dụng!
+        </p>
+
+        <!-- Toggle Mode -->
+        <div class="cache-config-row">
+          <div class="switch-box">
+            <label>Cơ chế áp dụng:</label>
+            <button
+              type="button"
+              class="action-btn"
+              [class.success]="useShareReplay"
+              [class.danger]="!useShareReplay"
+              (click)="useShareReplay = !useShareReplay; forceRefreshCache()"
+            >
+              {{ useShareReplay ? '🛡️ CÓ sử dụng shareReplay({ bufferSize: 1, refCount: true })' : '🚨 KHÔNG dùng shareReplay (Gọi API trùng lặp)' }}
+            </button>
+          </div>
+
+          <div class="stat-counter-badge" [class.warning-pulse]="httpNetworkRequestCount > 1 && !useShareReplay">
+            🌐 Số HTTP Requests thực sự gửi lên Server: <strong>{{ httpNetworkRequestCount }}</strong>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button
+            type="button"
+            class="action-btn primary"
+            (click)="subscribeComponentA()"
+            [disabled]="componentAListening"
+          >
+            1. Component A Subscribe
+          </button>
+          <button
+            type="button"
+            class="action-btn primary"
+            (click)="subscribeComponentB()"
+            [disabled]="componentBListening"
+          >
+            2. Component B Subscribe
+          </button>
+          <button
+            type="button"
+            class="action-btn primary"
+            (click)="subscribeComponentC()"
+            [disabled]="componentCListening"
+          >
+            3. Component C Subscribe
+          </button>
+          <button type="button" class="action-btn secondary" (click)="forceRefreshCache()">
+            🔄 Force Reload (Xóa Cache)
+          </button>
+        </div>
+
+        <!-- 3 Components View -->
+        <div class="components-grid">
+          <div class="comp-box" [class.loaded]="componentAResult">
+            <div class="comp-title">📦 Component Header</div>
+            <div class="comp-content">{{ componentAResult || 'Chưa nhận dữ liệu (Chưa subscribe)' }}</div>
+          </div>
+          <div class="comp-box" [class.loaded]="componentBResult">
+            <div class="comp-title">📦 Component Sidebar</div>
+            <div class="comp-content">{{ componentBResult || 'Chưa nhận dữ liệu (Chưa subscribe)' }}</div>
+          </div>
+          <div class="comp-box" [class.loaded]="componentCResult">
+            <div class="comp-title">📦 Component Main Content</div>
+            <div class="comp-content">{{ componentCResult || 'Chưa nhận dữ liệu (Chưa subscribe)' }}</div>
+          </div>
+        </div>
+
+        <div class="cache-explain-box">
+          @if (useShareReplay) {
+            <p>✅ <strong>Tuyệt vời:</strong> Cả 3 components đều nhận được cùng một dữ liệu phản hồi, nhưng Server chỉ nhận đúng <strong>1 lần gọi HTTP duy nhất</strong>!</p>
+          } @else {
+            <p>⚠️ <strong>Cảnh báo:</strong> Mỗi lần một component subscribe, một HTTP request mới lại được gửi đi, dẫn đến tổng cộng <strong>{{ httpNetworkRequestCount }} requests</strong> không cần thiết.</p>
+          }
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 4: Subject as Event Bus / State Service -->
+  @if (activeTab === 'event-bus') {
+    <section class="tab-pane">
+      <div class="demo-card full-width">
+        <div class="card-title-bar">
+          <h3>Ứng Dụng Thực Tế: Shared State Service & Event Bus Với BehaviorSubject</h3>
+          <span class="tag">Reactive State Pattern</span>
+        </div>
+        <p class="card-desc">
+          Mô hình State Management kinh điển trong Angular: Một service chia sẻ giỏ hàng (<code>CartService</code>) dùng <code>BehaviorSubject</code>. Bất kỳ component nào subscribe vào đều tự động cập nhật phản ứng theo thời gian thực!
+        </p>
+
+        <div class="cart-header-status">
+          <div class="cart-badge-chip">
+            🛒 Giỏ hàng: <strong>{{ cartTotalCount }}</strong> món | Tổng tiền: <strong>${{ cartTotalPrice }}</strong>
+          </div>
+          <div class="cart-btn-actions">
+            <button type="button" class="action-btn primary" (click)="addItemToCart('RxJS Pro Course', 39)">
+              ➕ Thêm RxJS Course ($39)
+            </button>
+            <button type="button" class="action-btn primary" (click)="addItemToCart('NestJS Backend Guide', 29)">
+              ➕ Thêm NestJS Guide ($29)
+            </button>
+            <button type="button" class="action-btn danger" (click)="clearCart()">
+              🗑️ Xóa sạch giỏ hàng
+            </button>
+          </div>
+        </div>
+
+        <div class="cart-items-table">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tên sản phẩm</th>
+                <th>Giá</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of cartItemsList; track item.id) {
+                <tr>
+                  <td><code>#{{ item.id }}</code></td>
+                  <td><strong>{{ item.name }}</strong></td>
+                  <td>${{ item.price }}</td>
+                  <td>
+                    <button type="button" class="remove-btn" (click)="removeCartItem(item.id)">
+                      Xóa
+                    </button>
+                  </td>
+                </tr>
+              }
+              @if (cartItemsList.length === 0) {
+                <tr>
+                  <td colspan="4" class="empty-cart-msg">Giỏ hàng hiện đang rỗng!</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- TAB 5: Cheatsheet -->
+  @if (activeTab === 'cheatsheet') {
+    <section class="tab-pane">
+      <div class="cheatsheet-card">
+        <div class="card-title-bar">
+          <h3>Bảng Tra Cứu Toàn Diện: Subject & Multicasting</h3>
+          <span class="tag">RxJS 7+ CheatSheet</span>
+        </div>
+        <div class="table-container">
+          <table class="spec-table">
+            <thead>
+              <tr>
+                <th>Tên Subject / Operator</th>
+                <th>Phân loại</th>
+                <th>Cần Giá Trị Khởi Tạo?</th>
+                <th>Subscriber Đến Trễ Nhận Được Gì?</th>
+                <th>Hành Vi Khi Complete</th>
+                <th>Angular Use-Case</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (spec of cheatsheetSpecs; track spec.name) {
+                <tr>
+                  <td><code>{{ spec.name }}</code></td>
+                  <td>
+                    <span class="type-badge" [class.multicast-badge]="spec.type.includes('Multicast')">
+                      {{ spec.type }}
+                    </span>
+                  </td>
+                  <td>{{ spec.initialValueRequired }}</td>
+                  <td>{{ spec.lateSubscriberReceives }}</td>
+                  <td>{{ spec.behaviorOnComplete }}</td>
+                  <td>{{ spec.angularUseCase }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Real-time Activity Log Terminal -->
+  <section class="activity-log-section">
+    <div class="log-header">
+      <div class="log-title">
+        <span class="pulse-dot"></span>
+        <span>RxJS Stream Activity Console</span>
+        <span class="log-count">({{ logs.length }} logs)</span>
+      </div>
+      <button type="button" class="clear-btn" (click)="clearLogs()">
+        🗑️ Xóa logs
+      </button>
+    </div>
+    <div class="terminal-body">
+      @for (log of logs; track log.id) {
+        <div class="log-row">
+          <span class="log-time">{{ log.time }}</span>
+          <span class="badge-type" [class]="log.type.toLowerCase()">{{ log.type }}</span>
+          <span class="log-op">[{{ log.operator }}]</span>
+          <span class="log-msg">{{ log.message }}</span>
+        </div>
+      }
+      @if (logs.length === 0) {
+        <div class="log-empty">Chưa có sự kiện nào. Hãy tương tác với các demo ở trên!</div>
+      }
+    </div>
+  </section>
 </div>

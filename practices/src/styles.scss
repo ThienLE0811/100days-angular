@@ -1,3 +1,19 @@
+/* Global Reset & Viewport Constraints */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
 /* Global Styles & Reusable Lab Utilities */
 :root {
   --primary: #4f46e5;

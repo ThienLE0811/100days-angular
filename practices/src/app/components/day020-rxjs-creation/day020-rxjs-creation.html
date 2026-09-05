@@ -1,4 +1,773 @@
-<div class="day-container">
-  <h2>Day020-rxjs-creation</h2>
-  <p>day020-rxjs-creation works!</p>
+<div class="day020-page">
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 20</span>
+        <span class="badge badge-syntax">of()</span>
+        <span class="badge badge-syntax">from()</span>
+        <span class="badge badge-syntax">fromEvent()</span>
+        <span class="badge badge-syntax">fromEventPattern()</span>
+        <span class="badge badge-syntax">interval()</span>
+        <span class="badge badge-syntax">timer()</span>
+        <span class="badge badge-syntax">defer()</span>
+        <span class="badge badge-syntax">throwError()</span>
+      </div>
+      <h1 class="page-title">RxJS Creation Operators</h1>
+      <p class="page-subtitle">
+        Khám phá các <strong>Creation Operators</strong> - các pure functions chuyên dụng để khởi tạo <code>Observable</code>
+        từ bất kỳ kiểu dữ liệu nào: primitives, arrays, iterables, Promises, DOM events, websocket listeners, thời gian, hoặc lazy factories mà không cần phải thủ công viết cú pháp <code>new Observable()</code>.
+      </p>
+    </div>
+
+    <!-- Quick Stats & Clear Logs -->
+    <div class="header-quick-stats">
+      <div class="stat-pill">
+        <span class="stat-name">Active Subscriptions</span>
+        <strong class="stat-num text-cyan">
+          {{ (isFromEventSubscribed ? 1 : 0) + (intervalStatus === 'RUNNING' ? 1 : 0) + (timerPeriodicStatus === 'RUNNING' ? 1 : 0) + (isSignalRSubscribed ? 1 : 0) }}
+        </strong>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-name">Total Logs</span>
+        <strong class="stat-num text-violet">{{ logs.length }}</strong>
+      </div>
+      <button class="btn-action-ghost" (click)="clearLogs()" title="Xóa logs">
+        <span>Xóa Logs</span> ⌫
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'of-from'"
+      (click)="activeTab = 'of-from'"
+    >
+      <span class="tab-icon">⚖️</span>
+      <span class="tab-text">1. of() vs from()</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'events'"
+      (click)="activeTab = 'events'"
+    >
+      <span class="tab-icon">🖱️</span>
+      <span class="tab-text">2. fromEvent & Pattern</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'time'"
+      (click)="activeTab = 'time'"
+    >
+      <span class="tab-icon">⏱️</span>
+      <span class="tab-text">3. interval() & timer()</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'defer'"
+      (click)="activeTab = 'defer'"
+    >
+      <span class="tab-icon">⚡</span>
+      <span class="tab-text">4. defer() vs of()</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'error'"
+      (click)="activeTab = 'error'"
+    >
+      <span class="tab-icon">⚠️</span>
+      <span class="tab-text">5. throwError()</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'cheatsheet'"
+      (click)="activeTab = 'cheatsheet'"
+    >
+      <span class="tab-icon">📚</span>
+      <span class="tab-text">6. Cheatsheet & Specs</span>
+    </button>
+  </nav>
+
+  <!-- Dashboard Main Layout -->
+  <div class="dashboard-grid">
+    <!-- Main Interactive Area -->
+    <div class="dashboard-column main-column">
+
+      <!-- ================================================================= -->
+      <!-- TAB 1: of() vs from() -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'of-from'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">So Sánh Trọng Tâm</span>
+              <h2 class="card-title">of() và from() - Khác biệt cốt lõi</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-info">
+              <span class="alert-icon">💡</span>
+              <div class="alert-content">
+                <strong>Quy tắc nhớ:</strong>
+                <ul>
+                  <li><code>of(...values)</code>: Nhận mọi giá trị làm đối số. Nếu truyền vào <code>Array [1, 2, 3]</code>, nó sẽ emit <strong>cả Array</strong> như một giá trị duy nhất rồi complete.</li>
+                  <li><code>from(iterableOrPromise)</code>: Chỉ nhận <strong>Iterable</strong> (Array, String, Map, Set) hoặc <strong>Promise</strong>. Nếu nhận <code>Array [1, 2, 3]</code>, nó sẽ unpack và emit <strong>từng phần tử 1, 2, 3</strong> riêng rẽ!</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Two Columns Comparison -->
+            <div class="comparison-grid">
+              <!-- Column A: of() -->
+              <div class="subcard of-box">
+                <div class="subcard-header">
+                  <div class="badge-row">
+                    <span class="tech-badge of-badge">Operator of()</span>
+                    <span class="type-pill">Auto Complete ✅</span>
+                  </div>
+                  <h3>Demo các trường hợp của of()</h3>
+                  <p class="subcard-desc">Tạo Observable từ bất kỳ giá trị nào và complete ngay lập tức.</p>
+                </div>
+
+                <div class="actions-group">
+                  <button class="btn btn-outline" (click)="runOfPrimitiveDemo()">
+                    ▶ of('hello')
+                  </button>
+                  <button class="btn btn-outline" (click)="runOfArrayDemo()">
+                    ▶ of([1, 2, 3]) (Array nguyên vẹn)
+                  </button>
+                  <button class="btn btn-outline" (click)="runOfSequenceDemo()">
+                    ▶ of(1, 2, 3, 'hello', &#123;foo: 'bar'&#125;)
+                  </button>
+                </div>
+
+                <div class="stream-visualizer">
+                  <div class="vis-header">
+                    <span>Kết quả phát ra từ of()</span>
+                    <span class="count-tag">{{ ofResults.length }} items</span>
+                  </div>
+                  <div class="vis-body">
+                    <div *ngIf="ofResults.length === 0" class="empty-state">
+                      Bấm nút bên trên để quan sát Observable of() phát dữ liệu
+                    </div>
+                    <div class="marble-row" *ngIf="ofResults.length > 0">
+                      <div
+                        *ngFor="let item of ofResults"
+                        class="marble-item"
+                        [class.marble-complete]="item.isComplete"
+                      >
+                        <span class="marble-index">#{{ item.id }}</span>
+                        <div class="marble-circle">{{ item.isComplete ? '|' : item.value }}</div>
+                        <span class="marble-label">{{ item.isComplete ? 'complete' : item.type }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="code-preview">
+                  <code>// of([1, 2, 3]) phát đúng 1 lần: Array [1, 2, 3]<br>of([1, 2, 3]).subscribe(observer);</code>
+                </div>
+              </div>
+
+              <!-- Column B: from() -->
+              <div class="subcard from-box">
+                <div class="subcard-header">
+                  <div class="badge-row">
+                    <span class="tech-badge from-badge">Operator from()</span>
+                    <span class="type-pill">Unpack & Auto Complete ✅</span>
+                  </div>
+                  <h3>Demo các trường hợp của from()</h3>
+                  <p class="subcard-desc">Chỉ nhận Iterable hoặc Promise và unwrap/iterate từng item.</p>
+                </div>
+
+                <div class="actions-group">
+                  <button class="btn btn-primary" (click)="runFromArrayDemo()">
+                    ▶ from([1, 2, 3]) (Tách từng item)
+                  </button>
+                  <button class="btn btn-primary" (click)="runFromStringDemo()">
+                    ▶ from('hello world') (Tách từng ký tự)
+                  </button>
+                  <button class="btn btn-primary" (click)="runFromMapAndSetDemo()">
+                    ▶ from(Map) & from(Set)
+                  </button>
+                  <button class="btn btn-accent" (click)="runFromPromiseDemo()" [disabled]="isPromiseLoading">
+                    {{ isPromiseLoading ? '⏳ Đang chờ Promise...' : '▶ from(Promise.resolve(...))' }}
+                  </button>
+                </div>
+
+                <div class="stream-visualizer">
+                  <div class="vis-header">
+                    <span>Kết quả phát ra từ from()</span>
+                    <span class="count-tag">{{ fromResults.length }} items</span>
+                  </div>
+                  <div class="vis-body">
+                    <div *ngIf="fromResults.length === 0" class="empty-state">
+                      Bấm nút bên trên để quan sát Observable from() phát dữ liệu
+                    </div>
+                    <div class="marble-row" *ngIf="fromResults.length > 0">
+                      <div
+                        *ngFor="let item of fromResults"
+                        class="marble-item"
+                        [class.marble-complete]="item.isComplete"
+                      >
+                        <span class="marble-index">#{{ item.id }}</span>
+                        <div class="marble-circle">{{ item.isComplete ? '|' : item.value }}</div>
+                        <span class="marble-label">{{ item.isComplete ? 'complete' : item.type }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="code-preview">
+                  <code>// from([1, 2, 3]) phát 3 lần tuần tự: 1 rồi 2 rồi 3<br>from([1, 2, 3]).subscribe(observer);</code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 2: fromEvent() & fromEventPattern() -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'events'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge warning">DOM & Custom Listeners</span>
+              <h2 class="card-title">fromEvent() & fromEventPattern()</h2>
+            </div>
+            <div class="header-actions">
+              <button
+                class="btn"
+                [ngClass]="isFromEventSubscribed ? 'btn-danger' : 'btn-success'"
+                (click)="isFromEventSubscribed ? unsubscribeFromEvents() : subscribeFromEvents()"
+              >
+                {{ isFromEventSubscribed ? '🛑 Hủy Subscribe (Unsubscribe)' : '▶ Đăng ký Lại (Subscribe)' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-warning">
+              <span class="alert-icon">⚠️</span>
+              <div class="alert-content">
+                <strong>Nguy cơ Tràn Bộ Nhớ (Memory Leak):</strong>
+                <code>fromEvent</code> và <code>fromEventPattern</code> <strong>KHÔNG BAO GIỜ TỰ COMPLETE</strong>!
+                Bởi vì người dùng có thể click hoặc gõ phím bất kỳ lúc nào. Bạn <strong>bắt buộc phải unsubscribe</strong> khi component bị hủy (ngOnDestroy).
+              </div>
+            </div>
+
+            <!-- Event Playground -->
+            <div class="events-grid">
+              <!-- Box 1: Click & Input -->
+              <div class="subcard event-subcard">
+                <h3>1. fromEvent(element, 'click' | 'input')</h3>
+                <p class="subcard-desc">Chuyển đổi các Native DOM Events trực tiếp thành Observable Stream.</p>
+
+                <div class="interactive-sandbox">
+                  <div class="sandbox-item">
+                    <label>Target Button (Click Event):</label>
+                    <button
+                      #demoClickBtn
+                      class="btn btn-interactive"
+                      [disabled]="!isFromEventSubscribed"
+                    >
+                      🎯 Nhấp vào tôi để trigger Event
+                    </button>
+                    <span class="click-counter-badge">
+                      Tổng số lần click: <strong>{{ fromEventClickCount }}</strong>
+                    </span>
+                  </div>
+
+                  <div class="sandbox-item">
+                    <label>Target Input Box (Input Event):</label>
+                    <input
+                      #demoInputBox
+                      type="text"
+                      class="custom-input"
+                      placeholder="Gõ văn bản bất kỳ để xem stream emit..."
+                      [disabled]="!isFromEventSubscribed"
+                    />
+                    <div class="input-display" *ngIf="fromEventLastKey">
+                      Stream emit giá trị: <code>"{{ fromEventLastKey }}"</code>
+                    </div>
+                  </div>
+
+                  <div class="sandbox-item">
+                    <label>Target Box (MouseMove Event):</label>
+                    <div #mouseTrackBox class="mouse-box">
+                      <span>Di chuyển chuột vào vùng này</span>
+                      <strong>X: {{ fromEventLastMousePos.x }}px | Y: {{ fromEventLastMousePos.y }}px</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="sub-status" [class.active-sub]="isFromEventSubscribed">
+                  Trạng thái Subscription: <strong>{{ isFromEventSubscribed ? 'ĐANG LẮNG NGHE (ACTIVE)' : 'ĐÃ UNSUBSCRIBE (DỪNG)' }}</strong>
+                </div>
+              </div>
+
+              <!-- Box 2: fromEventPattern (Mock SignalR Hub) -->
+              <div class="subcard pattern-subcard">
+                <div class="badge-row">
+                  <span class="tech-badge hub-badge">Nâng Cao (fromEventPattern)</span>
+                </div>
+                <h3>2. Bọc Custom Event APIs (Ví dụ: WebSocket / SignalR Hub)</h3>
+                <p class="subcard-desc">
+                  Sử dụng <code>addHandler</code> và <code>removeHandler</code> để kết nối và đóng kết nối tùy biến khi subscribe/unsubscribe.
+                </p>
+
+                <div class="hub-controller">
+                  <button
+                    class="btn"
+                    [ngClass]="isSignalRSubscribed ? 'btn-danger' : 'btn-primary'"
+                    (click)="toggleSignalRSubscription()"
+                  >
+                    {{ isSignalRSubscribed ? '🔌 Ngắt kết nối SignalR Hub (Unsubscribe)' : '📡 Kết nối SignalR Hub (Subscribe)' }}
+                  </button>
+                  <span class="hub-status-pill" [class.connected]="isSignalRSubscribed">
+                    {{ isSignalRSubscribed ? 'Hub: Connected' : 'Hub: Disconnected' }}
+                  </span>
+                </div>
+
+                <div class="hub-messages-feed">
+                  <div class="feed-header">Tin nhắn thời gian thực từ Mock Hub:</div>
+                  <div *ngIf="signalRMessages.length === 0" class="empty-feed">
+                    Chưa có tin nhắn nào. Bấm nút Kết nối để bắt đầu stream từ Hub.
+                  </div>
+                  <div *ngFor="let msg of signalRMessages" class="feed-item">
+                    <span class="feed-time">{{ msg.serverTime }}</span>
+                    <span class="feed-body">{{ msg.body }}</span>
+                  </div>
+                </div>
+
+                <div class="code-preview">
+                  <pre>fromEventPattern(
+  (handler) => hub.connection.on('ReceiveMessage', handler),
+  (handler) => hub.connection.off('ReceiveMessage', handler),
+  (data) => data.body
+).subscribe(observer);</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 3: interval() & timer() -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'time'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge accent">Thời Gian & Chu Kỳ</span>
+              <h2 class="card-title">interval() & timer()</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-info">
+              <span class="alert-icon">💡</span>
+              <div class="alert-content">
+                <strong>So sánh:</strong>
+                <ul>
+                  <li><code>interval(ms)</code>: Phát tuần hoàn 0, 1, 2... sau mỗi khoảng chu kỳ (như <code>setInterval</code>). <strong>Không tự complete</strong>.</li>
+                  <li><code>timer(delay)</code>: Chờ sau <code>delay</code> ms, phát số 0 duy nhất và <strong>TỰ COMPLETE</strong> (như <code>setTimeout</code>).</li>
+                  <li><code>timer(delay, period)</code>: Chờ sau <code>delay</code> ms rồi phát tuần hoàn mỗi <code>period</code> ms (không tự complete).</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="time-grid">
+              <!-- Interval Card -->
+              <div class="subcard interval-card">
+                <div class="subcard-header">
+                  <span class="tech-badge interval-badge">interval()</span>
+                  <h3>Tuần hoàn vô hạn</h3>
+                </div>
+
+                <div class="time-controls">
+                  <div class="input-row">
+                    <label>Chu kỳ (ms):</label>
+                    <input type="number" [(ngModel)]="intervalMs" min="200" step="200" class="short-input" />
+                  </div>
+                  <div class="btn-row">
+                    <button
+                      class="btn btn-primary"
+                      (click)="startInterval()"
+                      [disabled]="intervalStatus === 'RUNNING'"
+                    >
+                      ▶ Start Interval
+                    </button>
+                    <button
+                      class="btn btn-outline"
+                      (click)="stopInterval()"
+                      [disabled]="intervalStatus !== 'RUNNING'"
+                    >
+                      ⏹ Stop (Unsubscribe)
+                    </button>
+                  </div>
+                </div>
+
+                <div class="ticker-box">
+                  <span class="ticker-label">Giá trị hiện tại:</span>
+                  <span class="ticker-val">{{ intervalCurrentValue !== null ? intervalCurrentValue : '--' }}</span>
+                </div>
+
+                <div class="recent-ticks">
+                  <span class="ticks-label">10 giá trị gần nhất:</span>
+                  <div class="ticks-pills">
+                    <span *ngFor="let t of intervalEmittedItems" class="tick-pill">{{ t }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Timer One-off Card -->
+              <div class="subcard timer-card">
+                <div class="subcard-header">
+                  <span class="tech-badge timer-badge">timer(delay)</span>
+                  <h3>Delay 1 Lần & Tự Complete</h3>
+                </div>
+
+                <div class="time-controls">
+                  <div class="input-row">
+                    <label>Delay (ms):</label>
+                    <input type="number" [(ngModel)]="timerOneOffDelay" min="500" step="500" class="short-input" />
+                  </div>
+                  <button
+                    class="btn btn-accent"
+                    (click)="startTimerOneOff()"
+                    [disabled]="timerOneOffStatus === 'COUNTING'"
+                  >
+                    ▶ Kích hoạt Timer ({{ timerOneOffDelay }}ms)
+                  </button>
+                </div>
+
+                <div class="progress-container">
+                  <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" [style.width.%]="timerOneOffProgress"></div>
+                  </div>
+                  <div class="progress-status-row">
+                    <span>Trạng thái: <strong>{{ timerOneOffStatus }}</strong></span>
+                    <span>{{ timerOneOffProgress }}%</span>
+                  </div>
+                </div>
+
+                <div class="result-box" *ngIf="timerOneOffStatus === 'COMPLETED'">
+                  ✅ Stream đã phát số <code>{{ timerOneOffValue }}</code> và <strong>TỰ ĐỘNG COMPLETE</strong>!
+                </div>
+              </div>
+
+              <!-- Timer Periodic Card -->
+              <div class="subcard timer-periodic-card">
+                <div class="subcard-header">
+                  <span class="tech-badge timer-badge">timer(delay, period)</span>
+                  <h3>Delay Ban Đầu + Tuần Hoàn</h3>
+                </div>
+
+                <div class="time-controls">
+                  <div class="input-row">
+                    <label>Delay ban đầu:</label>
+                    <input type="number" [(ngModel)]="timerPeriodicDelay" class="short-input" />
+                    <label>Chu kỳ sau đó:</label>
+                    <input type="number" [(ngModel)]="timerPeriodicPeriod" class="short-input" />
+                  </div>
+                  <div class="btn-row">
+                    <button
+                      class="btn btn-primary"
+                      (click)="startTimerPeriodic()"
+                      [disabled]="timerPeriodicStatus === 'RUNNING'"
+                    >
+                      ▶ Start Timer Tuần Hoàn
+                    </button>
+                    <button
+                      class="btn btn-outline"
+                      (click)="stopTimerPeriodic()"
+                      [disabled]="timerPeriodicStatus !== 'RUNNING'"
+                    >
+                      ⏹ Stop
+                    </button>
+                  </div>
+                </div>
+
+                <div class="recent-ticks">
+                  <span class="ticks-label">Các giá trị nhận được:</span>
+                  <div class="ticks-pills">
+                    <span *ngFor="let t of timerPeriodicValues" class="tick-pill accent-pill">{{ t }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 4: defer() vs of() (The Famous Experiment) -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'defer'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge defer-badge">Lazy Factory Operator</span>
+              <h2 class="card-title">defer() vs of() - Thí nghiệm Độc Nhất</h2>
+            </div>
+            <button class="btn btn-outline-sm" (click)="resetOfVsDeferExperiment()">
+              ↺ Reset Thí Nghiệm
+            </button>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-success">
+              <span class="alert-icon">⭐</span>
+              <div class="alert-content">
+                <strong>Bản chất của defer():</strong>
+                <code>defer(() => Observable)</code> không tạo Observable ngay tại thời điểm khai báo. Nó nhận vào một <strong>ObservableFactory</strong> và chỉ thực thi factory đó <strong>mỗi khi có một subscriber đăng ký</strong>.
+                Điều này đảm bảo mỗi Subscriber nhận được một Observable hoàn toàn mới với dữ liệu tươi mới!
+              </div>
+            </div>
+
+            <div class="experiment-grid">
+              <!-- Column A: of(Math.random()) -->
+              <div class="experiment-box of-exp">
+                <div class="exp-head">
+                  <span class="exp-badge static">of(Math.random())</span>
+                  <h4>Giá Trị Tĩnh (Đã Tính Trước)</h4>
+                  <p>Hàm <code>Math.random()</code> được chạy đúng 1 lần khi tạo Observable. Mọi subscriber sau đó nhận chung 1 kết quả duy nhất!</p>
+                </div>
+
+                <button class="btn btn-outline w-full" (click)="runSubscribeToOfRandom()">
+                  ➕ Thêm Subscriber mới vào of()
+                </button>
+
+                <div class="subscribers-list">
+                  <div *ngIf="ofSubscriberResults.length === 0" class="empty-sub">
+                    Chưa có subscriber nào. Hãy nhấn nút để đăng ký!
+                  </div>
+                  <div
+                    *ngFor="let sub of ofSubscriberResults"
+                    class="sub-card static-match"
+                  >
+                    <div class="sub-name">{{ sub.subscriberName }} ({{ sub.subscribedAt }})</div>
+                    <div class="sub-val">Random: <code>{{ sub.randomValue }}</code></div>
+                    <span class="match-tag">Trùng khớp 100% với các sub khác!</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Column B: defer(() => of(Math.random())) -->
+              <div class="experiment-box defer-exp">
+                <div class="exp-head">
+                  <span class="exp-badge dynamic">defer(() => of(Math.random()))</span>
+                  <h4>Giá Trị Động (Tạo Mới Cho Từng Sub)</h4>
+                  <p>Mỗi lần bấm subscribe, defer kích hoạt lại hàm factory. Mỗi Subscriber nhận được 1 giá trị ngẫu nhiên hoàn toàn mới!</p>
+                </div>
+
+                <button class="btn btn-primary w-full" (click)="runSubscribeToDeferRandom()">
+                  ➕ Thêm Subscriber mới vào defer()
+                </button>
+
+                <div class="subscribers-list">
+                  <div *ngIf="deferSubscriberResults.length === 0" class="empty-sub">
+                    Chưa có subscriber nào. Hãy nhấn nút để đăng ký!
+                  </div>
+                  <div
+                    *ngFor="let sub of deferSubscriberResults"
+                    class="sub-card dynamic-new"
+                  >
+                    <div class="sub-name">{{ sub.subscriberName }} ({{ sub.subscribedAt }})</div>
+                    <div class="sub-val">Random: <code>{{ sub.randomValue }}</code></div>
+                    <span class="new-tag">✨ Giá trị mới tinh độc lập!</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Timestamp Use Case -->
+            <div class="real-world-defer">
+              <h4>Ứng dụng thực tế: Đóng gói Timestamp / Retry Logic</h4>
+              <p>Mỗi khi retry hoặc subscribe lại, <code>defer</code> giúp tạo lại thời điểm chính xác:</p>
+              <div class="defer-time-action">
+                <button class="btn btn-accent" (click)="runSubscribeToDeferTimestamp()">
+                  ⏱️ Subscribe defer(Timestamp)
+                </button>
+                <div class="timestamp-tags">
+                  <span *ngFor="let t of deferTimestampResults" class="time-tag">
+                    Sub #{{ t.id }}: {{ t.time }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 5: throwError() -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'error'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge danger">Error Streams</span>
+              <h2 class="card-title">throwError() - Phát Tín Hiệu Lỗi Lập Tức</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-danger">
+              <span class="alert-icon">⚠️</span>
+              <div class="alert-content">
+                <strong>Cơ chế hoạt động:</strong>
+                <code>throwError()</code> tạo một Observable mà không phát bất kỳ giá trị (next) nào. Thay vào đó, nó lập tức gửi <strong>Error Notification</strong> đến Observer khi được subscribe.
+                Stream sẽ đóng ngay lập tức và hàm <code>complete</code> sẽ không bao giờ được gọi.
+              </div>
+            </div>
+
+            <div class="error-simulator-card">
+              <div class="error-config">
+                <label>Thông báo lỗi mô phỏng (Error Payload):</label>
+                <input
+                  type="text"
+                  [(ngModel)]="customErrorMessage"
+                  class="custom-input"
+                  placeholder="Nhập thông điệp lỗi..."
+                />
+                <button class="btn btn-danger" (click)="runThrowErrorDemo()">
+                  ⚡ Subscribe vào throwError()
+                </button>
+              </div>
+
+              <div class="error-result-panel" *ngIf="throwErrorStatus === 'EMITTED'">
+                <div class="error-banner">
+                  <span class="err-icon">💥</span>
+                  <div class="err-text">
+                    <strong>Observer.error() đã bắt được lỗi:</strong>
+                    <p class="err-msg">{{ throwErrorDetail }}</p>
+                  </div>
+                </div>
+
+                <div class="syntax-upgrade-note">
+                  <span class="note-title">💡 Lưu ý cú pháp RxJS 7+:</span>
+                  <p>
+                    Trong RxJS 6 trở về trước, ta có thể viết <code>throwError('error string')</code>. Nhưng từ RxJS 7+, cú pháp khuyến nghị chuẩn là truyền vào một error factory function:
+                    <br>
+                    <code>throwError(() => new Error('custom error'))</code> để giữ call stack chính xác và đảm bảo lazy evaluation!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 6: CHEATSHEET & REFERENCE -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'cheatsheet'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">Bảng Tra Cứu Toàn Diện</span>
+              <h2 class="card-title">Cheat Sheet: RxJS Creation Operators</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="specs-table">
+                <thead>
+                  <tr>
+                    <th>Operator</th>
+                    <th>Đặc Điểm & Cú Pháp</th>
+                    <th>Tự Complete?</th>
+                    <th>Tóm Tắt Khả Năng</th>
+                    <th>Ứng Dụng Thực Chiến Trong Angular</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let op of operatorsList">
+                    <td>
+                      <strong class="op-name">{{ op.name }}</strong>
+                      <span class="op-badge">{{ op.badge }}</span>
+                    </td>
+                    <td>
+                      <code class="op-code">{{ op.signature }}</code>
+                    </td>
+                    <td>
+                      <span
+                        class="complete-pill"
+                        [class.auto-yes]="op.autoComplete"
+                        [class.auto-no]="!op.autoComplete"
+                      >
+                        {{ op.autoComplete ? 'CÓ (Auto Complete)' : 'KHÔNG (Vô Hạn)' }}
+                      </span>
+                    </td>
+                    <td class="op-summary">{{ op.summary }}</td>
+                    <td class="op-angular">{{ op.angularNote }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Other Rare Operators Note -->
+            <div class="alert-box alert-secondary">
+              <span class="alert-icon">ℹ️</span>
+              <div class="alert-content">
+                <strong>Các Creation Operators khác ít dùng trong Angular:</strong>
+                <ul>
+                  <li><code>ajax()</code> và <code>fromFetch()</code>: Dùng để gọi HTTP request. Trong Angular chúng ta luôn ưu tiên dùng <code>HttpClient</code> của <code>@angular/common/http</code> vì nó đã tích hợp sẵn Dependency Injection, Interceptors và RxJS.</li>
+                  <li><code>generate()</code>: Giống như vòng lặp <code>for</code> phát ra stream theo điều kiện lặp và bước nhảy.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Real-time Activity Log Console -->
+    <aside class="dashboard-column sidebar-column">
+      <div class="card logs-card">
+        <div class="card-header">
+          <div class="log-title-wrap">
+            <span class="card-badge logs-badge">Stream Terminal</span>
+            <h3 class="logs-heading">Nhật Ký Stream Trực Tiếp</h3>
+          </div>
+          <button class="btn-clear-ghost" (click)="clearLogs()" title="Xóa logs">
+            Xóa ⌫
+          </button>
+        </div>
+
+        <div class="logs-body">
+          <div *ngIf="logs.length === 0" class="no-logs">
+            Chưa có log sự kiện nào. Hãy tương tác với các nút trên giao diện!
+          </div>
+
+          <div class="log-stream" *ngIf="logs.length > 0">
+            <div
+              *ngFor="let log of logs"
+              class="log-entry"
+              [ngClass]="'log-type-' + log.type.toLowerCase()"
+            >
+              <div class="log-meta">
+                <span class="log-tag" [ngClass]="'badge-' + log.type.toLowerCase()">
+                  {{ log.type }}
+                </span>
+                <span class="log-operator">{{ log.operator }}</span>
+                <span class="log-time">{{ log.time }}</span>
+              </div>
+              <div class="log-msg">{{ log.message }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
 </div>

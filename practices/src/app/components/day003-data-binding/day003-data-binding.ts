@@ -31,13 +31,12 @@ export interface ActionLog {
 })
 export class Day003DataBinding {
   // 1. Data Model (Dữ liệu người dùng: Thien Le, age 30)
-  readonly defaultAvatar =
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80';
+  readonly defaultAvatar = '/avatar.jpg';
 
   user: UserProfile = {
     name: 'Thien Le',
-    age: 30,
-    role: 'Google Developer Expert & Fullstack Architect',
+    age: 25,
+    role: 'Fullstack Developer',
     avatar: this.defaultAvatar,
     bio: 'Đam mê chia sẻ kiến thức Angular và TypeScript cho cộng đồng lập trình viên Việt Nam. Tác giả chuỗi 100 Days of Angular.',
     website: 'https://github.com/ThienLE0811',
@@ -96,11 +95,19 @@ export class Day003DataBinding {
     if (this.user.isFollowing) {
       this.user.followers++;
       this.triggerToast(`Đã theo dõi ${this.user.name} thành công!`);
-      this.addLog('event', 'onToggleFollow()', `Đã theo dõi. Tổng followers: ${this.user.followers}`);
+      this.addLog(
+        'event',
+        'onToggleFollow()',
+        `Đã theo dõi. Tổng followers: ${this.user.followers}`,
+      );
     } else {
       this.user.followers--;
       this.triggerToast(`Đã hủy theo dõi ${this.user.name}.`);
-      this.addLog('event', 'onToggleFollow()', `Hủy theo dõi. Còn lại followers: ${this.user.followers}`);
+      this.addLog(
+        'event',
+        'onToggleFollow()',
+        `Hủy theo dõi. Còn lại followers: ${this.user.followers}`,
+      );
     }
   }
 
@@ -120,7 +127,7 @@ export class Day003DataBinding {
     this.addLog(
       'property',
       'toggleDisabled()',
-      `Thuộc tính [disabled] đổi thành: ${this.isInputDisabled}`
+      `Thuộc tính [disabled] đổi thành: ${this.isInputDisabled}`,
     );
   }
 
@@ -148,7 +155,7 @@ export class Day003DataBinding {
     this.addLog(
       'twoway',
       '(ngModelChange)',
-      `Tách rời Two-Way: Role được cập nhật thành: "${newRole}"`
+      `Tách rời Two-Way: Role được cập nhật thành: "${newRole}"`,
     );
   }
 

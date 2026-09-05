@@ -23,6 +23,10 @@ export class App {
     );
   });
 
+  hasBadge(dayNum: number): boolean {
+    return dayNum === 2 || dayNum === 3 || (dayNum >= 15 && dayNum <= 26);
+  }
+
   onSearch(event: Event) {
     const val = (event.target as HTMLInputElement).value;
     this.search.set(val);

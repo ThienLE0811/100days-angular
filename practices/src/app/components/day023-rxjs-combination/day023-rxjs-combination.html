@@ -1,4 +1,602 @@
-<div class="day-container">
-  <h2>Day023-rxjs-combination</h2>
-  <p>day023-rxjs-combination works!</p>
+<div class="day023-page">
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 23</span>
+        <span class="badge badge-syntax">forkJoin()</span>
+        <span class="badge badge-syntax">combineLatest()</span>
+        <span class="badge badge-syntax">zip()</span>
+        <span class="badge badge-syntax">concat()</span>
+        <span class="badge badge-syntax">merge()</span>
+        <span class="badge badge-syntax">race()</span>
+        <span class="badge badge-syntax">withLatestFrom()</span>
+        <span class="badge badge-syntax">startWith() / endWith()</span>
+        <span class="badge badge-syntax">pairwise()</span>
+      </div>
+      <h1 class="page-title">RxJS Combination Operators</h1>
+      <p class="page-subtitle">
+        Khám phá các <strong>Combination Operators</strong> - công cụ cực kỳ thiết yếu trong ứng dụng Angular
+        cho phép phối hợp, hợp nhất, xếp hàng hoặc cho cạnh tranh nhiều luồng <code>Observable</code> bất đồng bộ
+        thành một dòng dữ liệu duy nhất theo logic nghiệp vụ.
+      </p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="header-quick-stats">
+      <div class="stat-pill">
+        <span class="stat-name">Tỷ giá USD/VND</span>
+        <strong class="stat-num text-cyan">{{ liveExchangeRate.toLocaleString('vi-VN') }}</strong>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-name">Logs</span>
+        <strong class="stat-num text-violet">{{ logs.length }}</strong>
+      </div>
+      <button class="btn-action-ghost" (click)="clearLogs()" title="Xóa logs">
+        <span>Xóa Logs</span> ⌫
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'forkjoin-combine'"
+      (click)="activeTab = 'forkjoin-combine'"
+    >
+      <span class="tab-icon">⚖️</span>
+      <span class="tab-text">1. forkJoin vs combineLatest</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'zip-concat-merge'"
+      (click)="activeTab = 'zip-concat-merge'"
+    >
+      <span class="tab-icon">🔀</span>
+      <span class="tab-text">2. zip, concat & merge</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'race'"
+      (click)="activeTab = 'race'"
+    >
+      <span class="tab-icon">🏎️</span>
+      <span class="tab-text">3. race()</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'pipeable'"
+      (click)="activeTab = 'pipeable'"
+    >
+      <span class="tab-icon">🧩</span>
+      <span class="tab-text">4. Pipeable Operators</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'cheatsheet'"
+      (click)="activeTab = 'cheatsheet'"
+    >
+      <span class="tab-icon">🧭</span>
+      <span class="tab-text">5. Decision Matrix & Specs</span>
+    </button>
+  </nav>
+
+  <!-- Dashboard Layout -->
+  <div class="dashboard-grid">
+    <!-- Main Content Area -->
+    <div class="dashboard-column main-column">
+
+      <!-- ================================================================= -->
+      <!-- TAB 1: forkJoin vs combineLatest -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'forkjoin-combine'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">So Sánh Kinh Điển</span>
+              <h2 class="card-title">forkJoin() vs combineLatest()</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-info">
+              <span class="alert-icon">💡</span>
+              <div class="alert-content">
+                <strong>Sự khác biệt căn bản:</strong>
+                <ul>
+                  <li><code>forkJoin()</code>: Giống như <code>Promise.all()</code>. Chờ <strong>TẤT CẢ con hoàn tất (COMPLETE)</strong> rồi mới emit một lần duy nhất và complete (dùng cho parallel HTTP requests).</li>
+                  <li><code>combineLatest()</code>: Sống lâu dài (long-lived). Khi <strong>mỗi con emit ít nhất 1 lần</strong>, nó emit mảng giá trị mới nhất và sẽ <strong>tiếp tục emit mỗi khi bất kỳ con nào thay đổi</strong> (dùng cho ViewModel state).</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="comparison-grid">
+              <!-- Column A: forkJoin() -->
+              <div class="subcard forkjoin-box">
+                <div class="subcard-header">
+                  <div class="badge-row">
+                    <span class="tech-badge forkjoin-badge">forkJoin()</span>
+                    <span class="type-pill">Wait for All Complete 🛑</span>
+                  </div>
+                  <h3>Demo: Tải 3 Dropdowns Song Song</h3>
+                  <p class="subcard-desc">Gọi Accounts (600ms), Departments (1000ms), Stores (800ms).</p>
+                </div>
+
+                <button
+                  class="btn btn-primary"
+                  (click)="runForkJoinDemo()"
+                  [disabled]="isForkJoinLoading"
+                >
+                  {{ isForkJoinLoading ? '⏳ Đang gọi 3 APIs song song...' : '▶ Kích Hoạt forkJoin()' }}
+                </button>
+
+                <div class="results-box">
+                  <div *ngIf="!forkJoinResults && !isForkJoinLoading" class="empty-hint">
+                    Nhấn nút ở trên để bắt đầu gọi APIs.
+                  </div>
+                  <div *ngIf="isForkJoinLoading" class="loading-state">
+                    <div class="spinner"></div>
+                    <span>Đang đợi cả 3 APIs hoàn tất cùng lúc...</span>
+                  </div>
+                  <div *ngIf="forkJoinResults" class="forkjoin-data-card">
+                    <div class="data-group">
+                      <span class="group-title">👤 Accounts:</span>
+                      <code>{{ forkJoinResults.accounts.join(', ') }}</code>
+                    </div>
+                    <div class="data-group">
+                      <span class="group-title">🏢 Departments:</span>
+                      <code>{{ forkJoinResults.departments.join(', ') }}</code>
+                    </div>
+                    <div class="data-group">
+                      <span class="group-title">🏪 Stores:</span>
+                      <code>{{ forkJoinResults.stores.join(', ') }}</code>
+                    </div>
+                    <span class="complete-tag">✅ Đã nhận đủ & Tự động Complete</span>
+                  </div>
+                </div>
+
+                <div class="code-preview">
+                  <pre>forkJoin(&#123;
+  accounts: this.api.getAccounts(),
+  departments: this.api.getDepartments(),
+  stores: this.api.getStores()
+&#125;).subscribe(observer);</pre>
+                </div>
+              </div>
+
+              <!-- Column B: combineLatest() -->
+              <div class="subcard combine-box">
+                <div class="subcard-header">
+                  <div class="badge-row">
+                    <span class="tech-badge combine-badge">combineLatest()</span>
+                    <span class="type-pill">Reactive State Updates 🔄</span>
+                  </div>
+                  <h3>Demo: Angular Pagination ViewModel (vm$)</h3>
+                  <p class="subcard-desc">Tự động emit tổ hợp mới mỗi khi Page, Size hoặc Search thay đổi.</p>
+                </div>
+
+                <!-- Interactive Filters Controls -->
+                <div class="pagination-controls">
+                  <div class="control-item">
+                    <label>Trang hiện tại:</label>
+                    <div class="page-btn-group">
+                      <button class="btn btn-outline-sm" (click)="onPageChange(-1)" [disabled]="currentPage <= 1">◀</button>
+                      <span class="page-num">Trang {{ currentPage }}</span>
+                      <button class="btn btn-outline-sm" (click)="onPageChange(1)">▶</button>
+                    </div>
+                  </div>
+
+                  <div class="control-item">
+                    <label>Số mục / trang:</label>
+                    <select class="custom-select" [(ngModel)]="currentSize" (ngModelChange)="onSizeChange($event)">
+                      <option [ngValue]="5">5 dòng / trang</option>
+                      <option [ngValue]="10">10 dòng / trang</option>
+                      <option [ngValue]="20">20 dòng / trang</option>
+                    </select>
+                  </div>
+
+                  <div class="control-item">
+                    <label>Tìm kiếm từ khóa:</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="searchTerm"
+                      (input)="onSearchChange()"
+                      class="custom-input-sm"
+                      placeholder="Tìm kiếm..."
+                    />
+                  </div>
+                </div>
+
+                <!-- Live ViewModel Display -->
+                <div class="vm-display-card" *ngIf="combineLatestVm">
+                  <div class="vm-row">
+                    <span>Trạng thái Range:</span>
+                    <strong>{{ combineLatestVm.displayRange }}</strong>
+                  </div>
+                  <div class="vm-row">
+                    <span>Tìm kiếm:</span>
+                    <code>"{{ combineLatestVm.search }}"</code>
+                  </div>
+                  <div class="vm-badge">Stream vm$ phát ngay khi có bất kỳ input nào thay đổi</div>
+                </div>
+
+                <div class="code-preview">
+                  <pre>this.vm$ = combineLatest([
+  this.page$, this.size$, this.search$
+]).pipe(map(([page, size, search]) =&gt; (&#123; ... &#125;)));</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 2: zip, concat & merge -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'zip-concat-merge'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge accent">Ghép Cặp & Thứ Tự Chạy</span>
+              <h2 class="card-title">zip(), concat() & merge()</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <!-- 1. zip() Demo -->
+            <div class="subcard">
+              <div class="subcard-header">
+                <div class="badge-row">
+                  <span class="tech-badge zip-badge">zip()</span>
+                  <span class="type-pill">Ghép Theo Thứ Tự Index (1-1, 2-2)</span>
+                </div>
+                <h3>1. zip(): Ghép 3 Streams có cùng số lượng phần tử</h3>
+                <p class="subcard-desc">age$ [29, 28, 30] + name$ ['Chau', 'Trung', 'Tiep'] + isAdmin$ [true, false, true]</p>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn btn-primary" (click)="runZipDemo()">
+                  ▶ Kích hoạt zip(age$, name$, isAdmin$)
+                </button>
+              </div>
+
+              <div class="zip-table-wrap" *ngIf="zipResults.length > 0">
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>Bộ #</th>
+                      <th>Tên (name$)</th>
+                      <th>Tuổi (age$)</th>
+                      <th>Quyền Quản Trị (isAdmin$)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of zipResults; let i = index">
+                      <td><strong>#{{ i + 1 }}</strong></td>
+                      <td>{{ item.name }}</td>
+                      <td>{{ item.age }} tuổi</td>
+                      <td>
+                        <span class="status-pill" [class.status-good]="item.isAdmin">
+                          {{ item.isAdmin ? 'Admin' : 'User' }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 2. concat() vs merge() Timeline Demo -->
+            <div class="subcard">
+              <div class="subcard-header">
+                <div class="badge-row">
+                  <span class="tech-badge concat-badge">concat() vs merge()</span>
+                </div>
+                <h3>2. Đối Chiếu: Tuần Tự (concat) vs Đồng Thời (merge)</h3>
+                <p class="subcard-desc">
+                  Stream A (500ms x 3 phần tử) và Stream B (300ms x 3 phần tử).
+                </p>
+              </div>
+
+              <div class="btn-cluster">
+                <button
+                  class="btn"
+                  [ngClass]="concatMergeMode === 'concat' ? 'btn-primary' : 'btn-outline'"
+                  (click)="runConcatOrMergeDemo('concat')"
+                  [disabled]="isStreamRunning"
+                >
+                  ▶ Chạy concat() [Tuần tự: Hết A rồi mới đến B]
+                </button>
+                <button
+                  class="btn"
+                  [ngClass]="concatMergeMode === 'merge' ? 'btn-accent' : 'btn-outline'"
+                  (click)="runConcatOrMergeDemo('merge')"
+                  [disabled]="isStreamRunning"
+                >
+                  ▶ Chạy merge() [Song song: B nhanh hơn nên xen kẽ vào A]
+                </button>
+              </div>
+
+              <!-- Stream Execution Visualizer -->
+              <div class="stream-visualizer">
+                <div class="vis-header">
+                  <span>Dòng thời gian phát của: <code>{{ concatMergeMode }}()</code></span>
+                  <span class="count-tag">{{ streamExecutionItems.length }} items</span>
+                </div>
+                <div class="vis-body">
+                  <div *ngIf="streamExecutionItems.length === 0" class="empty-state">
+                    Bấm một trong hai nút ở trên để quan sát thứ tự xuất hiện của các phần tử.
+                  </div>
+                  <div class="marble-row" *ngIf="streamExecutionItems.length > 0">
+                    <div
+                      *ngFor="let item of streamExecutionItems"
+                      class="marble-item"
+                      [class.marble-stream-b]="item.streamName.includes('Stream B')"
+                    >
+                      <span class="marble-index">#{{ item.id }}</span>
+                      <div class="marble-circle">{{ item.value }}</div>
+                      <span class="marble-label">{{ item.time }}</span>
+                    </div>
+                    <div class="marble-item" *ngIf="!isStreamRunning">
+                      <span class="marble-index">end</span>
+                      <div class="marble-circle complete-circle">|</div>
+                      <span class="marble-label">complete</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 3: race() -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'race'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge warning">Cuộc Đua Nhanh Nhất</span>
+              <h2 class="card-title">race() - Kẻ Nhanh Nhất Sẽ Chiếm Toàn Bộ</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-warning">
+              <span class="alert-icon">🏁</span>
+              <div class="alert-content">
+                <strong>Quy tắc của race():</strong>
+                <code>race(obs1, obs2, obs3)</code> lắng nghe đồng thời các ứng viên. 
+                Observable nào <strong>phát giá trị đầu tiên (hoặc error đầu tiên)</strong> thì toàn bộ kết quả của Observable đó sẽ được sử dụng,
+                đồng thời tất cả các ứng viên khác sẽ <strong>bị hủy đăng ký (unsubscribe) ngay lập tức</strong>!
+              </div>
+            </div>
+
+            <!-- Real-world Alert Banner Use Case -->
+            <div class="subcard">
+              <div class="subcard-header">
+                <h3>Tình huống thực tế: Tự động tắt Banner Thông Báo</h3>
+                <p class="subcard-desc">
+                  Banner sẽ tự tắt khi 1 trong 3 điều kiện sau xảy ra ĐẦU TIÊN:
+                  (1) Hết giờ 5 giây, (2) User bấm nút Đóng, (3) User chuyển trang.
+                </p>
+              </div>
+
+              <div class="actions-row">
+                <button
+                  class="btn btn-primary"
+                  (click)="openRaceAlertBanner()"
+                  [disabled]="isBannerVisible"
+                >
+                  🚀 Mở Banner & Bắt Đầu Cuộc Đua (race)
+                </button>
+              </div>
+
+              <!-- Interactive Banner Container -->
+              <div class="race-banner-box" *ngIf="isBannerVisible">
+                <div class="banner-head">
+                  <span class="banner-title">📢 Thông báo hệ thống (Cuộc đua race() đang diễn ra)</span>
+                  <button class="btn-banner-close" (click)="triggerUserCloseBanner()" title="Đóng ngay">
+                    ✕ Đóng thủ công
+                  </button>
+                </div>
+                <p class="banner-body">
+                  Banner này đang được giám sát bởi <code>race()</code>. 
+                  Bạn có thể bấm nút đóng ở góc trên, hoặc nút chuyển trang bên dưới, hoặc chờ 5 giây để timer tự kích hoạt.
+                </p>
+                <div class="banner-actions">
+                  <button class="btn btn-outline-sm" (click)="triggerNavigateAway()">
+                    🚀 Mô phỏng Chuyển Sang Trang Khác (Navigate)
+                  </button>
+                  <span class="countdown-hint">⏱️ Tự động đóng sau 5 giây...</span>
+                </div>
+              </div>
+
+              <!-- Winner Result Display -->
+              <div class="race-winner-card" *ngIf="bannerWinner">
+                <span class="winner-label">🏆 Kết Quả Người Thắng Cuộc:</span>
+                <strong class="winner-text">{{ bannerWinner }}</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 4: Pipeable Operators -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'pipeable'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">Các Pipeable Operators</span>
+              <h2 class="card-title">withLatestFrom, startWith, endWith & pairwise</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <!-- 1. withLatestFrom Demo -->
+            <div class="subcard">
+              <div class="subcard-header">
+                <div class="badge-row">
+                  <span class="tech-badge pipeable-badge">withLatestFrom()</span>
+                  <span class="type-pill">Chỉ Emit Khi Outer Stream Phát</span>
+                </div>
+                <h3>1. withLatestFrom(): Chụp ảnh tỷ giá khi bấm Đặt Hàng</h3>
+                <p class="subcard-desc">
+                  Tỷ giá USD/VND nhảy liên tục ở nền ({{ liveExchangeRate.toLocaleString('vi-VN') }} VND), nhưng CHỈ khi bấm nút Đặt Hàng thì mới kết hợp giá trị.
+                </p>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn btn-success" (click)="submitOrderWithLatestRate()">
+                  🛒 Đặt Hàng $100 USD (Kèm Tỷ Giá Mới Nhất)
+                </button>
+              </div>
+
+              <div class="order-logs-list" *ngIf="orderSubmissionLogs.length > 0">
+                <div *ngFor="let ord of orderSubmissionLogs" class="order-pill">
+                  <span>Đơn #{{ ord.orderId }}:</span>
+                  <strong>$100 USD</strong> x <code>{{ ord.rate.toLocaleString('vi-VN') }} VND</code> =
+                  <strong class="text-green">{{ ord.totalVnd.toLocaleString('vi-VN') }} VND</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. startWith & endWith Demo -->
+            <div class="subcard">
+              <div class="subcard-header">
+                <div class="badge-row">
+                  <span class="tech-badge pipeable-badge">startWith() & endWith()</span>
+                </div>
+                <h3>2. startWith & endWith: Chèn Giá Trị Đầu & Cuối Dòng Chảy</h3>
+              </div>
+
+              <div class="actions-row">
+                <button class="btn btn-primary" (click)="runStartWithEndWithDemo()" [disabled]="productStreamState === 'LOADING'">
+                  ▶ Tải Danh Mục Hàng Hóa
+                </button>
+              </div>
+
+              <div class="products-list-box" *ngIf="productStreamItems.length > 0">
+                <div *ngFor="let p of productStreamItems; let first = first; let last = last" class="product-item"
+                     [class.is-start]="first" [class.is-end]="last">
+                  <span>{{ p }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. pairwise Demo -->
+            <div class="subcard">
+              <div class="subcard-header">
+                <div class="badge-row">
+                  <span class="tech-badge pipeable-badge">pairwise()</span>
+                  <span class="type-pill">So Sánh Cặp [Trước, Sau]</span>
+                </div>
+                <h3>3. pairwise(): Theo dõi biến động giá cổ phiếu</h3>
+                <p class="subcard-desc">Giá hiện tại: <strong>${{ stockPrice }}</strong>. Bấm nút để thay đổi giá.</p>
+              </div>
+
+              <div class="btn-cluster">
+                <button class="btn btn-success" (click)="updateStockPrice(15)">📈 Tăng giá (+$15)</button>
+                <button class="btn btn-danger" (click)="updateStockPrice(-10)">📉 Giảm giá (-$10)</button>
+                <button class="btn btn-outline" (click)="updateStockPrice(5)">📈 Tăng nhẹ (+$5)</button>
+              </div>
+
+              <div class="pairwise-feed" *ngIf="pairwiseDeltas.length > 0">
+                <div *ngFor="let pair of pairwiseDeltas" class="pair-card" [ngClass]="pair.trend.toLowerCase()">
+                  <span>Cặp: ${{ pair.prev }} ➡️ ${{ pair.curr }}</span>
+                  <strong>Biến động: {{ pair.diff > 0 ? '+' : '' }}{{ pair.diff }} ({{ pair.trend }})</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 5: DECISION MATRIX & CHEATSHEET -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'cheatsheet'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">Bảng Quyết Định & Tra Cứu</span>
+              <h2 class="card-title">Decision Matrix: Khi Nào Dùng Operator Nào?</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="specs-table">
+                <thead>
+                  <tr>
+                    <th>Operator</th>
+                    <th>Nhóm</th>
+                    <th>Khi Nào Nên Dùng?</th>
+                    <th>Thời Điểm Emit & Tự Complete</th>
+                    <th>Ứng Dụng Trong Angular</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of decisionSpecs">
+                    <td><strong class="op-name">{{ item.operator }}</strong></td>
+                    <td><span class="op-cat">{{ item.category }}</span></td>
+                    <td><p class="op-when">{{ item.whenToUse }}</p></td>
+                    <td>
+                      <small class="op-emit"><strong>Emit:</strong> {{ item.emitsWhen }}</small>
+                      <small class="op-comp"><strong>Complete:</strong> {{ item.autoComplete }}</small>
+                    </td>
+                    <td><small class="op-angular">{{ item.angularUseCase }}</small></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- Right Sidebar: Live Activity Log Console -->
+    <aside class="dashboard-column sidebar-column">
+      <div class="card logs-card">
+        <div class="card-header">
+          <div class="log-title-wrap">
+            <span class="card-badge logs-badge">Stream Terminal</span>
+            <h3 class="logs-heading">Nhật Ký Stream Trực Tiếp</h3>
+          </div>
+          <button class="btn-clear-ghost" (click)="clearLogs()" title="Xóa logs">
+            Xóa ⌫
+          </button>
+        </div>
+
+        <div class="logs-body">
+          <div *ngIf="logs.length === 0" class="no-logs">
+            Chưa có sự kiện nào. Hãy tương tác với các nút trên giao diện!
+          </div>
+
+          <div class="log-stream" *ngIf="logs.length > 0">
+            <div
+              *ngFor="let log of logs"
+              class="log-entry"
+              [ngClass]="'log-type-' + log.type.toLowerCase()"
+            >
+              <div class="log-meta">
+                <span class="log-tag" [ngClass]="'badge-' + log.type.toLowerCase()">
+                  {{ log.type }}
+                </span>
+                <span class="log-operator">{{ log.operator }}</span>
+                <span class="log-time">{{ log.time }}</span>
+              </div>
+              <div class="log-msg">{{ log.message }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
 </div>

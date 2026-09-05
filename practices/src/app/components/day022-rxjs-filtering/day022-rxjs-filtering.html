@@ -1,4 +1,588 @@
-<div class="day-container">
-  <h2>Day022-rxjs-filtering</h2>
-  <p>day022-rxjs-filtering works!</p>
+<div class="day022-page">
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 22</span>
+        <span class="badge badge-syntax">filter()</span>
+        <span class="badge badge-syntax">first() / last()</span>
+        <span class="badge badge-syntax">find() / single()</span>
+        <span class="badge badge-syntax">take() / skip()</span>
+        <span class="badge badge-syntax">takeUntil()</span>
+        <span class="badge badge-syntax">distinct()</span>
+        <span class="badge badge-syntax">distinctUntilChanged()</span>
+        <span class="badge badge-syntax">debounceTime()</span>
+        <span class="badge badge-syntax">throttleTime()</span>
+      </div>
+      <h1 class="page-title">RxJS Filtering Operators</h1>
+      <p class="page-subtitle">
+        Tìm hiểu các <strong>Filtering Operators</strong> - nhóm operators dùng để sàng lọc, hạn chế số lượng,
+        loại bỏ dữ liệu trùng lặp hoặc điều tiết tần suất (rate-limiting) các giá trị được phát ra từ <code>Observable</code>
+        trước khi đến điểm đăng ký cuối cùng.
+      </p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="header-quick-stats">
+      <div class="stat-pill">
+        <span class="stat-name">Raw Clicks</span>
+        <strong class="stat-num text-amber">{{ rapidClickRawCount }}</strong>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-name">Throttled Pass</span>
+        <strong class="stat-num text-cyan">{{ throttleEmittedCount }}</strong>
+      </div>
+      <button class="btn-action-ghost" (click)="clearLogs()" title="Xóa logs">
+        <span>Xóa Logs</span> ⌫
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'basic'"
+      (click)="activeTab = 'basic'"
+    >
+      <span class="tab-icon">🎯</span>
+      <span class="tab-text">1. filter, first, last, find, single</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'take-skip'"
+      (click)="activeTab = 'take-skip'"
+    >
+      <span class="tab-icon">✂️</span>
+      <span class="tab-text">2. take & skip Variations</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'distinct'"
+      (click)="activeTab = 'distinct'"
+    >
+      <span class="tab-icon">💎</span>
+      <span class="tab-text">3. distinct & changed</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'rate-limit'"
+      (click)="activeTab = 'rate-limit'"
+    >
+      <span class="tab-icon">⏱️</span>
+      <span class="tab-text">4. debounce, throttle, audit, sample</span>
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'cheatsheet'"
+      (click)="activeTab = 'cheatsheet'"
+    >
+      <span class="tab-icon">📚</span>
+      <span class="tab-text">5. Cheat Sheet & Specs</span>
+    </button>
+  </nav>
+
+  <!-- Dashboard Layout -->
+  <div class="dashboard-grid">
+    <!-- Main Content Area -->
+    <div class="dashboard-column main-column">
+
+      <!-- ================================================================= -->
+      <!-- TAB 1: filter, first, last, find, single -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'basic'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">Điều Kiện & Điểm Mút</span>
+              <h2 class="card-title">filter(), first(), last(), find() & single()</h2>
+            </div>
+            <span class="source-hint">Mảng nguồn: [1, 2, 3, 4, 5, 6]</span>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-info">
+              <span class="alert-icon">💡</span>
+              <div class="alert-content">
+                <strong>Điểm cần lưu ý từ tài liệu:</strong>
+                <ul>
+                  <li><code>filter(predicate)</code>: Chỉ cho qua các giá trị thỏa mãn điều kiện (truthy).</li>
+                  <li><code>first()</code>: Lấy giá trị đầu tiên thỏa mãn. Ném <code>EmptyError</code> nếu stream rỗng (trừ khi có <code>defaultValue</code>).</li>
+                  <li><code>last()</code>: Lấy giá trị cuối cùng trước khi complete.</li>
+                  <li><code>find()</code>: Giống <code>first()</code> nhưng <strong>không bao giờ ném lỗi</strong> (trả về undefined nếu không thấy).</li>
+                  <li><code>single()</code>: Nghiêm ngặt nhất - <strong>ném Error</strong> nếu có <strong>nhiều hơn 1</strong> giá trị thỏa mãn!</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Action Buttons Grid -->
+            <div class="operators-action-grid">
+              <button class="btn btn-outline" (click)="runFilterDemo('filter-even')">
+                ▶ filter(x =&gt; x % 2 === 0) [Số chẵn]
+              </button>
+              <button class="btn btn-outline" (click)="runFilterDemo('first')">
+                ▶ first() [Phần tử đầu tiên: 1]
+              </button>
+              <button class="btn btn-outline" (click)="runFilterDemo('first-pred')">
+                ▶ first(x =&gt; x &gt; 3) [Phần tử đầu &gt; 3: 4]
+              </button>
+              <button class="btn btn-outline" (click)="runFilterDemo('first-default')">
+                ▶ first(x &gt; 10, 'default') [Có fallback]
+              </button>
+              <button class="btn btn-outline" (click)="runFilterDemo('last')">
+                ▶ last() [Phần tử cuối: 6]
+              </button>
+              <button class="btn btn-outline" (click)="runFilterDemo('find')">
+                ▶ find(x =&gt; x % 2 === 0) [Tìm số chẵn: 2]
+              </button>
+              <button class="btn btn-success" (click)="runFilterDemo('single-success')">
+                ▶ single(x =&gt; x === 2) [Duy nhất 1 số: OK]
+              </button>
+              <button class="btn btn-danger" (click)="runFilterDemo('single-error')">
+                ⚡ single(x =&gt; x &gt; 1) [Nhiều hơn 1: BÁO LỖI]
+              </button>
+            </div>
+
+            <!-- Visual Output Panel -->
+            <div class="stream-visualizer">
+              <div class="vis-header">
+                <span>Kết quả lọc từ: <code>{{ basicOperatorName || 'Chưa chạy' }}</code></span>
+                <span class="count-tag">{{ basicFilterResults.length }} items</span>
+              </div>
+              <div class="vis-body">
+                <div *ngIf="basicFilterResults.length === 0 && !basicErrorMsg" class="empty-state">
+                  Nhấn vào các nút bên trên để xem từng operator lọc và hoàn tất stream!
+                </div>
+
+                <!-- Error Notice -->
+                <div *ngIf="basicErrorMsg" class="error-inline-banner">
+                  <span class="err-icon">💥</span>
+                  <div class="err-content">
+                    <strong>Bắt được lỗi Runtime từ single():</strong>
+                    <code>{{ basicErrorMsg }}</code>
+                    <small>Vì có nhiều hơn 1 giá trị &gt; 1 trong mảng [1, 2, 3, 4, 5, 6] nên single() lập tức fail!</small>
+                  </div>
+                </div>
+
+                <!-- Marbles -->
+                <div class="marble-row" *ngIf="basicFilterResults.length > 0">
+                  <div *ngFor="let item of basicFilterResults" class="marble-item">
+                    <span class="marble-index">#{{ item.id }}</span>
+                    <div class="marble-circle">{{ item.value }}</div>
+                    <span class="marble-label">emitted</span>
+                  </div>
+                  <div class="marble-item complete-marble">
+                    <span class="marble-index">end</span>
+                    <div class="marble-circle complete-circle">|</div>
+                    <span class="marble-label">complete</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 2: take & skip variations -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'take-skip'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge accent">Cắt / Bỏ Qua Theo Số Lượng & Sự Kiện</span>
+              <h2 class="card-title">take() & skip() Variations</h2>
+            </div>
+            <span class="source-hint">Nguồn mẫu: [1, 2, 3, 4, 5]</span>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-warning">
+              <span class="alert-icon">⭐</span>
+              <div class="alert-content">
+                <strong>take(1) vs first() trong Angular:</strong>
+                <code>take(1)</code> thường được ưa chuộng hơn <code>first()</code> trong các <strong>Route Guards</strong> và lấy snapshot dữ liệu
+                vì <code>take(1)</code> <strong>không bao giờ ném EmptyError</strong> nếu stream tự complete rỗng!
+              </div>
+            </div>
+
+            <!-- Buttons Grid -->
+            <div class="operators-action-grid">
+              <button class="btn btn-primary" (click)="runTakeSkipDemo('take-2')">
+                ▶ take(2) [Lấy 2 số đầu: 1, 2]
+              </button>
+              <button class="btn btn-primary" (click)="runTakeSkipDemo('take-1')">
+                ▶ take(1) [Lấy đúng 1 số đầu: 1]
+              </button>
+              <button class="btn btn-primary" (click)="runTakeSkipDemo('take-last-2')">
+                ▶ takeLast(2) [Lấy 2 số cuối khi complete: 4, 5]
+              </button>
+              <button class="btn btn-outline" (click)="runTakeSkipDemo('skip-2')">
+                ▶ skip(2) [Bỏ qua 2 số đầu, lấy: 3, 4, 5]
+              </button>
+              <button class="btn btn-outline" (click)="runTakeSkipDemo('take-while')">
+                ▶ takeWhile(x &lt; 4) [Lấy đến khi &gt;= 4 thì dừng: 1, 2, 3]
+              </button>
+              <button class="btn btn-outline" (click)="runTakeSkipDemo('skip-while')">
+                ▶ skipWhile(x &lt; 3) [Bỏ qua khi &lt; 3, lấy: 3, 4, 5]
+              </button>
+            </div>
+
+            <!-- Output Visualizer -->
+            <div class="stream-visualizer">
+              <div class="vis-header">
+                <span>Kết quả từ: <code>{{ takeSkipOperatorName || 'Chưa chạy' }}</code></span>
+                <span class="count-tag">{{ takeSkipResults.length }} items</span>
+              </div>
+              <div class="vis-body">
+                <div *ngIf="takeSkipResults.length === 0" class="empty-state">
+                  Nhấn vào một trong các nút take/skip để xem các phần tử được lọc.
+                </div>
+                <div class="marble-row" *ngIf="takeSkipResults.length > 0">
+                  <div *ngFor="let item of takeSkipResults" class="marble-item">
+                    <span class="marble-index">#{{ item.id }}</span>
+                    <div class="marble-circle">{{ item.value }}</div>
+                    <span class="marble-label">emitted</span>
+                  </div>
+                  <div class="marble-item complete-marble">
+                    <span class="marble-index">end</span>
+                    <div class="marble-circle complete-circle">|</div>
+                    <span class="marble-label">complete</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Special Interactive Demo: takeUntil (ngOnDestroy pattern) -->
+            <div class="subcard takeuntil-subcard">
+              <div class="subcard-header">
+                <div class="badge-row">
+                  <span class="tech-badge takeuntil-badge">takeUntil(notifier$)</span>
+                  <span class="type-pill">Pattern Unsubscribe Angular ⭐</span>
+                </div>
+                <h3>Mô phỏng cơ chế tự hủy subscription với takeUntil()</h3>
+                <p class="subcard-desc">
+                  Trong Angular, ta dùng <code>takeUntil(this.destroy$)</code> để tự động hủy mọi subscriptions khi component unmount.
+                </p>
+              </div>
+
+              <div class="takeuntil-sandbox">
+                <div class="btn-cluster">
+                  <button
+                    class="btn"
+                    [ngClass]="isTakeUntilActive ? 'btn-danger' : 'btn-primary'"
+                    (click)="isTakeUntilActive ? stopTakeUntilDemo() : startTakeUntilDemo()"
+                  >
+                    {{ isTakeUntilActive ? '⏹ Dừng Thủ Công' : '▶ Bắt Đầu interval(600ms)' }}
+                  </button>
+                  <button
+                    class="btn btn-accent"
+                    (click)="triggerTakeUntilNotifier()"
+                    [disabled]="!isTakeUntilActive"
+                  >
+                    ⚡ Phát Tín Hiệu Notifier (destroy$.next())
+                  </button>
+                </div>
+
+                <div class="takeuntil-counter-box">
+                  <span class="counter-label">Số tick hiện tại:</span>
+                  <strong class="counter-num">{{ isTakeUntilActive ? takeUntilCounter : '--' }}</strong>
+                  <span class="counter-status" [class.alive]="isTakeUntilActive">
+                    {{ isTakeUntilActive ? 'Đang chạy (lắng nghe cho tới khi notifier emit)' : 'Đã dừng / hoàn tất' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="code-preview">
+                <pre>// Pattern chuẩn trong Angular component:
+interval(1000).pipe(takeUntil(this.destroy$)).subscribe(...);
+
+ngOnDestroy() &#123;
+  this.destroy$.next();
+  this.destroy$.complete();
+&#125;</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 3: distinct, distinctUntilChanged, distinctUntilKeyChanged -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'distinct'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge warning">Lọc Dữ Liệu Trùng Lặp</span>
+              <h2 class="card-title">distinct() vs distinctUntilChanged()</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-info">
+              <span class="alert-icon">💡</span>
+              <div class="alert-content">
+                <strong>So sánh cơ chế so trùng:</strong>
+                <ul>
+                  <li><code>distinct()</code>: So sánh với <strong>TOÀN BỘ LỊCH SỬ</strong> của stream. Một giá trị đã xuất hiện một lần thì sẽ không bao giờ xuất hiện lần thứ hai.</li>
+                  <li><code>distinctUntilChanged()</code>: Chỉ so sánh với <strong>GIÁ TRỊ LIỀN TRƯỚC ĐÓ</strong>. Nếu một giá trị bị lặp lại sau khi đã có giá trị khác chen vào giữa, nó vẫn được cho qua!</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Numbers Comparison -->
+            <div class="subcard">
+              <div class="subcard-header">
+                <h3>Thử nghiệm 1: Mảng số lặp [1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 4]</h3>
+              </div>
+              <div class="btn-cluster">
+                <button class="btn btn-primary" (click)="runDistinctNumbers('distinct-all')">
+                  ▶ distinct() [Loại sạch trùng lặp lịch sử: 1, 2, 3, 4]
+                </button>
+                <button class="btn btn-accent" (click)="runDistinctNumbers('distinct-until-changed')">
+                  ▶ distinctUntilChanged() [Chỉ chặn trùng liền kề: 1, 2, 1, 2, 3, 4]
+                </button>
+              </div>
+            </div>
+
+            <!-- Objects Comparison -->
+            <div class="subcard">
+              <div class="subcard-header">
+                <h3>Thử nghiệm 2: Mảng Object [Foo, Foo, Bar, Foo]</h3>
+                <p class="subcard-desc">So sánh theo thuộc tính <code>name</code> của đối tượng.</p>
+              </div>
+              <div class="btn-cluster">
+                <button class="btn btn-primary" (click)="runDistinctObjects('distinct-key')">
+                  ▶ distinct(p =&gt; p.name) [Chỉ ra Foo, Bar]
+                </button>
+                <button class="btn btn-accent" (click)="runDistinctObjects('distinct-until-key-changed')">
+                  ▶ distinctUntilKeyChanged('name') [Ra Foo, Bar, Foo]
+                </button>
+              </div>
+            </div>
+
+            <!-- Distinct Visualizer -->
+            <div class="stream-visualizer">
+              <div class="vis-header">
+                <span>Kết quả lọc: <code>{{ distinctModeName || 'Chưa chạy' }}</code></span>
+                <span class="count-tag">{{ distinctResults.length }} items</span>
+              </div>
+              <div class="vis-body">
+                <div *ngIf="distinctResults.length === 0" class="empty-state">
+                  Bấm vào một trong các nút bên trên để kiểm tra kết quả.
+                </div>
+                <div class="marble-row" *ngIf="distinctResults.length > 0">
+                  <div *ngFor="let item of distinctResults" class="marble-item">
+                    <span class="marble-index">#{{ item.id }}</span>
+                    <div class="marble-circle">{{ item.value }}</div>
+                    <span class="marble-label">passed</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 4: debounceTime, throttleTime, auditTime, sampleTime -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'rate-limit'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">Bộ Tứ Điều Tiết Thời Gian</span>
+              <h2 class="card-title">debounceTime, throttleTime, auditTime & sampleTime</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="alert-box alert-info">
+              <span class="alert-icon">💡</span>
+              <div class="alert-content">
+                <strong>Sự khác biệt giữa 4 operators điều tiết thời gian:</strong>
+                <ul>
+                  <li><code>debounceTime(ms)</code>: Đợi người dùng ngưng gõ phím / ngừng phát tín hiệu đủ <code>ms</code> thì mới emit giá trị cuối (dùng cho Search Input).</li>
+                  <li><code>throttleTime(ms)</code>: Phát ngay giá trị đầu tiên, sau đó khóa (cooldown) trong <code>ms</code> không nhận thêm (chống spam click / mousemove).</li>
+                  <li><code>auditTime(ms)</code>: Sau khi có sự kiện đầu tiên, chờ hết <code>ms</code> rồi emit giá trị <strong>cuối cùng</strong> ghi nhận được trong khoảng chờ đó.</li>
+                  <li><code>sampleTime(ms)</code>: Cứ mỗi <code>ms</code> lại thức dậy lấy mẫu giá trị gần nhất một lần (theo chu kỳ máy móc).</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Search Autocomplete with debounceTime -->
+            <div class="subcard debounce-subcard">
+              <div class="subcard-header">
+                <div class="badge-row">
+                  <span class="tech-badge debounce-badge">debounceTime(400ms)</span>
+                  <span class="type-pill">Tìm Kiếm Typeahead ⭐</span>
+                </div>
+                <h3>1. Ứng dụng Typeahead Search với debounceTime(400ms)</h3>
+                <p class="subcard-desc">Gõ nhanh liên tục: stream sẽ KHÔNG emit cho tới khi bạn ngừng gõ 400ms.</p>
+              </div>
+
+              <div class="search-input-wrap">
+                <input
+                  #searchDebounceInput
+                  type="text"
+                  class="custom-input"
+                  placeholder="Gõ thật nhanh vào đây để thử nghiệm debounceTime..."
+                />
+              </div>
+
+              <div class="debounced-feed">
+                <div class="feed-title">Các truy vấn được emit sau khi dừng gõ:</div>
+                <div *ngIf="debouncedEmittedTerms.length === 0" class="empty-feed">
+                  Hãy thử gõ vào ô tìm kiếm ở trên...
+                </div>
+                <div *ngFor="let item of debouncedEmittedTerms" class="feed-item">
+                  <span class="feed-time">{{ item.time }}</span>
+                  <span class="feed-query">"{{ item.text }}"</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rapid Click Testing for throttle, audit, sample -->
+            <div class="subcard rapid-subcard">
+              <div class="subcard-header">
+                <div class="badge-row">
+                  <span class="tech-badge throttle-badge">throttle vs audit vs sample</span>
+                  <button class="btn btn-outline-sm" (click)="resetRateLimitStats()">↺ Reset Stats</button>
+                </div>
+                <h3>2. Thử nghiệm Spam Click liên tục vào nút bên dưới</h3>
+                <p class="subcard-desc">Nhấp chuột thật nhanh 10 - 20 lần để so sánh sự khác biệt của 3 cơ chế.</p>
+              </div>
+
+              <div class="rapid-click-area">
+                <button
+                  #rapidActionBtn
+                  class="btn btn-primary btn-giant"
+                  (click)="onRawRapidClick()"
+                >
+                  ⚡ SPAM CLICK VÀO ĐÂY LIÊN TỤC ⚡
+                </button>
+
+                <!-- Comparison Meters -->
+                <div class="meters-grid">
+                  <div class="meter-box raw">
+                    <span class="meter-label">Raw Clicks Thực Tế</span>
+                    <strong class="meter-num">{{ rapidClickRawCount }}</strong>
+                    <span class="meter-note">Tổng lần click nhận từ DOM</span>
+                  </div>
+
+                  <div class="meter-box throttle">
+                    <span class="meter-label">throttleTime(1000ms)</span>
+                    <strong class="meter-num">{{ throttleEmittedCount }}</strong>
+                    <span class="meter-note">Emit click đầu tiên, khóa 1s</span>
+                  </div>
+
+                  <div class="meter-box audit">
+                    <span class="meter-label">auditTime(1000ms)</span>
+                    <strong class="meter-num">{{ auditEmittedCount }}</strong>
+                    <span class="meter-note">Emit click cuối sau 1s</span>
+                  </div>
+
+                  <div class="meter-box sample">
+                    <span class="meter-label">sampleTime(1500ms)</span>
+                    <strong class="meter-num">{{ sampleEmittedCount }}</strong>
+                    <span class="meter-note">Lấy mẫu định kỳ mỗi 1.5s</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- TAB 5: CHEATSHEET & SPECS -->
+      <!-- ================================================================= -->
+      <div *ngIf="activeTab === 'cheatsheet'" class="tab-pane">
+        <section class="card demo-card">
+          <div class="card-header">
+            <div>
+              <span class="card-badge primary">Bảng Tra Cứu Toàn Diện</span>
+              <h2 class="card-title">Bảng Đặc Tả RxJS Filtering Operators</h2>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="specs-table">
+                <thead>
+                  <tr>
+                    <th>Operator</th>
+                    <th>Cú Pháp Mẫu</th>
+                    <th>Tự Complete?</th>
+                    <th>Mô Tả Chức Năng</th>
+                    <th>Ứng Dụng Thực Chiến Trong Angular</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let op of specsList">
+                    <td>
+                      <strong class="op-name">{{ op.name }}</strong>
+                      <span class="op-cat">{{ op.category }}</span>
+                    </td>
+                    <td><code class="op-code">{{ op.signature }}</code></td>
+                    <td>
+                      <span
+                        class="complete-pill"
+                        [class.auto-yes]="op.autoComplete"
+                        [class.auto-no]="!op.autoComplete"
+                      >
+                        {{ op.autoComplete ? 'CÓ (Complete)' : 'KHÔNG (Tiếp tục)' }}
+                      </span>
+                    </td>
+                    <td><p class="op-summary">{{ op.summary }}</p></td>
+                    <td><small class="op-angular"><strong>Angular:</strong> {{ op.angularUseCase }}</small></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+
+    <!-- Right Sidebar: Live Activity Log Console -->
+    <aside class="dashboard-column sidebar-column">
+      <div class="card logs-card">
+        <div class="card-header">
+          <div class="log-title-wrap">
+            <span class="card-badge logs-badge">Stream Terminal</span>
+            <h3 class="logs-heading">Nhật Ký Stream Trực Tiếp</h3>
+          </div>
+          <button class="btn-clear-ghost" (click)="clearLogs()" title="Xóa logs">
+            Xóa ⌫
+          </button>
+        </div>
+
+        <div class="logs-body">
+          <div *ngIf="logs.length === 0" class="no-logs">
+            Chưa có sự kiện nào. Hãy tương tác với các nút và ô nhập liệu bên trái!
+          </div>
+
+          <div class="log-stream" *ngIf="logs.length > 0">
+            <div
+              *ngFor="let log of logs"
+              class="log-entry"
+              [ngClass]="'log-type-' + log.type.toLowerCase()"
+            >
+              <div class="log-meta">
+                <span class="log-tag" [ngClass]="'badge-' + log.type.toLowerCase()">
+                  {{ log.type }}
+                </span>
+                <span class="log-operator">{{ log.operator }}</span>
+                <span class="log-time">{{ log.time }}</span>
+              </div>
+              <div class="log-msg">{{ log.message }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
 </div>

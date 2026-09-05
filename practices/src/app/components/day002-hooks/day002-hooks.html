@@ -1,0 +1,407 @@
+<div class="day002-page">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 02</span>
+        <span class="badge badge-syntax">ngOnInit</span>
+        <span class="badge badge-syntax">ngOnDestroy</span>
+        <span class="badge badge-syntax">ngOnChanges</span>
+        <span class="badge badge-syntax">ngAfterViewInit</span>
+        <span class="badge badge-syntax">ngDoCheck</span>
+      </div>
+      <h1 class="page-title">Angular Lifecycle Hooks: Từ Cơ Bản Đến Chuyên Sâu</h1>
+      <p class="page-subtitle">
+        Khám phá toàn bộ <strong>8 Lifecycle Hooks</strong> của Angular: tìm hiểu thứ tự thực thi từ lúc khởi tạo (Mount)
+        đến khi hủy bỏ (Unmount), phân loại chi tiết theo mức độ thông dụng từ <strong>rất hay dùng (95%)</strong>
+        đến <strong>rất ít dùng (&lt;5%)</strong>, và thực nghiệm tương tác với Component Con thời gian thực.
+      </p>
+    </div>
+
+    <!-- Quick Stats Banner -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Trạng thái Con:</span>
+        <span class="stat-value" [class.mounted-val]="isChildMounted" [class.unmounted-val]="!isChildMounted">
+          {{ isChildMounted ? '● Mounted' : '○ Unmounted' }}
+        </span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Tổng Sự Kiện:</span>
+        <span class="stat-value total-val">{{ logs.length }} logs</span>
+      </div>
+      <button class="btn-clear-logs" (click)="clearLogs()" title="Xóa lịch sử logs">
+        Xóa Logs ⌫
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout -->
+  <div class="dashboard-grid">
+    <!-- Left Column: Core Demos -->
+    <div class="dashboard-column main-column">
+
+      <!-- SECTION 1: Bảng Điều Khiển Tương Tác & Component Con -->
+      <section class="card demo-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge control-badge">Thực Nghiệm Thực Tế</span>
+            <h2 class="card-title">1. Bảng Điều Khiển &amp; Thử Nghiệm Component Con</h2>
+          </div>
+          <button
+            class="btn"
+            [class.btn-danger-sm]="isChildMounted"
+            [class.btn-success-sm]="!isChildMounted"
+            (click)="toggleChildMount()"
+          >
+            {{ isChildMounted ? '⏹ Gỡ Bỏ Con (ngOnDestroy)' : '▶ Gắn Lại Con (ngOnInit)' }}
+          </button>
+        </div>
+
+        <div class="card-body">
+          <div class="alert-box alert-info">
+            <span class="alert-icon">💡</span>
+            <div class="alert-content">
+              <strong>Mục tiêu thử nghiệm:</strong> Thao tác các nút bên dưới để quan sát từng Hook được kích hoạt.
+              Đặc biệt chú ý sự khác nhau giữa việc <strong>Mutate Object</strong> (chỉ <code>ngDoCheck</code> bắt được)
+              và <strong>Immutable Object</strong> (cả <code>ngOnChanges</code> và <code>ngDoCheck</code> đều chạy)!
+            </div>
+          </div>
+
+          <!-- Action Buttons Bar -->
+          <div class="action-buttons-toolbar">
+            <button
+              class="btn btn-primary-sm"
+              (click)="changePrimitiveInputs()"
+              [disabled]="!isChildMounted"
+              title="Đổi giá trị count & title nguyên thủy"
+            >
+              🔄 1. Đổi Primitive Input (ngOnChanges)
+            </button>
+
+            <button
+              class="btn btn-warning-sm"
+              (click)="mutateObjectInput()"
+              [disabled]="!isChildMounted"
+              title="user.age++ (Cùng tham chiếu Object)"
+            >
+              ⚠️ 2. Mutate Object (Chỉ ngDoCheck bắt)
+            </button>
+
+            <button
+              class="btn btn-purple-sm"
+              (click)="immutableObjectInput()"
+              [disabled]="!isChildMounted"
+              title="{ ...user, age++ } (Tạo tham chiếu mới)"
+            >
+              ✨ 3. Immutable Object (ngOnChanges + ngDoCheck)
+            </button>
+
+            <button
+              class="btn btn-outline-sm"
+              (click)="toggleProjectedContent()"
+              [disabled]="!isChildMounted"
+              title="Bật/tắt nội dung truyền qua ng-content"
+            >
+              📦 4. Bật/Tắt &lt;ng-content&gt;
+            </button>
+
+            <button
+              class="btn btn-outline-sm"
+              (click)="triggerDummyChangeDetection()"
+              [disabled]="!isChildMounted"
+              title="Kích hoạt 1 chu kỳ Change Detection thông thường"
+            >
+              ⚡ 5. Kích Hoạt Change Detection
+            </button>
+          </div>
+
+          <!-- Child Component Stage -->
+          <div class="child-render-stage">
+            @if (isChildMounted) {
+              <app-lifecycle-child
+                [title]="childTitle"
+                [count]="childCount"
+                [user]="childUser"
+                (hookEvent)="onChildHookEvent($event)"
+              >
+                @if (isContentProjected) {
+                  <span #projectedSpan class="projected-tag">
+                    ✨ {{ projectedText }} (Tạo lúc: {{ childCount }})
+                  </span>
+                }
+              </app-lifecycle-child>
+            } @else {
+              <div class="unmounted-placeholder">
+                <span class="unmounted-icon">🛑</span>
+                <h4>Component Con Đã Bị Gỡ Khỏi DOM (Unmounted)</h4>
+                <p>
+                  Hook <code>ngOnDestroy</code> vừa hoàn thành việc dọn dẹp các luồng ngầm và bộ đếm timer.
+                  Nhấn nút <strong>"Gắn Lại Con (ngOnInit)"</strong> ở trên để khởi tạo lại vòng đời mới!
+                </p>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: Sơ Đồ Tuần Tự Vòng Đời (Lifecycle Sequence Flow) -->
+      <section class="card flow-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge sequence-badge">Trật Tự Thực Thi</span>
+            <h2 class="card-title">2. Sơ Đồ Tuần Tự Các Hooks (Lifecycle Execution Flow)</h2>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="sequence-timeline">
+            <!-- Step 1: Constructor -->
+            <div class="timeline-step">
+              <span class="step-num">0</span>
+              <div class="step-card">
+                <span class="step-title">constructor()</span>
+                <small class="step-desc">Khởi tạo class JS, DI injection. <em>(Chưa nhận @Input)</em></small>
+              </div>
+            </div>
+
+            <div class="step-connector">↓</div>
+
+            <!-- Step 2: ngOnChanges -->
+            <div class="timeline-step">
+              <span class="step-num core-num">1</span>
+              <div class="step-card core-card">
+                <div class="step-card-head">
+                  <span class="step-title">ngOnChanges()</span>
+                  <span class="hook-freq-badge core">95% Rất hay dùng</span>
+                </div>
+                <small class="step-desc">Nhận <code>SimpleChanges</code>. Chạy trước <code>ngOnInit</code> và mỗi khi <code>@Input</code> đổi reference.</small>
+              </div>
+            </div>
+
+            <div class="step-connector">↓</div>
+
+            <!-- Step 3: ngOnInit -->
+            <div class="timeline-step">
+              <span class="step-num core-num">2</span>
+              <div class="step-card core-card">
+                <div class="step-card-head">
+                  <span class="step-title">ngOnInit()</span>
+                  <span class="hook-freq-badge core">95% Rất hay dùng</span>
+                </div>
+                <small class="step-desc">Gọi API, khởi tạo dữ liệu chính. Chạy duy nhất <strong>1 lần</strong>.</small>
+              </div>
+            </div>
+
+            <div class="step-connector">↓</div>
+
+            <!-- Step 4: ngDoCheck -->
+            <div class="timeline-step">
+              <span class="step-num docheck-num">3</span>
+              <div class="step-card docheck-card">
+                <div class="step-card-head">
+                  <span class="step-title">ngDoCheck()</span>
+                  <span class="hook-freq-badge docheck">&lt;5% Rất ít dùng</span>
+                </div>
+                <small class="step-desc">Tự định nghĩa kiểm tra thay đổi thủ công. Chạy trong <strong>MỌI</strong> chu kỳ Change Detection.</small>
+              </div>
+            </div>
+
+            <div class="step-connector">↓</div>
+
+            <!-- Step 5: ngAfterContentInit -->
+            <div class="timeline-step">
+              <span class="step-num view-num">4</span>
+              <div class="step-card view-card">
+                <div class="step-card-head">
+                  <span class="step-title">ngAfterContentInit()</span>
+                  <span class="hook-freq-badge view">60% Khá hay dùng</span>
+                </div>
+                <small class="step-desc">Nội dung chiếu ngoài <code>&lt;ng-content&gt;</code> đã nạp xong (1 lần duy nhất).</small>
+              </div>
+            </div>
+
+            <div class="step-connector">↓</div>
+
+            <!-- Step 6: ngAfterContentChecked -->
+            <div class="timeline-step">
+              <span class="step-num recheck-num">5</span>
+              <div class="step-card recheck-card">
+                <div class="step-card-head">
+                  <span class="step-title">ngAfterContentChecked()</span>
+                  <span class="hook-freq-badge recheck">20% Ít dùng</span>
+                </div>
+                <small class="step-desc">Kiểm tra lại nội dung chiếu sau mỗi chu kỳ Change Detection.</small>
+              </div>
+            </div>
+
+            <div class="step-connector">↓</div>
+
+            <!-- Step 7: ngAfterViewInit -->
+            <div class="timeline-step">
+              <span class="step-num view-num">6</span>
+              <div class="step-card view-card">
+                <div class="step-card-head">
+                  <span class="step-title">ngAfterViewInit()</span>
+                  <span class="hook-freq-badge view">60% Khá hay dùng</span>
+                </div>
+                <small class="step-desc">DOM và các <code>@ViewChild</code> đã render hoàn tất. Tích hợp Chart/DOM tại đây (1 lần duy nhất).</small>
+              </div>
+            </div>
+
+            <div class="step-connector">↓</div>
+
+            <!-- Step 8: ngAfterViewChecked -->
+            <div class="timeline-step">
+              <span class="step-num recheck-num">7</span>
+              <div class="step-card recheck-card">
+                <div class="step-card-head">
+                  <span class="step-title">ngAfterViewChecked()</span>
+                  <span class="hook-freq-badge recheck">20% Ít dùng</span>
+                </div>
+                <small class="step-desc">Kiểm tra lại View sau mỗi chu kỳ Change Detection.</small>
+              </div>
+            </div>
+
+            <div class="step-connector">↓ (Khi Component bị hủy)</div>
+
+            <!-- Step 9: ngOnDestroy -->
+            <div class="timeline-step">
+              <span class="step-num destroy-num">8</span>
+              <div class="step-card destroy-card">
+                <div class="step-card-head">
+                  <span class="step-title">ngOnDestroy()</span>
+                  <span class="hook-freq-badge core">95% Rất hay dùng</span>
+                </div>
+                <small class="step-desc">Dọn dẹp tài nguyên (Unsubscribe RxJS, clearInterval) chống Memory Leak trước khi unmount.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: Chi Tiết Phân Cấp Hooks (Từ Hay Dùng Đến Ít Dùng) -->
+      <section class="card tiers-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge hierarchy-badge">Phân Loại Chuyên Môn</span>
+            <h2 class="card-title">3. Bảng Chi Tiết 8 Hooks Xếp Theo Tần Suất Sử Dụng</h2>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="hook-definition-list">
+            @for (hook of hookDefinitions; track hook.name) {
+              <div class="hook-detail-card" [class]="'tier-' + hook.tier.toLowerCase()">
+                <div class="hook-card-header">
+                  <div class="hook-title-wrap">
+                    <span class="hook-name">{{ hook.name }}</span>
+                    <span class="interface-tag">implements {{ hook.interfaceName }}</span>
+                  </div>
+                  <span class="tier-pill" [class]="'pill-' + hook.tier.toLowerCase()">
+                    {{ hook.frequency }}
+                  </span>
+                </div>
+
+                <div class="hook-card-body">
+                  <div class="hook-row">
+                    <span class="row-label">Thời điểm gọi:</span>
+                    <span class="row-content">{{ hook.timing }}</span>
+                  </div>
+                  <div class="hook-row">
+                    <span class="row-label">Ứng dụng thực tế:</span>
+                    <span class="row-content highlight">{{ hook.useCase }}</span>
+                  </div>
+                  <div class="hook-row best-practice-row">
+                    <span class="row-label">Best Practice:</span>
+                    <span class="row-content tip-text">💡 {{ hook.bestPractice }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Sidebar (Realtime Logs & Code Snippets) -->
+    <div class="dashboard-column side-column">
+
+      <!-- Live Activity Logs -->
+      <section class="card logs-card">
+        <div class="card-header">
+          <div class="log-title-wrap">
+            <span class="live-dot"></span>
+            <h3 class="side-card-title">Nhật Ký Hooks Real-time</h3>
+          </div>
+          <span class="log-count">{{ logs.length }} sự kiện</span>
+        </div>
+
+        <div class="card-body logs-body">
+          @if (logs.length === 0) {
+            <div class="no-logs">Chưa có sự kiện nào được ghi nhận</div>
+          } @else {
+            <div class="log-stream">
+              @for (log of logs; track log.id) {
+                <div class="log-entry" [class]="'source-' + log.tier.toLowerCase()">
+                  <div class="log-meta">
+                    <span class="hook-tag" [class]="'tag-' + log.tier.toLowerCase()">{{ log.hookName }}</span>
+                    <span class="log-time">{{ log.time }}</span>
+                  </div>
+                  <div class="log-msg">{{ log.detail }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Code Reference Card -->
+      <section class="card code-ref-card">
+        <div class="card-header">
+          <h3 class="side-card-title">Cú Pháp Chuẩn Triển Khai Hooks</h3>
+        </div>
+        <div class="card-body code-ref-body">
+          <div class="code-snippet">
+            <span class="code-label">1. Core Hooks (OnInit, OnDestroy)</span>
+            <pre><code>export class MyComponent implements OnInit, OnDestroy &#123;
+  private sub?: Subscription;
+
+  ngOnInit(): void &#123;
+    // 1. Gọi API hoặc nạp dữ liệu
+    this.sub = this.api.getData().subscribe();
+  &#125;
+
+  ngOnDestroy(): void &#123;
+    // 2. Dọn dẹp chống memory leak
+    this.sub?.unsubscribe();
+  &#125;
+&#125;</code></pre>
+          </div>
+
+          <div class="code-snippet">
+            <span class="code-label">2. Input Changes (OnChanges)</span>
+            <pre><code>ngOnChanges(changes: SimpleChanges): void &#123;
+  if (changes['userId']) &#123;
+    const cur = changes['userId'].currentValue;
+    this.loadUserDetails(cur);
+  &#125;
+&#125;</code></pre>
+          </div>
+
+          <div class="code-snippet">
+            <span class="code-label">3. DOM View Ready (AfterViewInit)</span>
+            <pre><code>&#64;ViewChild('myCanvas') canvas!: ElementRef;
+
+ngAfterViewInit(): void &#123;
+  // Khởi tạo thư viện đồ họa hoặc focus DOM
+  new Chart(this.canvas.nativeElement, &#123;...&#125;);
+&#125;</code></pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>

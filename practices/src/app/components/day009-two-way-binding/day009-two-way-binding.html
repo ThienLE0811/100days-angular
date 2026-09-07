@@ -1,4 +1,695 @@
-<div class="day-container">
-  <h2>Day009-two-way-binding</h2>
-  <p>day009-two-way-binding works!</p>
+<div class="day009-page">
+  <!-- ================================================================= -->
+  <!-- PAGE HEADER SECTION                                               -->
+  <!-- ================================================================= -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 09</span>
+        <span class="badge badge-syntax">[()] Banana-in-a-box</span>
+        <span class="badge badge-syntax">&#64;Input()</span>
+        <span class="badge badge-syntax">&#64;Output() propertyChange</span>
+        <span class="badge badge-syntax">[(ngModel)]</span>
+        <span class="badge badge-syntax">Signal model()</span>
+        <span class="badge badge-syntax">Custom Two-way</span>
+      </div>
+      <h1 class="page-title">Custom Two-way Binding trong Angular</h1>
+      <p class="page-subtitle">
+        Làm chủ cơ chế đồng bộ dữ liệu hai chiều:
+        khám phá bản chất thực sự của <strong>[(ngModel)]</strong> dưới gầm máy,
+        nắm vững <strong>quy tắc vàng đặt tên hậu tố Change</strong> (<code>&#64;Input() foo</code> &amp; <code>&#64;Output() fooChange</code>),
+        tự chế tạo các component 2 chiều kinh điển (<strong>Toggle Switch</strong>, <strong>Number Stepper</strong>, <strong>Star Rating</strong>),
+        và khám phá bước tiến hóa <strong>model() Signal</strong> trong Angular hiện đại.
+      </p>
+    </div>
+
+    <!-- Quick Status & Action Stat Box -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Trạng thái Demo Thực Hành:</span>
+        <span class="stat-value">6 Kịch bản Thực tế Sẵn Sàng</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Hành động vừa thực hiện:</span>
+        <span class="stat-value action-highlight">{{ lastActionMessage() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================================================================= -->
+  <!-- NAVIGATION TABS                                                   -->
+  <!-- ================================================================= -->
+  <nav class="lab-tabs-nav">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'all'"
+      (click)="currentTab.set('all')"
+    >
+      📚 Toàn bộ Bài Học
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'ngmodel-basics'"
+      (click)="currentTab.set('ngmodel-basics')"
+    >
+      1. Bản Chất ngModel
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'toggle-demo'"
+      (click)="currentTab.set('toggle-demo')"
+    >
+      2. Toggle Switch [(checked)]
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'stepper-demo'"
+      (click)="currentTab.set('stepper-demo')"
+    >
+      3. Number Stepper [(count)]
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'rating-demo'"
+      (click)="currentTab.set('rating-demo')"
+    >
+      4. Star Rating [(rating)]
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'model-signal'"
+      (click)="currentTab.set('model-signal')"
+    >
+      5. So Sánh model() Signal
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'device-settings'"
+      (click)="currentTab.set('device-settings')"
+    >
+      6. Phòng Lab Cấu Hình Thiết Bị
+    </button>
+  </nav>
+
+  <!-- ================================================================= -->
+  <!-- MAIN CONTENT SECTIONS                                             -->
+  <!-- ================================================================= -->
+  <div class="content-sections">
+
+    <!-- =============================================================== -->
+    <!-- SECTION 1: ngModel Deconstructed                               -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'ngmodel-basics') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 1</span>
+            <h2 class="card-title">Bản Chất ngModel: Giải Mã Cú Pháp "Banana-in-a-box" [()]</h2>
+          </div>
+          <span class="info-tag">Ví dụ Tiep Phan từ Tài liệu</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">💡</div>
+            <div class="concept-text">
+              <strong>Bản chất viết tắt của <code>[(ngModel)]="name"</code>:</strong>
+              Cú pháp hình "trái chuối trong hộp" <code>[()]</code> thực chất là sự kết hợp của:
+              <br />
+              1. <code>[ngModel]="name"</code> (Property Binding: Dữ liệu từ component đổ xuống thẻ input).
+              <br />
+              2. <code>(ngModelChange)="name = $event"</code> (Event Binding: Khi người dùng gõ phím, sự kiện phát ra giá trị mới và gán ngược lại cho biến).
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Panel tương tác trực tiếp -->
+            <div class="panel-box">
+              <h3 class="panel-title">🎮 Thử Nghiệm: Đối Chiếu Cú Pháp Viết Tắt vs Phân Rã</h3>
+              <p class="panel-desc">
+                Cả 2 ô nhập liệu bên dưới đều thao tác trực tiếp trên cùng 1 biến <code>userName</code>. Hãy gõ thử ở bất kỳ ô nào:
+              </p>
+
+              <div class="two-way-inputs-list">
+                <!-- Ô 1: Viết tắt [(ngModel)] -->
+                <div class="input-card">
+                  <div class="input-badge short">Cách 1: Cú pháp viết tắt [(ngModel)]</div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="userName"
+                    placeholder="Nhập tên người dùng..."
+                  />
+                  <small class="code-hint"><code>&lt;input [(ngModel)]="userName" /&gt;</code></small>
+                </div>
+
+                <!-- Ô 2: Phân rã rõ ràng [ngModel] và (ngModelChange) -->
+                <div class="input-card">
+                  <div class="input-badge deconstructed">Cách 2: Cú pháp phân rã [ngModel] + (ngModelChange)</div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [ngModel]="userName"
+                    (ngModelChange)="onDeconstructedNameChange($event)"
+                    placeholder="Nhập tên người dùng..."
+                  />
+                  <small class="code-hint">
+                    <code>&lt;input [ngModel]="userName" (ngModelChange)="name = $event" /&gt;</code>
+                  </small>
+                </div>
+              </div>
+
+              <!-- Live sync badge -->
+              <div class="render-output-box">
+                <div class="output-label">Giá Trị Biến userName Thời Gian Thực:</div>
+                <div class="live-user-greeting">
+                  <span class="greeting-icon">👋</span>
+                  <span>Xin chào, <strong class="user-highlight">{{ userName || '(Chưa nhập tên)' }}</strong>!</span>
+                </div>
+                <div class="preset-names-row">
+                  <span class="preset-label">Chọn tên mẫu:</span>
+                  <button type="button" class="btn-text" (click)="userName = 'Tiep Phan'">Tiep Phan (Doc)</button>
+                  <button type="button" class="btn-text" (click)="userName = 'Angular Developer'">Angular Dev</button>
+                  <button type="button" class="btn-text" (click)="userName = 'DeepMind AI Engineer'">AI Engineer</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Luồng Hoạt Động (Data Down, Event Up)</span>
+                <span class="code-lang">HTML</span>
+              </div>
+              <pre><code><span class="c-comment">&lt;!-- 1. Cú pháp viết tắt (Convenient Shortcut) --&gt;</span>
+&lt;<span class="c-tag">input</span> <span class="c-attr">type</span>=<span class="c-str">"text"</span> <span class="c-highlight">[(ngModel)]</span>=<span class="c-str">"name"</span> /&gt;
+
+<span class="c-comment">&lt;!-- 2. Cú pháp phân rã tương đương 100%: --&gt;</span>
+&lt;<span class="c-tag">input</span>
+  <span class="c-attr">type</span>=<span class="c-str">"text"</span>
+  <span class="c-attr">[ngModel]</span>=<span class="c-str">"name"</span>
+  <span class="c-attr">(ngModelChange)</span>=<span class="c-str">"name = $event"</span>
+/&gt;
+
+<span class="c-comment">&lt;!-- QUY TẮC BẤT BIẾN:
+     Property Binding: [prop]      -> Truyền dữ liệu vào con
+     Event Binding:    (propChange) -> Bắn sự kiện ra ngoài cha
+     Two-way:          [(prop)]     -> Đồng bộ hai chiều! --&gt;</span></code></pre>
+
+              <div class="callout callout-info">
+                <strong>Chìa khóa kiến thức:</strong> Muốn tự tạo Custom Two-way binding cho bất kỳ component nào,
+                bạn chỉ cần tạo cặp <code>&#64;Input() value</code> và <code>&#64;Output() valueChange</code>!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 2: Toggle Component Two-way [(checked)]                -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'toggle-demo') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 2</span>
+            <h2 class="card-title">Custom Two-way Binding: Toggle Switch [(checked)]</h2>
+          </div>
+          <span class="info-tag">Component Toggle Kinh Điển Từ Tài Liệu</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🔴 🟢</div>
+            <div class="concept-text">
+              <strong>Mô tả Toggle Component từ tài liệu Day 9:</strong>
+              Nút tròn chuyển động có animation với nền đỏ (<code>#fe4551</code>) khi tắt và xanh (<code>#10b981</code>) khi bật.
+              Component con khai báo <code>&#64;Input() checked</code> và <code>&#64;Output() checkedChange</code>.
+              Component cha sử dụng cực kỳ ngắn gọn qua cú pháp <code>[(checked)]="toggleState"</code>!
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Thử nghiệm Toggle 2 chiều -->
+            <div class="panel-box">
+              <h3 class="panel-title">🎮 Thử Nghiệm: Bật / Tắt Từ Con &amp; Từ Cha</h3>
+              <p class="panel-desc">
+                Click vào nút tròn bên dưới (con) HOẶC click nút điều khiển từ cha để thấy sự đồng bộ tức thời:
+              </p>
+
+              <div class="toggle-demo-center">
+                <!-- Custom Two-way Toggle Component -->
+                <app-toggle-day9 [(checked)]="toggleState"></app-toggle-day9>
+
+                <div class="toggle-status-badge" [class.on]="toggleState">
+                  Trạng thái hiện tại: <strong>{{ toggleState ? 'BẬT (TRUE)' : 'TẮT (FALSE)' }}</strong>
+                </div>
+              </div>
+
+              <!-- Điều khiển từ Component Cha -->
+              <div class="render-output-box">
+                <div class="output-label">Điều Khiển Từ Phía Component Cha:</div>
+                <div class="parent-controls-row">
+                  <button type="button" class="btn btn-primary" (click)="flipToggleFromParent()">
+                    🔄 Đảo Trạng Thái Từ Cha
+                  </button>
+                  <button type="button" class="btn btn-outline" (click)="toggleState = true">
+                    Bật (True)
+                  </button>
+                  <button type="button" class="btn btn-outline" (click)="toggleState = false">
+                    Tắt (False)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Bí Quyết Viết Component Con</span>
+                <span class="code-lang">TypeScript</span>
+              </div>
+              <pre><code><span class="c-comment">// Trong toggle.component.ts:</span>
+<span class="c-tag">&#64;Component</span>(&#123;
+  selector: <span class="c-str">'app-toggle'</span>,
+  template: <span class="c-str">`&lt;div class="toggle-wrapper" [class.checked]="checked" (click)="toggle()"&gt;...&lt;/div&gt;`</span>
+&#125;)
+<span class="c-tag">export class</span> ToggleComponent &#123;
+  <span class="c-comment">// 1. Input nhận dữ liệu vào</span>
+  <span class="c-tag">&#64;Input</span>() checked = <span class="c-highlight">false</span>;
+
+  <span class="c-comment">// 2. Output BẮT BUỘC có hậu tố "Change": checked + Change</span>
+  <span class="c-tag">&#64;Output</span>() checkedChange = <span class="c-highlight">new EventEmitter&lt;boolean&gt;</span>();
+
+  toggle() &#123;
+    this.checked = !this.checked;
+    <span class="c-comment">// 3. Phát giá trị mới ra cha</span>
+    this.checkedChange.<span class="c-attr">emit</span>(this.checked);
+  &#125;
+&#125;
+
+<span class="c-comment">&lt;!-- Trong app.component.html (Cha sử dụng 2 chiều): --&gt;</span>
+&lt;<span class="c-tag">app-toggle</span> <span class="c-highlight">[(checked)]</span>=<span class="c-str">"toggleState"</span>&gt;&lt;/<span class="c-tag">app-toggle</span>&gt;</code></pre>
+
+              <div class="callout callout-success">
+                <strong>Ghi nhớ:</strong> Nếu bạn đặt tên output là <code>onChecked</code> hay <code>checkedEvent</code>,
+                Angular sẽ <strong>không thể</strong> nhận diện cú pháp <code>[(checked)]</code>! Bắt buộc phải là <code>checkedChange</code>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 3: Number Stepper Component Two-way [(count)]           -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'stepper-demo') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge success">Phần 3</span>
+            <h2 class="card-title">Number Stepper Component: [(count)]="quantity"</h2>
+          </div>
+          <span class="info-tag">Tăng / Giảm số lượng 2 chiều</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🔢</div>
+            <div class="concept-text">
+              <strong>Tùy biến với giá trị kiểu Number:</strong>
+              Áp dụng công thức <code>&#64;Input() count</code> và <code>&#64;Output() countChange</code>.
+              Component con hỗ trợ nút tăng (+), giảm (-), và nhập số trực tiếp có kiểm tra giới hạn <code>min</code> / <code>max</code>.
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Thử nghiệm Stepper -->
+            <div class="panel-box">
+              <h3 class="panel-title">🛒 Thử Nghiệm: Điều Chỉnh Số Lượng Mua Hàng</h3>
+
+              <div class="stepper-demo-center">
+                <div class="product-item-card">
+                  <div class="p-thumb">🎧</div>
+                  <div class="p-details">
+                    <h4 class="p-title">Tai nghe Hi-Res Sony WH-1000XM5</h4>
+                    <span class="p-price">6.990.000 đ / cái</span>
+                  </div>
+                </div>
+
+                <div class="stepper-action-row">
+                  <span class="stepper-label">Số lượng đặt mua:</span>
+                  <!-- Two-way Stepper Component -->
+                  <app-number-stepper
+                    [(count)]="stepperQuantity"
+                    [min]="1"
+                    [max]="10"
+                    [step]="1"
+                    unit="cái"
+                  ></app-number-stepper>
+                </div>
+              </div>
+
+              <!-- Đồng bộ về cha -->
+              <div class="render-output-box">
+                <div class="output-label">Component Cha Tính Toán Tổng Tiền:</div>
+                <div class="order-summary-row">
+                  <span>Số lượng ở Cha: <strong>{{ stepperQuantity }} cái</strong></span>
+                  <span class="total-money">
+                    Tổng: <strong>{{ (stepperQuantity * 6990000) | number:'1.0-0' }} đ</strong>
+                  </span>
+                </div>
+                <div class="preset-names-row">
+                  <span class="preset-label">Gán nhanh từ Cha:</span>
+                  <button type="button" class="btn-text" (click)="setStepperFromParent(1)">1 cái</button>
+                  <button type="button" class="btn-text" (click)="setStepperFromParent(5)">5 cái</button>
+                  <button type="button" class="btn-text" (click)="setStepperFromParent(10)">Tối đa 10 cái</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Định Nghĩa Stepper Two-Way</span>
+                <span class="code-lang">TypeScript</span>
+              </div>
+              <pre><code><span class="c-comment">// Trong number-stepper.component.ts:</span>
+<span class="c-tag">&#64;Component</span>(&#123; selector: <span class="c-str">'app-number-stepper'</span>, ... &#125;)
+<span class="c-tag">export class</span> NumberStepperComponent &#123;
+  <span class="c-tag">&#64;Input</span>() count = <span class="c-highlight">0</span>;
+  <span class="c-tag">&#64;Output</span>() countChange = <span class="c-highlight">new EventEmitter&lt;number&gt;</span>();
+
+  increment() &#123;
+    this.count++;
+    this.countChange.<span class="c-attr">emit</span>(this.count);
+  &#125;
+  decrement() &#123;
+    this.count--;
+    this.countChange.<span class="c-attr">emit</span>(this.count);
+  &#125;
+&#125;
+
+<span class="c-comment">&lt;!-- Sử dụng tại component cha: --&gt;</span>
+&lt;<span class="c-tag">app-number-stepper</span> <span class="c-highlight">[(count)]</span>=<span class="c-str">"quantity"</span>&gt;&lt;/<span class="c-tag">app-number-stepper</span>&gt;</code></pre>
+
+              <div class="callout callout-info">
+                <strong>Đồng bộ liền mạch:</strong> Cả khi người dùng bấm nút trên component con hoặc component cha tự cập nhật biến <code>quantity</code>,
+                cả hai nơi đều luôn giữ đúng 1 trạng thái duy nhất (Single Source of Truth).
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 4: Star Rating Component Two-way [(rating)]             -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'rating-demo') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge warning">Phần 4</span>
+            <h2 class="card-title">Star Rating Component: [(rating)]="userScore"</h2>
+          </div>
+          <span class="info-tag">Đánh giá sao tương tác</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner banner-warning">
+            <div class="concept-icon">⭐</div>
+            <div class="concept-text">
+              <strong>Custom UI Widget phức tạp:</strong>
+              Two-way binding không chỉ áp dụng cho input hay toggle đơn giản, mà áp dụng hoàn hảo cho các widget giao diện phong phú
+              như bộ chọn sao đánh giá, slider màu, hay lịch chọn ngày.
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Thử nghiệm Star Rating -->
+            <div class="panel-box">
+              <h3 class="panel-title">⭐ Thử Nghiệm: Đánh Giá Độ Hài Lòng</h3>
+              <p class="panel-desc">
+                Rê chuột lên các ngôi sao để xem trước, click để chốt điểm số, hoặc chọn điểm số từ component cha:
+              </p>
+
+              <div class="rating-demo-center">
+                <!-- Two-way Star Rating Component -->
+                <app-star-rating [(rating)]="userRating"></app-star-rating>
+
+                <div class="rating-feedback-badge">
+                  @if (userRating === 5) {
+                    <span class="score-desc excellent">🤩 Tuyệt vời! Rất hài lòng</span>
+                  } @else if (userRating === 4) {
+                    <span class="score-desc good">😊 Rất tốt! Trải nghiệm mượt mà</span>
+                  } @else if (userRating === 3) {
+                    <span class="score-desc average">😐 Ổn, cần cải thiện thêm</span>
+                  } @else if (userRating > 0) {
+                    <span class="score-desc poor">😞 Chưa hài lòng</span>
+                  } @else {
+                    <span class="score-desc unrated">Chưa có đánh giá nào</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Gán điểm từ Cha -->
+              <div class="render-output-box">
+                <div class="output-label">Component Cha Thao Tác Điểm Đánh Giá:</div>
+                <div class="preset-names-row">
+                  <span class="preset-label">Gán nhanh từ Cha:</span>
+                  <button type="button" class="btn btn-sm btn-outline" (click)="userRating = 1">1 Sao</button>
+                  <button type="button" class="btn btn-sm btn-outline" (click)="userRating = 3">3 Sao</button>
+                  <button type="button" class="btn btn-sm btn-outline" (click)="userRating = 5">5 Sao ⭐</button>
+                  <button type="button" class="btn btn-sm btn-text" (click)="userRating = 0">Xóa Đánh Giá</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Cấu Trúc Star Rating Two-Way</span>
+                <span class="code-lang">TypeScript</span>
+              </div>
+              <pre><code><span class="c-comment">// Trong star-rating.component.ts:</span>
+<span class="c-tag">&#64;Component</span>(&#123; selector: <span class="c-str">'app-star-rating'</span>, ... &#125;)
+<span class="c-tag">export class</span> StarRatingComponent &#123;
+  <span class="c-tag">&#64;Input</span>() rating = <span class="c-highlight">0</span>;
+  <span class="c-tag">&#64;Output</span>() ratingChange = <span class="c-highlight">new EventEmitter&lt;number&gt;</span>();
+
+  setRating(star: number) &#123;
+    this.rating = star;
+    this.ratingChange.<span class="c-attr">emit</span>(this.rating);
+  &#125;
+&#125;
+
+<span class="c-comment">&lt;!-- Component cha sử dụng 2 chiều: --&gt;</span>
+&lt;<span class="c-tag">app-star-rating</span> <span class="c-highlight">[(rating)]</span>=<span class="c-str">"userScore"</span>&gt;&lt;/<span class="c-tag">app-star-rating</span>&gt;</code></pre>
+
+              <div class="callout callout-warning">
+                <strong>Lợi ích vượt bậc:</strong> Nhờ Two-way binding, component cha không cần phải viết hàm lắng nghe sự kiện
+                <code>(ratingChange)="onRatingChange($event)"</code> thủ công, template trở nên ngắn gọn và trong sáng.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 5: Classic vs Modern model() Signal                     -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'model-signal') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 5</span>
+            <h2 class="card-title">Tiến Hóa: Classic &#64;Input/&#64;Output Change vs Angular 19 model() Signal</h2>
+          </div>
+          <span class="info-tag">So sánh kiến trúc truyền thống và hiện đại</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🚀</div>
+            <div class="concept-text">
+              <strong>Bước tiến hóa lớn từ Angular 17.2+:</strong>
+              Nếu như ở Day 9, chúng ta phải viết 2 dòng (<code>&#64;Input() value</code> và <code>&#64;Output() valueChange</code>),
+              thì Angular hiện đại cung cấp hàm <strong><code>model()</code></strong>.
+              Khi khai báo <code>value = model(0)</code>, Angular tự động cấu hình cả Input lẫn Output ngầm định mà vẫn giữ nguyên cú pháp
+              <code>[(value)]="parentVar"</code> ở phía ngoài!
+            </div>
+          </div>
+
+          <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Tiêu Chí So Sánh</th>
+                  <th>Cách Tiếp Cận Cổ Điển (Day 9)</th>
+                  <th>Cách Tiếp Cận Hiện Đại (Angular 19+)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Cú pháp khai báo</strong></td>
+                  <td>
+                    <code>&#64;Input() checked = false;</code><br />
+                    <code>&#64;Output() checkedChange = new EventEmitter();</code>
+                  </td>
+                  <td>
+                    <code>readonly checked = model(false);</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Cập nhật giá trị</strong></td>
+                  <td>
+                    <code>this.checked = newVal;</code><br />
+                    <code>this.checkedChange.emit(this.checked);</code>
+                  </td>
+                  <td>
+                    <code>this.checked.set(newVal);</code> hoặc<br />
+                    <code>this.checked.update(v =&gt; !v);</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Tương thích Signal / Computed</strong></td>
+                  <td>Phải chuyển đổi qua toSignal()</td>
+                  <td><span class="badge-tag green">Là WritableSignal sẵn có</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Cú pháp dùng ở Cha</strong></td>
+                  <td><code>[(checked)]="state"</code></td>
+                  <td><span class="badge-tag green">Giữ nguyên 100% [(checked)]="state"</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 6: Device Settings Panel Lab                           -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'device-settings') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge success">Phần 6</span>
+            <h2 class="card-title">Phòng Lab Thực Tế: Bảng Điều Khiển Thiết Bị &amp; Khảo Sát Đánh Giá</h2>
+          </div>
+          <span class="info-tag">Tích hợp toàn diện các Custom Two-way Components</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">💻</div>
+            <div class="concept-text">
+              <strong>Kịch bản thực tế tổng hợp:</strong> Bảng thiết lập hệ thống máy tính với đầy đủ các thành phần Two-way binding:
+              Tên máy tính (<code>[(ngModel)]</code>), Bật/Tắt kết nối (<code>[(checked)]</code>), Âm lượng &amp; Độ sáng (<code>[(count)]</code>),
+              và Đánh giá người dùng (<code>[(rating)]</code>). Mọi thay đổi đều phản ánh trực tiếp vào JSON State bên phải!
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Bảng điều khiển thiết bị -->
+            <div class="panel-box">
+              <div class="panel-header-row">
+                <h3 class="panel-title">⚙️ Cấu Hình Thiết Bị</h3>
+                <button type="button" class="btn btn-sm btn-outline" (click)="resetDeviceSettings()">
+                  🔄 Mặc Định
+                </button>
+              </div>
+
+              <div class="device-controls-list">
+                <!-- 1. Tên thiết bị (ngModel 2-way) -->
+                <div class="device-control-item">
+                  <label class="item-label">Tên Thiết Bị [(ngModel)]:</label>
+                  <input type="text" class="form-control" [(ngModel)]="deviceName" />
+                </div>
+
+                <!-- 2. Toggles kết nối (custom toggle 2-way) -->
+                <div class="device-control-item">
+                  <span class="item-label">Kết Nối Không Dây [(checked)]:</span>
+                  <div class="device-toggles-row">
+                    <div class="device-toggle-box">
+                      <span class="t-label">📶 Wi-Fi</span>
+                      <app-toggle-day9 [(checked)]="deviceWifi"></app-toggle-day9>
+                    </div>
+                    <div class="device-toggle-box">
+                      <span class="t-label">🎧 Bluetooth</span>
+                      <app-toggle-day9 [(checked)]="deviceBluetooth"></app-toggle-day9>
+                    </div>
+                    <div class="device-toggle-box">
+                      <span class="t-label">🔋 Tiết Kiệm Pin</span>
+                      <app-toggle-day9 [(checked)]="deviceBatterySaver"></app-toggle-day9>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Âm lượng & Độ sáng (custom stepper 2-way) -->
+                <div class="device-control-item">
+                  <span class="item-label">Âm Thanh &amp; Màn Hình [(count)]:</span>
+                  <div class="steppers-config-grid">
+                    <div class="stepper-sub-row">
+                      <span>🔊 Âm lượng:</span>
+                      <app-number-stepper
+                        [(count)]="deviceVolume"
+                        [min]="0"
+                        [max]="100"
+                        [step]="5"
+                        unit="%"
+                      ></app-number-stepper>
+                    </div>
+                    <div class="stepper-sub-row">
+                      <span>☀️ Độ sáng:</span>
+                      <app-number-stepper
+                        [(count)]="deviceBrightness"
+                        [min]="10"
+                        [max]="100"
+                        [step]="10"
+                        unit="%"
+                      ></app-number-stepper>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. Đánh giá trải nghiệm (custom rating 2-way) -->
+                <div class="device-control-item">
+                  <span class="item-label">Độ Hài Lòng Của Bạn [(rating)]:</span>
+                  <app-star-rating [(rating)]="deviceRating"></app-star-rating>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bảng JSON State phản ánh thời gian thực -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Live Synchronized JSON State</span>
+                <span class="code-lang">JSON Output</span>
+              </div>
+              <pre><code>{{ deviceConfigJson() }}</code></pre>
+
+              <div class="callout callout-success">
+                <strong>Đồng bộ thời gian thực 100%:</strong> Khi bạn click bất kỳ toggle nào, tăng giảm stepper,
+                hoặc chấm sao rating, biến ở component cha lập tức nhận giá trị mới và làm mới chuỗi JSON ở trên!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+  </div>
 </div>

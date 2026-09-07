@@ -1,4 +1,819 @@
-<div class="day-container">
-  <h2>Day013-content-projection-in-angular</h2>
-  <p>day013-content-projection-in-angular works!</p>
+<div class="day013-page">
+  <!-- ================================================================= -->
+  <!-- PAGE HEADER SECTION                                               -->
+  <!-- ================================================================= -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 13</span>
+        <span class="badge badge-syntax">&lt;ng-content&gt;</span>
+        <span class="badge badge-syntax">select="[attr]"</span>
+        <span class="badge badge-syntax">select=".class"</span>
+        <span class="badge badge-syntax">ngProjectAs</span>
+        <span class="badge badge-syntax">Eager Evaluation</span>
+        <span class="badge badge-syntax">Slot Architecture</span>
+      </div>
+      <h1 class="page-title">Content Projection trong Angular</h1>
+      <p class="page-subtitle">
+        Khám phá cơ chế chiếu nội dung (<strong>Content Projection / Slot</strong>) mạnh mẽ trong Angular:
+        từ <strong>Single-slot Toggle Switch</strong> linh hoạt, cạm bẫy <strong>Multiple ng-content</strong> không selector,
+        thiết kế kiến trúc <strong>Multi-slot</strong> đa tầng với selector (như thẻ <code>&lt;table&gt;</code>),
+        tuyệt chiêu <strong>ngProjectAs</strong>, đến bản chất <strong>Eager Evaluation</strong> khi component được khởi tạo.
+      </p>
+    </div>
+
+    <!-- Quick Status & Action Stat Box -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Trạng thái Demo Thực Hành:</span>
+        <span class="stat-value">6 Kịch bản Thực tế Sẵn Sàng</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Hành động vừa thực hiện:</span>
+        <span class="stat-value action-highlight">{{ lastActionMessage() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================================================================= -->
+  <!-- NAVIGATION TABS                                                   -->
+  <!-- ================================================================= -->
+  <nav class="lab-tabs-nav">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'all'"
+      (click)="currentTab.set('all')"
+    >
+      📚 Toàn bộ Bài Học
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'basics'"
+      (click)="currentTab.set('basics')"
+    >
+      1. Single ng-content (Toggle)
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'multi-trap'"
+      (click)="currentTab.set('multi-trap')"
+    >
+      2. Cạm Bẫy Multiple ng-content
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'multi-slot'"
+      (click)="currentTab.set('multi-slot')"
+    >
+      3. Multi-slot với Selectors
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'project-as'"
+      (click)="currentTab.set('project-as')"
+    >
+      4. Tuyệt Kỹ ngProjectAs
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'eager-lifecycle'"
+      (click)="currentTab.set('eager-lifecycle')"
+    >
+      5. Eager Evaluation & Vòng Đời
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'survey'"
+      (click)="currentTab.set('survey')"
+    >
+      6. Phòng Lab: Khảo Sát Khách Hàng
+    </button>
+  </nav>
+
+  <!-- ================================================================= -->
+  <!-- MAIN CONTENT GRID SECTIONS                                        -->
+  <!-- ================================================================= -->
+  <div class="content-sections">
+
+    <!-- =============================================================== -->
+    <!-- SECTION 1: Single-slot Projection (Toggle Component)           -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'basics') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 1</span>
+            <h2 class="card-title">Single-slot Content Projection với &lt;ng-content&gt;</h2>
+          </div>
+          <span class="info-tag">Ví dụ Toggle từ Tài liệu</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">💡</div>
+            <div class="concept-text">
+              <strong>Bản chất cốt lõi:</strong> Thay vì bắt component nhận hàng tá <code>@Input() label</code> với kiểu dữ liệu bị giới hạn là string,
+              chúng ta đặt thẻ <code>&lt;ng-content&gt;&lt;/ng-content&gt;</code> vào trong template của con.
+              Bất kỳ HTML, text, icon, hoặc component nào đặt giữa cặp thẻ mở/đóng ở cha sẽ được <strong>chiếu (project)</strong> trực tiếp vào vị trí đó.
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Panel tương tác trực tiếp -->
+            <div class="panel-box">
+              <h3 class="panel-title">🎮 Thử Nghiệm: Chiếu Nội Dung Bất Kỳ Vào Toggle Switch</h3>
+              <p class="panel-desc">
+                Cùng một component <code>&lt;app-custom-toggle&gt;</code>, nhưng component cha có thể truyền text thuần,
+                thẻ có icon SVG, hay badge trạng thái tùy biến mà không cần sửa 1 dòng code nào trong con:
+              </p>
+
+              <div class="toggle-list-demo">
+                <!-- Toggle 1: Text thuần -->
+                <div class="toggle-item-row">
+                  <div class="toggle-meta">Trường hợp 1: Văn bản thuần (Plain Text)</div>
+                  <app-custom-toggle
+                    [checked]="surveyQuestions()[0].checked"
+                    theme="blue"
+                    (checkedChange)="onQuestionToggle('q1', $event)"
+                  >
+                    <span>Hài lòng với giao diện ứng dụng?</span>
+                  </app-custom-toggle>
+                </div>
+
+                <!-- Toggle 2: Icon + Strong text -->
+                <div class="toggle-item-row">
+                  <div class="toggle-meta">Trường hợp 2: Icon Emoji + Nhãn in đậm</div>
+                  <app-custom-toggle
+                    [checked]="surveyQuestions()[1].checked"
+                    theme="emerald"
+                    (checkedChange)="onQuestionToggle('q2', $event)"
+                  >
+                    <span>📧 <strong>Thông báo Email Hằng Ngày</strong></span>
+                  </app-custom-toggle>
+                </div>
+
+                <!-- Toggle 3: Badge + Mô tả phụ (Rich HTML Layout) -->
+                <div class="toggle-item-row">
+                  <div class="toggle-meta">Trường hợp 3: Khối HTML phức tạp (Badge + Subtitle)</div>
+                  <app-custom-toggle
+                    [checked]="surveyQuestions()[2].checked"
+                    theme="purple"
+                    (checkedChange)="onQuestionToggle('q3', $event)"
+                  >
+                    <div class="rich-label">
+                      <span class="rich-badge">UX Mới</span>
+                      <span class="rich-title">Kích hoạt Giao diện Tối (Dark Mode)</span>
+                      <small class="rich-sub">Tự động thích ứng với cấu hình hệ điều hành</small>
+                    </div>
+                  </app-custom-toggle>
+                </div>
+              </div>
+
+              <!-- Trạng thái dữ liệu phản hồi 2 chiều -->
+              <div class="render-output-box">
+                <div class="output-label">Trạng thái Two-way Binding [(checked)]:</div>
+                <div class="status-summary-row">
+                  <span class="status-pill" [class.active]="surveyQuestions()[0].checked">
+                    Q1: {{ surveyQuestions()[0].checked ? 'BẬT (True)' : 'TẮT (False)' }}
+                  </span>
+                  <span class="status-pill" [class.active]="surveyQuestions()[1].checked">
+                    Q2: {{ surveyQuestions()[1].checked ? 'BẬT (True)' : 'TẮT (False)' }}
+                  </span>
+                  <span class="status-pill" [class.active]="surveyQuestions()[2].checked">
+                    Q3: {{ surveyQuestions()[2].checked ? 'BẬT (True)' : 'TẮT (False)' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Kiến Trúc Template: Con vs Cha</span>
+                <span class="code-lang">HTML</span>
+              </div>
+              <pre><code><span class="c-comment">&lt;!-- 1. Trong app-custom-toggle.component.html (Con) --&gt;</span>
+&lt;<span class="c-tag">div</span> <span class="c-attr">class</span>=<span class="c-str">"toggle-wrapper"</span>&gt;
+  &lt;<span class="c-tag">button</span> (<span class="c-attr">click</span>)=<span class="c-str">"toggle()"</span>&gt;...&lt;/<span class="c-tag">button</span>&gt;
+  &lt;<span class="c-tag">div</span> <span class="c-attr">class</span>=<span class="c-str">"toggle-projected-label"</span>&gt;
+    <span class="c-highlight">&lt;ng-content&gt;&lt;/ng-content&gt;</span> <span class="c-comment">&lt;!-- Điểm hứng nội dung --&gt;</span>
+  &lt;/<span class="c-tag">div</span>&gt;
+&lt;/<span class="c-tag">div</span>&gt;
+
+<span class="c-comment">&lt;!-- 2. Trong app.component.html (Cha sử dụng) --&gt;</span>
+&lt;<span class="c-tag">app-custom-toggle</span> [checked]=<span class="c-str">"isDark"</span>&gt;
+  <span class="c-comment">&lt;!-- Nội dung này được nhúng thẳng vào &lt;ng-content&gt; --&gt;</span>
+  &lt;<span class="c-tag">span</span>&gt;🌙 &lt;<span class="c-tag">strong</span>&gt;Chế độ Dark Mode&lt;/<span class="c-tag">strong</span>&gt;&lt;/<span class="c-tag">span</span>&gt;
+&lt;/<span class="c-tag">app-custom-toggle</span>&gt;</code></pre>
+
+              <div class="callout callout-info">
+                <strong>Ưu điểm vượt trội:</strong> Component con hoàn toàn tách biệt khỏi cấu trúc hiển thị của nhãn (Decoupled).
+                Bạn có thể đưa vào link, tooltip, nút bấm phụ mà không cần định nghĩa thêm bất kỳ Input property nào!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 2: Multiple ng-content Trap                            -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'multi-trap') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge warning">Phần 2</span>
+            <h2 class="card-title">Cạm Bẫy: Khai Báo Nhiều &lt;ng-content&gt; Không Selector</h2>
+          </div>
+          <span class="info-tag">Lỗi kinh điển người mới hay mắc</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner banner-warning">
+            <div class="concept-icon">⚠️</div>
+            <div class="concept-text">
+              <strong>Cảnh báo từ tài liệu Day 13:</strong> Bạn có thể nghĩ rằng nếu đặt 2 thẻ <code>&lt;ng-content&gt;</code> trong template thì nó sẽ nhân đôi (duplicate) nội dung hiển thị?
+              <strong>KHÔNG!</strong> Trong DOM, một node HTML chỉ có thể gắn vào <em>duy nhất một vị trí</em> tại một thời điểm.
+              Do đó, Angular sẽ <strong>chỉ render nội dung vào thẻ ng-content CUỐI CÙNG</strong>, còn thẻ trước đó bị bỏ trống hoàn toàn!
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Thử nghiệm trực quan -->
+            <div class="panel-box">
+              <h3 class="panel-title">🧪 Thử Nghiệm Trực Quan Trên Component Thật</h3>
+              <p class="panel-desc">
+                Component <code>&lt;app-multi-content-trap&gt;</code> có 2 thẻ <code>&lt;ng-content&gt;</code> đặt liên tiếp nhau.
+                Hãy quan sát nội dung mà component cha truyền vào:
+              </p>
+
+              <div class="trap-live-box">
+                <div class="trap-parent-label">
+                  Component Cha truyền vào:
+                  <code>&lt;div class="sample-pill"&gt;📦 Gói dữ liệu mẫu #100DoC&lt;/div&gt;</code>
+                </div>
+
+                <app-multi-content-trap>
+                  <div class="projected-sample-pill">
+                    <span class="pill-icon">📦</span>
+                    <span>Gói dữ liệu mẫu #100DoC (Do component cha truyền)</span>
+                  </div>
+                </app-multi-content-trap>
+              </div>
+
+              <div class="render-output-box">
+                <div class="output-label">Kết Luận Rút Ra:</div>
+                <div class="explanation-points">
+                  <div class="point-row">
+                    <span class="bullet red">❌</span>
+                    <span><strong>Slot 1 (trên) hoàn toàn rỗng:</strong> Angular không thể sao chép phần tử DOM nếu không có <code>TemplateRef</code>.</span>
+                  </div>
+                  <div class="point-row">
+                    <span class="bullet green">✅</span>
+                    <span><strong>Slot 2 (dưới) nhận nội dung:</strong> Angular chuyển node DOM vào vị trí cuối cùng được phát hiện.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích nguyên nhân -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Bản Chất Node Identity Trong Trình Duyệt</span>
+                <span class="code-lang">Lý thuyết</span>
+              </div>
+              <pre><code><span class="c-comment">&lt;!-- TRONG TEMPLATE CỦA CON (SAI LẦM PHỔ BIẾN): --&gt;</span>
+&lt;<span class="c-tag">div</span> <span class="c-attr">class</span>=<span class="c-str">"header-slot"</span>&gt;
+  &lt;<span class="c-highlight">ng-content</span>&gt;&lt;/<span class="c-highlight">ng-content</span>&gt;  <span class="c-comment">&lt;!-- ⚠️ BỊ RỖNG --&gt;</span>
+&lt;/<span class="c-tag">div</span>&gt;
+
+&lt;<span class="c-tag">div</span> <span class="c-attr">class</span>=<span class="c-str">"footer-slot"</span>&gt;
+  &lt;<span class="c-highlight">ng-content</span>&gt;&lt;/<span class="c-highlight">ng-content</span>&gt;  <span class="c-comment">&lt;!-- ✅ NHẬN TOÀN BỘ NỘI DUNG --&gt;</span>
+&lt;/<span class="c-tag">div</span>&gt;</code></pre>
+
+              <div class="callout callout-warning">
+                <strong>Giải pháp:</strong> Nếu muốn tạo nhiều vị trí nhận nội dung khác nhau, bạn <strong>bắt buộc phải sử dụng Selector</strong> (ở Phần 3 bên dưới).
+                Nếu muốn nhân bản cùng 1 nội dung nhiều lần, bạn phải dùng <code>&lt;ng-template&gt;</code> (Day 14).
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 3: Multi-slot Projection with Selectors                -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'multi-slot') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge success">Phần 3</span>
+            <h2 class="card-title">Multi-slot Content Projection với Selectors (select)</h2>
+          </div>
+          <span class="info-tag">Tương tự cơ chế table (thead, tbody, tfoot)</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🎛️</div>
+            <div class="concept-text">
+              <strong>Nguyên lý như thẻ <code>&lt;table&gt;</code>:</strong> Dù ở HTML bạn có đặt <code>&lt;tbody&gt;</code> trước <code>&lt;thead&gt;</code>,
+              trình duyệt vẫn luôn render thead ở trên cùng. Với thuộc tính <code>select="..."</code> trong <code>ng-content</code>,
+              Angular hỗ trợ 4 loại selector linh hoạt:
+              <strong>Tag</strong> (<code>select="header"</code>),
+              <strong>Class</strong> (<code>select=".card-header"</code>),
+              <strong>Attribute</strong> (<code>select="[card-header]"</code>), và
+              <strong>Default Slot</strong> (hứng nội dung còn lại).
+            </div>
+          </div>
+
+          <div class="interactive-toolbar">
+            <div class="toolbar-group">
+              <label class="toolbar-label">Kiểu hiển thị Thẻ (Variant):</label>
+              <div class="btn-toggle-group">
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-active]="cardVariant() === 'elevated'"
+                  (click)="cardVariant.set('elevated')"
+                >
+                  Elevated
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-active]="cardVariant() === 'bordered'"
+                  (click)="cardVariant.set('bordered')"
+                >
+                  Bordered
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-active]="cardVariant() === 'glass'"
+                  (click)="cardVariant.set('glass')"
+                >
+                  Glassmorphism
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-active]="cardVariant() === 'gradient'"
+                  (click)="cardVariant.set('gradient')"
+                >
+                  Gradient
+                </button>
+              </div>
+            </div>
+
+            <!-- Nút đảo thứ tự ở cha -->
+            <button
+              type="button"
+              class="btn btn-doc"
+              (click)="toggleParentOrder()"
+            >
+              🔄 {{ isParentOrderReversed() ? 'Hoàn tác thứ tự khai báo cha' : 'Trộn ngược thứ tự khai báo ở cha' }}
+            </button>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Thẻ Modern Card Render Thật -->
+            <div class="panel-box">
+              <h3 class="panel-title">
+                🃏 Kết Quả Render Thẻ Multi-slot Card
+                <span class="order-flag" [class.reversed]="isParentOrderReversed()">
+                  {{ isParentOrderReversed() ? '⚠️ Khai báo cha: Footer viết TRƯỚC Header!' : '✅ Khai báo cha: Thứ tự thông thường' }}
+                </span>
+              </h3>
+
+              @if (!isParentOrderReversed()) {
+                <app-modern-card [variant]="cardVariant()">
+                  <!-- THỨ TỰ CHUẨN: Header -> Media -> Body -> Default -> Actions -->
+                  <div card-header class="demo-card-header">
+                    <div class="header-left-info">
+                      <span class="header-icon">🚀</span>
+                      <div>
+                        <h4 class="card-heading">Hệ Thống Thiết Kế Design System</h4>
+                        <span class="card-subhead">Phiên bản v2.4.0 • Kiến trúc Angular Standalone</span>
+                      </div>
+                    </div>
+                    <span class="status-tag live">Đang Hoạt Động</span>
+                  </div>
+
+                  <div card-media class="demo-card-banner">
+                    <div class="banner-gradient">
+                      <span class="banner-tag">Projected Cover Banner</span>
+                    </div>
+                  </div>
+
+                  <div card-body class="demo-card-body">
+                    <p>
+                      Thẻ card này được cấu thành hoàn toàn từ các slot riêng biệt. Component con định vị vị trí các slot
+                      bằng <code>select="[card-header]"</code>, <code>select="[card-media]"</code>, <code>select="[card-body]"</code>.
+                    </p>
+                  </div>
+
+                  <!-- Nội dung không có attribute hay class trùng khớp -> Rơi vào default slot -->
+                  <div class="demo-card-unmatched">
+                    <strong>⚡ Phần tử không khớp selector nào:</strong>
+                    <span>Tự động được chuyển vào thẻ <code>&lt;ng-content&gt;</code> mặc định (Catch-all slot)!</span>
+                  </div>
+
+                  <div card-actions class="demo-card-actions">
+                    <button type="button" class="btn btn-sm btn-outline" (click)="toggleBookmark()">
+                      {{ isBookmarked() ? '⭐ Đã Lưu' : '☆ Lưu Yêu Thích' }}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary" (click)="toggleLike()">
+                      ❤️ Thích ({{ cardLikes() }})
+                    </button>
+                  </div>
+                </app-modern-card>
+              } @else {
+                <app-modern-card [variant]="cardVariant()">
+                  <!-- THỨ TỰ BỊ ĐẢO LỘN Ở CHA: Actions viết ĐẦU TIÊN, Header viết CUỐI CÙNG -->
+                  <div card-actions class="demo-card-actions">
+                    <button type="button" class="btn btn-sm btn-outline" (click)="toggleBookmark()">
+                      {{ isBookmarked() ? '⭐ Đã Lưu' : '☆ Lưu Yêu Thích' }}
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary" (click)="toggleLike()">
+                      ❤️ Thích ({{ cardLikes() }})
+                    </button>
+                  </div>
+
+                  <div class="demo-card-unmatched">
+                    <strong>⚡ Phần tử không khớp selector nào:</strong>
+                    <span>(Được viết ở giữa template cha nhưng vẫn render đúng slot mặc định)</span>
+                  </div>
+
+                  <div card-body class="demo-card-body">
+                    <p>
+                      <strong>Kiểm chứng thực tế:</strong> Ở template cha, thẻ <code>[card-actions]</code> được đặt lên dòng đầu tiên,
+                      nhưng kết quả hiển thị trên màn hình thì nút bấm vẫn nằm ở chân thẻ (Footer)!
+                    </p>
+                  </div>
+
+                  <div card-media class="demo-card-banner">
+                    <div class="banner-gradient">
+                      <span class="banner-tag">Projected Cover Banner (Khai báo sau body)</span>
+                    </div>
+                  </div>
+
+                  <div card-header class="demo-card-header">
+                    <div class="header-left-info">
+                      <span class="header-icon">🚀</span>
+                      <div>
+                        <h4 class="card-heading">Hệ Thống Thiết Kế Design System</h4>
+                        <span class="card-subhead">(Header này được viết ở dòng CUỐI CÙNG của cha!)</span>
+                      </div>
+                    </div>
+                    <span class="status-tag live">Vẫn Đúng Vị Trí</span>
+                  </div>
+                </app-modern-card>
+              }
+            </div>
+
+            <!-- Panel giải thích cú pháp Selector -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Các Dạng Selector Hỗ Trợ</span>
+                <span class="code-lang">HTML</span>
+              </div>
+              <pre><code><span class="c-comment">&lt;!-- 1. Tag Selector: Khớp theo tên thẻ HTML hoặc Component --&gt;</span>
+&lt;<span class="c-tag">ng-content</span> <span class="c-attr">select</span>=<span class="c-str">"header"</span>&gt;&lt;/<span class="c-tag">ng-content</span>&gt;
+&lt;<span class="c-tag">ng-content</span> <span class="c-attr">select</span>=<span class="c-str">"app-user-avatar"</span>&gt;&lt;/<span class="c-tag">ng-content</span>&gt;
+
+<span class="c-comment">&lt;!-- 2. Class Selector: Khớp theo tên CSS Class --&gt;</span>
+&lt;<span class="c-tag">ng-content</span> <span class="c-attr">select</span>=<span class="c-str">".card-header"</span>&gt;&lt;/<span class="c-tag">ng-content</span>&gt;
+
+<span class="c-comment">&lt;!-- 3. Attribute Selector: Phổ biến nhất cho Design System --&gt;</span>
+&lt;<span class="c-tag">ng-content</span> <span class="c-attr">select</span>=<span class="c-str">"[card-header]"</span>&gt;&lt;/<span class="c-tag">ng-content</span>&gt;
+&lt;<span class="c-tag">ng-content</span> <span class="c-attr">select</span>=<span class="c-str">"[card-body]"</span>&gt;&lt;/<span class="c-tag">ng-content</span>&gt;
+
+<span class="c-comment">&lt;!-- 4. Combine nhiều selector (dấu phẩy tương đương OR) --&gt;</span>
+&lt;<span class="c-tag">ng-content</span> <span class="c-attr">select</span>=<span class="c-str">"[card-actions], .card-actions, footer"</span>&gt;&lt;/<span class="c-tag">ng-content</span>&gt;
+
+<span class="c-comment">&lt;!-- 5. Catch-all Slot: Hứng mọi thẻ còn lại không match selector nào --&gt;</span>
+&lt;<span class="c-tag">ng-content</span>&gt;&lt;/<span class="c-tag">ng-content</span>&gt;</code></pre>
+
+              <div class="callout callout-success">
+                <strong>Gợi ý kinh nghiệm:</strong> Nên ưu tiên sử dụng <strong>Attribute Selector</strong> (ví dụ: <code>&lt;div card-header&gt;</code>)
+                thay vì CSS class selector. Cách này giúp phân tách rạch ròi giữa <em>vai trò cấu trúc slot</em> và <em>phong cách định dạng CSS</em>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 4: ngProjectAs Deep Dive                               -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'project-as') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 4</span>
+            <h2 class="card-title">Tuyệt Kỹ ngProjectAs: Khắc Phục Lỗi Selector Không Khớp</h2>
+          </div>
+          <span class="info-tag">Giải pháp cho component bị wrap</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🔮</div>
+            <div class="concept-text">
+              <strong>Khi nào cần dùng <code>ngProjectAs</code>?</strong>
+              Giả sử component con yêu cầu <code>&lt;ng-content select="app-custom-badge"&gt;</code>.
+              Tuy nhiên ở component cha, bạn lại muốn dùng một thẻ <code>&lt;span&gt;</code> đơn giản, hoặc component đó bị bọc bên trong một thẻ <code>&lt;div&gt;</code>.
+              Lúc này selector của con <strong>không thể nhận dạng được</strong>!
+              Thuộc tính <code>ngProjectAs</code> cho phép bạn gán danh xưng (alias) để nói với Angular:
+              <em>"Hãy coi phần tử này như là <code>app-custom-badge</code> và đưa nó vào slot tương ứng!"</em>
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Panel tương tác trực tiếp -->
+            <div class="panel-box">
+              <h3 class="panel-title">🎮 Thử Nghiệm: Bật / Tắt ngProjectAs</h3>
+              <p class="panel-desc">
+                Bấm nút bên dưới để chuyển đổi giữa việc dùng và không dùng <code>ngProjectAs="app-custom-badge"</code>
+                trên cùng một thẻ <code>&lt;span&gt;</code>:
+              </p>
+
+              <div class="interactive-switch-row">
+                <button
+                  type="button"
+                  class="btn"
+                  [class.btn-primary]="useProjectAs()"
+                  [class.btn-secondary]="!useProjectAs()"
+                  (click)="toggleProjectAs()"
+                >
+                  {{ useProjectAs() ? '✅ ĐANG BẬT: ngProjectAs="app-custom-badge"' : '❌ ĐANG TẮT: Thẻ span thông thường' }}
+                </button>
+              </div>
+
+              <!-- Component thực hành -->
+              <div class="project-as-wrapper">
+                <app-project-as-demo>
+                  @if (useProjectAs()) {
+                    <!-- Khi CÓ ngProjectAs -> Được project vào Slot Target (xanh lá) -->
+                    <span ngProjectAs="app-custom-badge" class="badge-demo-pill active">
+                      ✨ Thẻ &lt;span&gt; có ngProjectAs="app-custom-badge"
+                    </span>
+                  } @else {
+                    <!-- Khi KHÔNG CÓ ngProjectAs -> Rơi xuống Slot Fallback mặc định -->
+                    <span class="badge-demo-pill inactive">
+                      ⚠️ Thẻ &lt;span&gt; thường không có ngProjectAs
+                    </span>
+                  }
+                  <p class="normal-paragraph">Nội dung phụ thông thường (luôn vào Slot Mặc Định)</p>
+                </app-project-as-demo>
+              </div>
+
+              <div class="render-output-box">
+                <div class="output-label">Hiện Tượng Quan Sát Được:</div>
+                <div class="status-summary-text">
+                  @if (useProjectAs()) {
+                    <span class="text-success">
+                      🎯 <strong>Thành công:</strong> Thẻ &lt;span&gt; đã được chiếu thẳng vào <strong>Slot Đích</strong> (khung xanh lá)
+                      nhờ có khai báo <code>ngProjectAs="app-custom-badge"</code>.
+                    </span>
+                  } @else {
+                    <span class="text-warning">
+                      📥 <strong>Rơi về fallback:</strong> Do không khớp selector <code>app-custom-badge</code>,
+                      thẻ &lt;span&gt; bị đẩy xuống <strong>Slot Mặc Định</strong> bên dưới.
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Cách ngProjectAs Hoạt Động Dưới Gầm Máy</span>
+                <span class="code-lang">HTML</span>
+              </div>
+              <pre><code><span class="c-comment">&lt;!-- 1. Component con định nghĩa slot: --&gt;</span>
+&lt;<span class="c-tag">div</span> <span class="c-attr">class</span>=<span class="c-str">"badge-wrapper"</span>&gt;
+  &lt;<span class="c-highlight">ng-content select="app-custom-badge"</span>&gt;&lt;/<span class="c-highlight">ng-content</span>&gt;
+&lt;/<span class="c-tag">div</span>&gt;
+
+<span class="c-comment">&lt;!-- 2. Component cha dùng thẻ &lt;span&gt; hoặc &lt;div&gt; --&gt;</span>
+&lt;<span class="c-tag">app-project-as-demo</span>&gt;
+  <span class="c-comment">&lt;!-- Angular nhận diện bí danh này và khớp vào selector app-custom-badge --&gt;</span>
+  &lt;<span class="c-tag">span</span> <span class="c-highlight">ngProjectAs="app-custom-badge"</span> <span class="c-attr">class</span>=<span class="c-str">"pill"</span>&gt;
+    Nội dung thẻ span được project như app-custom-badge
+  &lt;/<span class="c-tag">span</span>&gt;
+&lt;/<span class="c-tag">app-project-as-demo</span>&gt;</code></pre>
+
+              <div class="callout callout-info">
+                <strong>Ứng dụng thực tế:</strong> Thư viện bên thứ 3 nổi tiếng như <code>ngx-dropzone</code> hay Angular Material
+                rất hay dùng kỹ thuật này để người dùng có thể tùy biến header/footer bằng thẻ HTML bất kỳ mà không phá vỡ slot selector.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 5: Eager Evaluation & Lifecycle                        -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'eager-lifecycle') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge warning">Phần 5</span>
+            <h2 class="card-title">Bản Chất Eager Evaluation: Khi Nào ng-content Được Khởi Tạo?</h2>
+          </div>
+          <span class="info-tag">Điểm khác biệt chí mạng với ng-template</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner banner-warning">
+            <div class="concept-icon">⏱️</div>
+            <div class="concept-text">
+              <strong>Câu hỏi phỏng vấn Angular thường gặp:</strong>
+              Nếu component con bọc thẻ <code>&lt;ng-content&gt;</code> bên trong <code>*ngIf="false"</code> (đang đóng),
+              thì component con bên trong có được khởi tạo không?
+              <strong>CÓ!</strong> Trong Content Projection, component cha luôn <strong>khởi tạo ngay lập tức (Eagerly Evaluated)</strong>
+              các element trước khi đem chiếu vào con. Hãy kiểm chứng log vòng đời ngay bên dưới!
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Thử nghiệm Accordion & Lifecycle Counter -->
+            <div class="panel-box">
+              <h3 class="panel-title">🔬 Kiểm Chứng Thực Tế Bằng Collapsible Panel</h3>
+              <p class="panel-desc">
+                Collapsible panel đang ở trạng thái <strong>{{ isCollapsibleOpen() ? 'ĐANG MỞ' : 'ĐANG ĐÓNG (*ngIf=false)' }}</strong>.
+                Hãy quan sát: Component <code>&lt;app-lifecycle-tracker&gt;</code> bên trong đã gọi <code>ngOnInit()</code> từ khi cha render!
+              </p>
+
+              <div class="collapsible-demo-wrapper">
+                <app-collapsible-panel
+                  [title]="'Bảng Điều Khiển Bảo Mật (Nhấn để Mở / Đóng)'"
+                  [isOpen]="isCollapsibleOpen()"
+                  (isOpenChange)="isCollapsibleOpen.set($event)"
+                >
+                  <!-- Component được truyền qua ng-content -->
+                  <app-lifecycle-tracker
+                    label="Module Kiểm Tra Token Bảo Mật"
+                    (lifecycleLog)="addLifecycleLog($event)"
+                  ></app-lifecycle-tracker>
+                </app-collapsible-panel>
+              </div>
+
+              <div class="render-output-box">
+                <div class="output-header-flex">
+                  <div class="output-label">Nhật Ký Vòng Đời (Lifecycle Execution Log):</div>
+                  <button type="button" class="btn-text" (click)="clearLogs()">Xóa Log</button>
+                </div>
+                <div class="log-terminal">
+                  @for (log of lifecycleLogs(); track $index) {
+                    <div class="log-entry">
+                      <span class="log-dot"></span>
+                      <span class="log-text">{{ log }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel so sánh với ng-template -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Bảng So Sánh: ng-content vs ng-template</span>
+                <span class="code-lang">Kiến trúc</span>
+              </div>
+
+              <div class="comparison-table-wrapper">
+                <table class="comparison-table">
+                  <thead>
+                    <tr>
+                      <th>Tiêu Chí</th>
+                      <th>&lt;ng-content&gt; (Day 13)</th>
+                      <th>&lt;ng-template&gt; (Day 14)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Thời điểm khởi tạo</strong></td>
+                      <td><span class="tag-eager">Eager (Ngay lập tức)</span></td>
+                      <td><span class="tag-lazy">Lazy (Khi được gọi)</span></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Ảnh hưởng bởi *ngIf con</strong></td>
+                      <td>Vẫn khởi tạo dù *ngIf=false</td>
+                      <td>Chỉ khởi tạo khi *ngIf=true</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Truyền Context Dữ Liệu</strong></td>
+                      <td>Không hỗ trợ (Data thuộc cha)</td>
+                      <td>Rất mạnh qua [ngTemplateOutletContext]</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Nhân bản phần tử</strong></td>
+                      <td>Chỉ render 1 lần (Single Slot)</td>
+                      <td>Render vô hạn lần qua *ngFor</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="callout callout-warning">
+                <strong>Lưu ý hiệu năng (Performance Gotcha):</strong> Nếu nội dung bên trong <code>ng-content</code> gọi API nặng hoặc tiêu tốn tài nguyên,
+                nó sẽ chạy ngay khi component cha tải dù người dùng chưa hề mở panel.
+                Để khắc phục, hãy chuyển sang dùng <strong>TemplateRef</strong> (Day 14).
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 6: Interactive Survey Lab                              -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'survey') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge success">Phần 6</span>
+            <h2 class="card-title">Phòng Lab Thực Hành: Bảng Khảo Sát Khách Hàng (Customer Survey)</h2>
+          </div>
+          <span class="info-tag">Ứng dụng thực tế hoàn chỉnh</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">📋</div>
+            <div class="concept-text">
+              <strong>Kịch bản thực tế từ tài liệu Day 13:</strong> Xây dựng bảng khảo sát khách hàng Yes/No.
+              Mỗi câu hỏi có tiêu đề, mô tả chi tiết, badge danh mục, và cờ kiểm tra bắt buộc (áp dụng Type Guard từ Day 12).
+              Toàn bộ được hiển thị mượt mà thông qua việc chiếu nội dung vào <code>&lt;app-custom-toggle&gt;</code>!
+            </div>
+          </div>
+
+          <!-- Progress Bar & Thống kê tiến độ -->
+          <div class="survey-stats-card">
+            <div class="survey-stat-header">
+              <div class="stat-info">
+                <span class="stat-big-number">{{ agreedCount() }}/{{ totalQuestions() }}</span>
+                <span class="stat-title">Câu hỏi được tán thành ({{ completionPercent() }}%)</span>
+              </div>
+              <div class="stat-badge-pill">
+                {{ agreedCount() >= 3 ? '🎉 Đạt mức tín nhiệm cao' : '⚡ Cần cải thiện thêm' }}
+              </div>
+            </div>
+
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                [style.width.%]="completionPercent()"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Danh sách câu hỏi khảo sát -->
+          <div class="survey-questions-grid">
+            @for (q of surveyQuestions(); track q.id) {
+              <div class="survey-card-item" [class.checked]="q.checked">
+                <app-custom-toggle
+                  [checked]="q.checked"
+                  [theme]="q.theme"
+                  (checkedChange)="onQuestionToggle(q.id, $event)"
+                >
+                  <!-- Projected Content vào toggle -->
+                  <div class="survey-item-content">
+                    <div class="item-title-row">
+                      <span class="category-tag" [class]="'cat-' + q.category">
+                        {{ q.category === 'ux' ? '🎨 Trải Nghiệm UX' : q.category === 'security' ? '🔒 Bảo Mật' : '⚡ Tính Năng' }}
+                      </span>
+                      @if (q.isRequired) {
+                        <span class="required-badge">* Bắt Buộc</span>
+                      }
+                      <strong class="item-question-title">{{ q.title }}</strong>
+                    </div>
+                    <p class="item-question-desc">{{ q.description }}</p>
+                  </div>
+                </app-custom-toggle>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+  </div>
 </div>

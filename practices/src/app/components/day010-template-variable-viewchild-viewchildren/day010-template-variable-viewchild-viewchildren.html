@@ -1,4 +1,739 @@
-<div class="day-container">
-  <h2>Day010-template-variable-viewchild-viewchildren</h2>
-  <p>day010-template-variable-viewchild-viewchildren works!</p>
+<div class="day010-page">
+  <!-- Thẻ input tĩnh nằm ngoài mọi khối điều kiện (@if) để minh chứng static: true hoạt động trong ngOnInit() -->
+  <input #staticNativeInput type="hidden" value="StaticInputValue_Success" />
+
+  <!-- ================================================================= -->
+  <!-- PAGE HEADER SECTION                                               -->
+  <!-- ================================================================= -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 10</span>
+        <span class="badge badge-syntax">#templateVar</span>
+        <span class="badge badge-syntax">exportAs</span>
+        <span class="badge badge-syntax">&#64;ViewChild(static, read)</span>
+        <span class="badge badge-syntax">&#64;ViewChildren(QueryList)</span>
+        <span class="badge badge-syntax">ngAfterViewInit</span>
+        <span class="badge badge-syntax">Signal viewChild()</span>
+      </div>
+      <h1 class="page-title">Template Variable, ViewChild &amp; ViewChildren trong Angular</h1>
+      <p class="page-subtitle">
+        Khám phá các kỹ thuật tương tác và truy vấn phần tử mạnh mẽ nhất trong Angular:
+        thao tác trực tiếp trên template với <strong>Template Variable (#varName)</strong>,
+        định danh directive chính xác bằng <strong>exportAs</strong>,
+        kết nối Template vào TypeScript Class qua <strong>&#64;ViewChild</strong> (hiểu sâu <code>static: true/false</code> &amp; <code>read: ElementRef</code>),
+        điều khiển hàng loạt bằng <strong>&#64;ViewChildren &amp; QueryList</strong>,
+        và đón đầu bước tiến hóa <strong>Signal Queries</strong> (<code>viewChild</code>, <code>viewChildren</code>) của Angular hiện đại.
+      </p>
+    </div>
+
+    <!-- Quick Status & Action Stat Box -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Trạng thái Demo Thực Hành:</span>
+        <span class="stat-value">6 Kịch bản Thực tế Sẵn Sàng</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Hành động vừa thực hiện:</span>
+        <span class="stat-value action-highlight">{{ lastActionMessage() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================================================================= -->
+  <!-- NAVIGATION TABS                                                   -->
+  <!-- ================================================================= -->
+  <nav class="lab-tabs-nav">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'all'"
+      (click)="currentTab.set('all')"
+    >
+      📚 Toàn bộ Bài Học
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'template-var'"
+      (click)="currentTab.set('template-var')"
+    >
+      1. Template Variable (#varName)
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'export-as'"
+      (click)="currentTab.set('export-as')"
+    >
+      2. exportAs (ngForm &amp; ngModel)
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'view-child'"
+      (click)="currentTab.set('view-child')"
+    >
+      3. &#64;ViewChild &amp; Options
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'view-children'"
+      (click)="currentTab.set('view-children')"
+    >
+      4. &#64;ViewChildren &amp; QueryList
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'signal-queries'"
+      (click)="currentTab.set('signal-queries')"
+    >
+      5. So Sánh Signal Queries
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'smart-dashboard'"
+      (click)="currentTab.set('smart-dashboard')"
+    >
+      6. Smart Lab Dashboard
+    </button>
+  </nav>
+
+  <!-- ================================================================= -->
+  <!-- MAIN CONTENT SECTIONS                                             -->
+  <!-- ================================================================= -->
+  <div class="content-sections">
+
+    <!-- =============================================================== -->
+    <!-- SECTION 1: Template Variable (#varName)                        -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'template-var') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 1</span>
+            <h2 class="card-title">Template Variable (#varName): Thao Tác Trực Tiếp Trên Template</h2>
+          </div>
+          <span class="info-tag">Không cần viết TypeScript Class</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">💡</div>
+            <div class="concept-text">
+              <strong>Template Reference Variable là gì?</strong>
+              Bằng cách thêm <code>#tênBiến</code> vào một thẻ HTML hoặc Component con, bạn có thể tham chiếu trực tiếp đến đối tượng đó
+              ở bất kỳ đâu trong cùng một template. Bạn có thể đọc thuộc tính hoặc gọi trực tiếp các phương thức (method) của component con
+              ngay trong sự kiện click của component cha!
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Thao tác trực tiếp với Component & DOM -->
+            <div class="panel-box">
+              <h3 class="panel-title">🎮 Thử Nghiệm 1: Gọi Trực Tiếp Method Component Con</h3>
+              <p class="panel-desc">
+                Nút bấm bên dưới nằm ở component cha nhưng gọi thẳng <code>localToggle.toggle()</code> của component con mà không thông qua bất kỳ hàm TypeScript nào:
+              </p>
+
+              <!-- Component con với Template Variable #localToggle -->
+              <div class="demo-subcomponent-wrapper">
+                <app-toggle-item
+                  #localToggle
+                  label="Đèn Thử Nghiệm (Template Variable)"
+                  icon="💡"
+                  [checked]="false"
+                ></app-toggle-item>
+              </div>
+
+              <div class="render-output-box">
+                <div class="output-label">Nút Bấm Cha Gọi Trực Tiếp Qua #localToggle:</div>
+                <div class="action-buttons-group">
+                  <button type="button" class="btn btn-primary" (click)="localToggle.toggle()">
+                    🔄 localToggle.toggle()
+                  </button>
+                  <button type="button" class="btn btn-outline" (click)="localToggle.turnOn()">
+                    Bật: localToggle.turnOn()
+                  </button>
+                  <button type="button" class="btn btn-outline" (click)="localToggle.turnOff()">
+                    Tắt: localToggle.turnOff()
+                  </button>
+                </div>
+              </div>
+
+              <!-- Thử nghiệm 2: Thao tác Native DOM với #nativeInput -->
+              <h3 class="panel-title" style="margin-top: 1rem;">🎮 Thử Nghiệm 2: Thao Tác Native DOM (#nativeInput)</h3>
+              <p class="panel-desc">
+                Điều khiển con trỏ focus, bôi đen văn bản và làm trống ô input bằng các native DOM method:
+              </p>
+
+              <div class="native-input-box">
+                <input
+                  #nativeInput
+                  type="text"
+                  class="form-control"
+                  [value]="sampleInputText"
+                  placeholder="Gõ văn bản bất kỳ..."
+                />
+              </div>
+
+              <div class="render-output-box">
+                <div class="output-label">Gọi Native DOM Methods Qua #nativeInput:</div>
+                <div class="action-buttons-group">
+                  <button type="button" class="btn btn-sm btn-outline" (click)="nativeInput.focus()">
+                    🎯 nativeInput.focus()
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline" (click)="nativeInput.select()">
+                    📝 nativeInput.select()
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline" (click)="nativeInput.value = ''">
+                    🗑️ nativeInput.value = ''
+                  </button>
+                  <button type="button" class="btn btn-sm btn-text" (click)="nativeInput.value = sampleInputText">
+                    Hoàn tác text
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Cú Pháp Template Variable #varName</span>
+                <span class="code-lang">HTML</span>
+              </div>
+              <pre><code><span class="c-comment">&lt;!-- 1. Tham chiếu đến Component con: --&gt;</span>
+&lt;<span class="c-tag">app-toggle-item</span> <span class="c-highlight">#localToggle</span>&gt;&lt;/<span class="c-tag">app-toggle-item</span>&gt;
+
+<span class="c-comment">&lt;!-- Nút bấm cha gọi thẳng method của con: --&gt;</span>
+&lt;<span class="c-tag">button</span> (<span class="c-attr">click</span>)=<span class="c-str">"<span class="c-highlight">localToggle.toggle()</span>"</span>&gt;
+  Đảo Trạng Thái
+&lt;/<span class="c-tag">button</span>&gt;
+
+<span class="c-comment">&lt;!-- 2. Tham chiếu đến Native HTMLElement: --&gt;</span>
+&lt;<span class="c-tag">input</span> <span class="c-highlight">#nativeInput</span> <span class="c-attr">type</span>=<span class="c-str">"text"</span> /&gt;
+
+<span class="c-comment">&lt;!-- Gọi trực tiếp DOM methods: focus(), select() --&gt;</span>
+&lt;<span class="c-tag">button</span> (<span class="c-attr">click</span>)=<span class="c-str">"<span class="c-highlight">nativeInput.focus()</span>"</span>&gt;Focus&lt;/<span class="c-tag">button</span>&gt;
+&lt;<span class="c-tag">button</span> (<span class="c-attr">click</span>)=<span class="c-str">"<span class="c-highlight">nativeInput.value = ''</span>"</span>&gt;Clear&lt;/<span class="c-tag">button</span>&gt;</code></pre>
+
+              <div class="callout callout-info">
+                <strong>Phạm vi sử dụng (Scope):</strong> Template Variable chỉ có hiệu lực bên trong template của component nơi nó được khai báo.
+                Bạn không thể dùng nó ở component con hoặc component cha trừ khi truyền nó qua <code>&#64;Input</code> hoặc truy vấn bằng <code>&#64;ViewChild</code>!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 2: exportAs (ngForm & ngModel)                         -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'export-as') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge success">Phần 2</span>
+            <h2 class="card-title">Cú Pháp exportAs: #varName="exportAsOfDirective"</h2>
+          </div>
+          <span class="info-tag">Ví dụ Form Validation từ Tài liệu</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">📋</div>
+            <div class="concept-text">
+              <strong>Tại sao cần <code>exportAs</code>?</strong>
+              Khi một thẻ HTML gắn nhiều directive (ví dụ thẻ <code>&lt;form&gt;</code> có gắn <code>NgForm</code>, thẻ <code>&lt;input&gt;</code> có gắn <code>NgModel</code>),
+              nếu chỉ viết <code>#f</code>, Angular sẽ mặc định trả về thẻ <code>HTMLFormElement</code>.
+              Để lấy về chính xác đối tượng directive <code>NgForm</code> nhằm kiểm tra tính hợp lệ (validation),
+              bạn dùng cú pháp: <code>#f="ngForm"</code> và <code>#ctrl="ngModel"</code>.
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Form Validation Sandbox -->
+            <div class="panel-box">
+              <h3 class="panel-title">📝 Thử Nghiệm: Trích Xuất Directive ngForm &amp; ngModel</h3>
+
+              <!-- Form khai báo #userForm="ngForm" -->
+              <form #userForm="ngForm" (ngSubmit)="onFormSubmit(userForm.valid)" class="export-as-form">
+                <!-- Field 1: Họ tên -->
+                <div class="form-group">
+                  <label class="form-label" for="fullNameInput">
+                    Họ và Tên (* bắt buộc):
+                  </label>
+                  <input
+                    id="fullNameInput"
+                    type="text"
+                    name="fullName"
+                    class="form-control"
+                    [(ngModel)]="formModel.fullName"
+                    required
+                    minlength="3"
+                    #nameCtrl="ngModel"
+                  />
+                  @if (nameCtrl.invalid && (nameCtrl.dirty || nameCtrl.touched)) {
+                    <span class="error-text">⚠️ Tên phải có ít nhất 3 ký tự!</span>
+                  }
+                </div>
+
+                <!-- Field 2: Email -->
+                <div class="form-group">
+                  <label class="form-label" for="emailInput">
+                    Địa chỉ Email (* bắt buộc &amp; đúng định dạng):
+                  </label>
+                  <input
+                    id="emailInput"
+                    type="email"
+                    name="email"
+                    class="form-control"
+                    [(ngModel)]="formModel.email"
+                    required
+                    email
+                    #emailCtrl="ngModel"
+                  />
+                  @if (emailCtrl.invalid && (emailCtrl.dirty || emailCtrl.touched)) {
+                    <span class="error-text">⚠️ Vui lòng nhập địa chỉ email hợp lệ!</span>
+                  }
+                </div>
+
+                <div class="form-actions-row">
+                  <button type="submit" class="btn btn-primary" [disabled]="userForm.invalid">
+                    💾 Gửi Dữ Liệu (userForm.valid={{ userForm.valid }})
+                  </button>
+                  <button type="button" class="btn btn-outline" (click)="userForm.resetForm()">
+                    🔄 userForm.resetForm()
+                  </button>
+                </div>
+              </form>
+
+              <!-- Bảng tra cứu trạng thái directive lấy qua exportAs -->
+              <div class="render-output-box">
+                <div class="output-label">Trạng Thái Directive Đọc Qua #nameCtrl="ngModel":</div>
+                <div class="flags-grid">
+                  <span class="flag-pill" [class.on]="nameCtrl.valid">valid: {{ nameCtrl.valid }}</span>
+                  <span class="flag-pill" [class.on]="nameCtrl.invalid">invalid: {{ nameCtrl.invalid }}</span>
+                  <span class="flag-pill" [class.on]="nameCtrl.dirty">dirty: {{ nameCtrl.dirty }}</span>
+                  <span class="flag-pill" [class.on]="nameCtrl.pristine">pristine: {{ nameCtrl.pristine }}</span>
+                  <span class="flag-pill" [class.on]="nameCtrl.touched">touched: {{ nameCtrl.touched }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Cách exportAs Hoạt Động</span>
+                <span class="code-lang">HTML</span>
+              </div>
+              <pre><code><span class="c-comment">&lt;!-- 1. Lấy NgForm instance qua exportAs="ngForm" --&gt;</span>
+&lt;<span class="c-tag">form</span> <span class="c-highlight">#userForm="ngForm"</span> (<span class="c-attr">ngSubmit</span>)=<span class="c-str">"onSubmit(userForm.valid)"</span>&gt;
+
+  <span class="c-comment">&lt;!-- 2. Lấy NgModel instance qua exportAs="ngModel" --&gt;</span>
+  &lt;<span class="c-tag">input</span>
+    <span class="c-attr">name</span>=<span class="c-str">"email"</span>
+    <span class="c-attr">[(ngModel)]</span>=<span class="c-str">"model.email"</span>
+    <span class="c-attr">required email</span>
+    <span class="c-highlight">#emailCtrl="ngModel"</span>
+  /&gt;
+
+  <span class="c-comment">&lt;!-- Đọc trực tiếp các cờ trạng thái: --&gt;</span>
+  &lt;<span class="c-tag">span</span> <span class="c-attr">*ngIf</span>=<span class="c-str">"emailCtrl.invalid &amp;&amp; emailCtrl.touched"</span>&gt;
+    Email không hợp lệ!
+  &lt;/<span class="c-tag">span</span>&gt;
+
+  <span class="c-comment">&lt;!-- Khóa nút Submit nếu cả Form chưa hợp lệ: --&gt;</span>
+  &lt;<span class="c-tag">button</span> [disabled]=<span class="c-str">"userForm.invalid"</span>&gt;Submit&lt;/<span class="c-tag">button</span>&gt;
+&lt;/<span class="c-tag">form</span>&gt;</code></pre>
+
+              <div class="callout callout-success">
+                <strong>Định nghĩa exportAs:</strong> Trong code khai báo directive, thuộc tính <code>&#64;Directive(&#123; exportAs: 'tênBiệtDanh' &#125;)</code>
+                chính là cơ chế mở ra cánh cổng cho template variable kết nối vào!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 3: @ViewChild in Class (static & read)                  -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'view-child') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge warning">Phần 3</span>
+            <h2 class="card-title">&#64;ViewChild Trong Class: static: true/false &amp; read: ElementRef</h2>
+          </div>
+          <span class="info-tag">Điều khiển từ TypeScript Class</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner banner-warning">
+            <div class="concept-icon">🔍</div>
+            <div class="concept-text">
+              <strong>Khi nào dùng &#64;ViewChild?</strong>
+              Khi bạn cần gọi method của component con bên trong mã lệnh TypeScript của component cha (chứ không phải ngoài template),
+              bạn dùng <code>&#64;ViewChild('templateVarName')</code>.
+              <br />
+              • <code>static: true</code>: Khởi tạo trước Change Detection, có sẵn ngay trong <code>ngOnInit()</code>.
+              <br />
+              • <code>static: false</code> (mặc định): Chỉ sẵn sàng sau khi DOM hoàn tất render trong <code>ngAfterViewInit()</code>.
+              <br />
+              • <code>read: ElementRef</code>: Đọc thẻ DOM native thay vì instance class của Component.
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Thao tác ViewChild từ Class -->
+            <div class="panel-box">
+              <h3 class="panel-title">🎮 Thử Nghiệm: Gọi Method Con Từ TypeScript Class</h3>
+              <p class="panel-desc">
+                Các nút bấm bên dưới gọi hàm trong <code>Day010TemplateVariableViewchildViewchildren</code> Class,
+                sau đó class dùng <code>this.singleTargetToggleRef</code> để điều khiển con:
+              </p>
+
+              <!-- Single target toggle component -->
+              <div class="demo-subcomponent-wrapper">
+                <app-toggle-item
+                  #singleTargetToggle
+                  label="Hệ Thống Bơm Làm Mát (Target ViewChild)"
+                  icon="❄️"
+                  [checked]="isSingleToggleChecked()"
+                  (checkedChange)="isSingleToggleChecked.set($event)"
+                ></app-toggle-item>
+              </div>
+
+              <!-- Nút bấm gọi hàm TypeScript class -->
+              <div class="render-output-box">
+                <div class="output-label">Gọi Method Qua this.singleTargetToggleRef:</div>
+                <div class="action-buttons-group">
+                  <button type="button" class="btn btn-primary" (click)="toggleViaViewChild()">
+                    ⚡ this.singleTargetToggleRef.toggle()
+                  </button>
+                  <button type="button" class="btn btn-outline" (click)="turnOnViaViewChild()">
+                    this.turnOn()
+                  </button>
+                  <button type="button" class="btn btn-outline" (click)="turnOffViaViewChild()">
+                    this.turnOff()
+                  </button>
+                  <button type="button" class="btn btn-doc" (click)="highlightViaReadElementRef()">
+                    ✨ read: ElementRef (Đổi DOM Style)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Kiểm chứng static: true trong ngOnInit -->
+              <div class="render-output-box">
+                <div class="output-label">Kiểm Chứng Thời Điểm Lifecycle Sẵn Sàng:</div>
+                <div class="lifecycle-logs-list">
+                  <div class="log-item">
+                    <span class="log-tag static">static: true (ngOnInit)</span>
+                    <span class="log-val">{{ staticInitLog() }}</span>
+                  </div>
+                  <div class="log-item">
+                    <span class="log-tag dynamic">static: false (ngAfterViewInit)</span>
+                    <span class="log-val">{{ afterViewInitLog() }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Cú Pháp &#64;ViewChild &amp; Options</span>
+                <span class="code-lang">TypeScript</span>
+              </div>
+              <pre><code><span class="c-tag">export class</span> AppComponent <span class="c-tag">implements</span> OnInit, AfterViewInit &#123;
+  <span class="c-comment">// 1. static: true -> Truy cập an toàn trong ngOnInit()</span>
+  <span class="c-tag">&#64;ViewChild</span>(<span class="c-str">'staticInput'</span>, &#123; <span class="c-highlight">static: true</span> &#125;)
+  inputRef!: ElementRef&lt;HTMLInputElement&gt;;
+
+  <span class="c-comment">// 2. Truy vấn Component instance (mặc định static: false)</span>
+  <span class="c-tag">&#64;ViewChild</span>(<span class="c-str">'singleToggle'</span>)
+  toggleComp!: AppToggleItemComponent;
+
+  <span class="c-comment">// 3. read: ElementRef -> Lấy native DOM của component</span>
+  <span class="c-tag">&#64;ViewChild</span>(<span class="c-str">'singleToggle'</span>, &#123; <span class="c-highlight">read: ElementRef</span> &#125;)
+  toggleNativeEl!: ElementRef&lt;HTMLElement&gt;;
+
+  ngOnInit() &#123;
+    <span class="c-comment">// inputRef đã sẵn sàng tại đây!</span>
+  &#125;
+
+  ngAfterViewInit() &#123;
+    <span class="c-comment">// toggleComp đã sẵn sàng tại đây!</span>
+    this.toggleComp.<span class="c-attr">turnOn</span>();
+  &#125;
+&#125;</code></pre>
+
+              <div class="callout callout-warning">
+                <strong>Cạm bẫy thường gặp (Gotcha):</strong> Đừng bao giờ truy cập <code>&#64;ViewChild</code> có <code>static: false</code>
+                trong <code>ngOnInit()</code>, vì tại thời điểm đó Angular chưa render xong DOM con, giá trị sẽ bị <code>undefined</code>!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 4: @ViewChildren & QueryList                           -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'view-children') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 4</span>
+            <h2 class="card-title">&#64;ViewChildren &amp; QueryList: Thao Tác Danh Sách Hàng Loạt</h2>
+          </div>
+          <span class="info-tag">Quản lý nhiều Component cùng loại</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🗂️</div>
+            <div class="concept-text">
+              <strong>Khi nào dùng &#64;ViewChildren?</strong>
+              Khi bạn render một danh sách nhiều component (ví dụ qua <code>&#64;for</code>), <code>&#64;ViewChildren(ComponentType)</code>
+              sẽ gom toàn bộ các instance vào một đối tượng <code>QueryList</code>.
+              QueryList hỗ trợ các hàm lặp như <code>.forEach()</code>, <code>.map()</code>, <code>.filter()</code>
+              và phát ra Observable <code>.changes</code> mỗi khi có phần tử được thêm hoặc xóa khỏi DOM.
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Thử nghiệm QueryList batch action -->
+            <div class="panel-box">
+              <div class="panel-header-row">
+                <h3 class="panel-title">🎮 Thao Tác Hàng Loạt Với QueryList</h3>
+                <div class="batch-btns-row">
+                  <button type="button" class="btn btn-sm btn-primary" (click)="turnAllOnViaViewChildren()">
+                    ⚡ Bật Toàn Bộ
+                  </button>
+                  <button type="button" class="btn btn-sm btn-active" (click)="turnAllOffViaViewChildren()">
+                    🛑 Tắt Toàn Bộ
+                  </button>
+                </div>
+              </div>
+
+              <!-- Danh sách thiết bị render qua @for -->
+              <div class="devices-vertical-list">
+                @for (device of smartDevices(); track device.id) {
+                  <app-toggle-item
+                    [label]="device.label"
+                    [icon]="device.icon"
+                    [checked]="device.checked"
+                    (checkedChange)="onDeviceToggleChange(device.id, $event)"
+                  ></app-toggle-item>
+                }
+              </div>
+
+              <!-- Thêm / Xóa động để kích hoạt QueryList.changes -->
+              <div class="render-output-box">
+                <div class="output-label">Kích Hoạt Sự Kiện QueryList.changes (Thêm/Bớt phần tử):</div>
+                <div class="action-buttons-group">
+                  <button type="button" class="btn btn-sm btn-outline" (click)="addNewDevice()">
+                    ➕ Thêm Thiết Bị Vào DOM
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline" (click)="removeLastDevice()">
+                    ➖ Gỡ Thiết Bị Khỏi DOM
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Cú Pháp &#64;ViewChildren &amp; QueryList</span>
+                <span class="code-lang">TypeScript</span>
+              </div>
+              <pre><code><span class="c-tag">&#64;Component</span>(&#123; ... &#125;)
+<span class="c-tag">export class</span> DashboardComponent <span class="c-tag">implements</span> AfterViewInit &#123;
+  <span class="c-comment">// Truy vấn toàn bộ các instance của AppToggleItemComponent</span>
+  <span class="c-tag">&#64;ViewChildren</span>(AppToggleItemComponent)
+  toggleList!: <span class="c-highlight">QueryList&lt;AppToggleItemComponent&gt;</span>;
+
+  ngAfterViewInit() &#123;
+    <span class="c-comment">// Lắng nghe khi số lượng phần tử thay đổi:</span>
+    this.toggleList.<span class="c-attr">changes</span>.subscribe(() =&gt; &#123;
+      console.log(<span class="c-str">'Số lượng hiện tại:'</span>, this.toggleList.length);
+    &#125;);
+  &#125;
+
+  <span class="c-comment">// Bật toàn bộ bằng cách lặp qua QueryList:</span>
+  turnAllOn() &#123;
+    this.toggleList.<span class="c-highlight">forEach</span>(comp =&gt; comp.<span class="c-attr">turnOn</span>());
+  &#125;
+&#125;</code></pre>
+
+              <div class="callout callout-info">
+                <strong>Điểm đặc biệt của QueryList:</strong> Không giống như mảng thông thường (Array),
+                <code>QueryList</code> là một Observable collection tự động cập nhật khi DOM thay đổi,
+                không cần phải tự query lại thủ công!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 5: Signal Queries (viewChild / viewChildren)            -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'signal-queries') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 5</span>
+            <h2 class="card-title">Tiến Hóa: Decorator Queries vs Angular 19 Signal Queries</h2>
+          </div>
+          <span class="info-tag">viewChild() &amp; viewChildren()</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🚀</div>
+            <div class="concept-text">
+              <strong>Bước nhảy vọt từ Angular 17.2+:</strong>
+              Angular giới thiệu các hàm truy vấn dạng Signal: <code>viewChild()</code> và <code>viewChildren()</code>.
+              Chúng thay thế các decorator <code>&#64;ViewChild</code> cổ điển, trả về một <code>Signal</code> có thể dùng trực tiếp
+              trong <code>computed()</code> hoặc template mà không cần chờ đợi phức tạp ở <code>ngAfterViewInit()</code>!
+            </div>
+          </div>
+
+          <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Tiêu Chí So Sánh</th>
+                  <th>Decorator Cổ Điển (Day 10)</th>
+                  <th>Signal Query Hiện Đại (Angular 19+)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Cú pháp khai báo</strong></td>
+                  <td>
+                    <code>&#64;ViewChild('myRef') el!: ElementRef;</code><br />
+                    <code>&#64;ViewChildren(MyComp) list!: QueryList;</code>
+                  </td>
+                  <td>
+                    <code>readonly el = viewChild&lt;ElementRef&gt;('myRef');</code><br />
+                    <code>readonly list = viewChildren(MyComp);</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Kiểu dữ liệu trả về</strong></td>
+                  <td>ElementRef | Component | QueryList</td>
+                  <td><span class="badge-tag green">Signal&lt;T | undefined&gt;</span> (Phản ứng tức thời)</td>
+                </tr>
+                <tr>
+                  <td><strong>Bắt buộc có giá trị (Required)</strong></td>
+                  <td>Dùng toán tử Non-null <code>el!</code> (Dễ lỗi runtime)</td>
+                  <td><span class="badge-tag green">viewChild.required()</span> (Bảo đảm type-safe)</td>
+                </tr>
+                <tr>
+                  <td><strong>Truy cập trong template</strong></td>
+                  <td><code>{{ '{' }}{{ '{' }} myEl.value {{ '}' }}{{ '}' }}</code> (Dễ lỗi null trước khi init)</td>
+                  <td><code>{{ '{' }}{{ '{' }} myEl()?.value {{ '}' }}{{ '}' }}</code> (An toàn với Signal)</td>
+                </tr>
+                <tr>
+                  <td><strong>Tương thích Zoneless</strong></td>
+                  <td>Phụ thuộc Change Detection Zone.js</td>
+                  <td><span class="badge-tag green">Tương thích 100% Signal-based Zoneless</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 6: Smart Lab Device Control Dashboard Lab              -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'smart-dashboard') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge success">Phần 6</span>
+            <h2 class="card-title">Phòng Lab Thực Tế: Smart Lab Device Control Dashboard</h2>
+          </div>
+          <span class="info-tag">Ứng dụng thực tế ViewChildren &amp; QueryList</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🔬</div>
+            <div class="concept-text">
+              <strong>Kịch bản thực tế:</strong> Bảng điều khiển trung tâm quản lý thiết bị phòng thí nghiệm công nghệ cao.
+              Component cha giám sát danh sách thiết bị, tính toán điện năng tiêu thụ theo thời gian thực,
+              và sử dụng <code>&#64;ViewChildren</code> để kích hoạt <strong>Tắt Khẩn Cấp Toàn Bộ (Emergency Stop)</strong>
+              hoặc <strong>Khởi Động Toàn Bộ Hệ Thống</strong> chỉ bằng 1 thao tác duy nhất!
+            </div>
+          </div>
+
+          <!-- Thống kê hệ thống -->
+          <div class="dashboard-stats-card">
+            <div class="stat-box">
+              <span class="stat-num">{{ activeCount() }} / {{ smartDevices().length }}</span>
+              <span class="stat-title">Thiết bị đang hoạt động</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num highlight">{{ totalPowerWatts() | number }} W</span>
+              <span class="stat-title">Tổng công suất điện tiêu thụ</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num status" [class.danger]="activeCount() === 0">
+                {{ activeCount() > 0 ? '🟢 Ổn định' : '🔴 Toàn bộ đã tắt' }}
+              </span>
+              <span class="stat-title">Trạng thái hệ thống</span>
+            </div>
+          </div>
+
+          <!-- Dashboard Toolbar -->
+          <div class="dashboard-toolbar-row">
+            <div class="toolbar-left">
+              <strong>Bảng Điều Khiển Trung Tâm (Central Controller)</strong>
+            </div>
+            <div class="toolbar-actions">
+              <button type="button" class="btn btn-primary" (click)="turnAllOnViaViewChildren()">
+                ⚡ Khởi Động Toàn Bộ
+              </button>
+              <button type="button" class="btn btn-active" (click)="turnAllOffViaViewChildren()">
+                🛑 Dừng Khẩn Cấp (Emergency Stop)
+              </button>
+            </div>
+          </div>
+
+          <!-- Grid thiết bị thông minh -->
+          <div class="smart-devices-grid">
+            @for (dev of smartDevices(); track dev.id) {
+              <div class="device-grid-item" [class.on]="dev.checked">
+                <app-toggle-item
+                  [label]="dev.label"
+                  [icon]="dev.icon"
+                  [checked]="dev.checked"
+                  (checkedChange)="onDeviceToggleChange(dev.id, $event)"
+                ></app-toggle-item>
+                <div class="power-tag">
+                  Công suất: <strong>{{ dev.powerUsage }} W</strong>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+  </div>
 </div>

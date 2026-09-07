@@ -1,4 +1,1073 @@
-<div class="day-container">
-  <h2>Day006-Attribute-Directive-Class-Style</h2>
-  <p>day006-attribute-directive-class-style works!</p>
+<div class="day006-page">
+  <!-- ================================================================= -->
+  <!-- PAGE HEADER SECTION                                               -->
+  <!-- ================================================================= -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-primary">Day 06</span>
+        <span class="badge badge-syntax">Attribute Directive</span>
+        <span class="badge badge-syntax">[class.name]</span>
+        <span class="badge badge-syntax">[class]="expr"</span>
+        <span class="badge badge-syntax">[style.prop.unit]</span>
+        <span class="badge badge-syntax">[style]="expr"</span>
+        <span class="badge badge-syntax">Native vs NgClass</span>
+      </div>
+      <h1 class="page-title">Attribute Directive: Class Binding & Style Binding</h1>
+      <p class="page-subtitle">
+        Khám phá toàn diện cơ chế điều khiển giao diện trong Angular:
+        phân biệt rạch ròi với <strong>Structural Directive</strong>, làm chủ kỹ thuật <strong>Single Class Toggle</strong>,
+        thao tác linh hoạt với <strong>3 định dạng Class Expression</strong>,
+        tận dụng sức mạnh của <strong>Style Binding kèm đơn vị đo</strong> (<code>px</code>, <code>%</code>, <code>deg</code>),
+        và thực hành thiết kế động với <strong>Multi-style Studio</strong>.
+      </p>
+    </div>
+
+    <!-- Quick Status & Action Stat Box -->
+    <div class="stats-badge-box">
+      <div class="stat-item">
+        <span class="stat-label">Trạng thái Demo Thực Hành:</span>
+        <span class="stat-value">6 Kịch bản Thực tế Sẵn Sàng</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Hành động vừa thực hiện:</span>
+        <span class="stat-value action-highlight">{{ lastActionMessage() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================================================================= -->
+  <!-- NAVIGATION TABS                                                   -->
+  <!-- ================================================================= -->
+  <nav class="lab-tabs-nav">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'all'"
+      (click)="currentTab.set('all')"
+    >
+      📚 Toàn bộ Bài Học
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'single-class'"
+      (click)="currentTab.set('single-class')"
+    >
+      1. Single Class Toggle
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'multi-class'"
+      (click)="currentTab.set('multi-class')"
+    >
+      2. Đa Dạng Biểu Thức Class
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'style-units'"
+      (click)="currentTab.set('style-units')"
+    >
+      3. Style Binding Kèm Đơn Vị
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'multi-style'"
+      (click)="currentTab.set('multi-style')"
+    >
+      4. Multi-style Studio
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'vs-ngclass'"
+      (click)="currentTab.set('vs-ngclass')"
+    >
+      5. So Sánh Chuẩn vs NgClass
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="currentTab() === 'product-lab'"
+      (click)="currentTab.set('product-lab')"
+    >
+      6. Phòng Lab Thẻ Sản Phẩm
+    </button>
+  </nav>
+
+  <!-- ================================================================= -->
+  <!-- MAIN CONTENT SECTIONS                                             -->
+  <!-- ================================================================= -->
+  <div class="content-sections">
+
+    <!-- =============================================================== -->
+    <!-- SECTION 1: Single Class Toggle                                 -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'single-class') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 1</span>
+            <h2 class="card-title">Single Class Toggle: [class.class-name]="condition"</h2>
+          </div>
+          <span class="info-tag">Ví dụ Tab Navigation từ Tài liệu</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">💡</div>
+            <div class="concept-text">
+              <strong>Bản chất cốt lõi:</strong> Cú pháp <code>[class.tên-class]="điều_kiện"</code> dùng để bật hoặc tắt một class đơn lẻ trên phần tử DOM.
+              Khi biểu thức trả về giá trị <em>truthy</em> (ví dụ: <code>true</code>), Angular sẽ thêm class đó vào <code>classList</code>;
+              khi trả về <em>falsy</em> (ví dụ: <code>false</code>, <code>null</code>, <code>undefined</code>), Angular sẽ tự động gỡ bỏ class đó ra.
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Panel tương tác trực tiếp -->
+            <div class="panel-box">
+              <h3 class="panel-title">🎮 Thử Nghiệm: Tab Navigation & Quick Toggles</h3>
+              <p class="panel-desc">
+                Nhấn chọn các tab bên dưới để quan sát class <code>tab-active</code> được gắn tự động vào tab tương ứng:
+              </p>
+
+              <!-- Tabs list demo -->
+              <div class="tabs-demo-container">
+                <div class="tabs-row">
+                  @for (tab of tabsList; track tab.id) {
+                    <button
+                      type="button"
+                      class="nav-tab-item"
+                      [class.tab-active]="activeTabId() === tab.id"
+                      (click)="selectTab(tab.id)"
+                    >
+                      <span class="tab-icon">{{ tab.icon }}</span>
+                      <span class="tab-text">{{ tab.label }}</span>
+                      @if (tab.badge) {
+                        <span class="tab-badge-pill" [class.badge-active]="activeTabId() === tab.id">
+                          {{ tab.badge }}
+                        </span>
+                      }
+                    </button>
+                  }
+                </div>
+
+                <!-- Tab content panel có hỗ trợ dark theme & elevation toggles -->
+                <div
+                  class="tab-content-display"
+                  [class.dark-theme]="isDarkMode()"
+                  [class.elevated-shadow]="isElevated()"
+                  [class.pulse-animation]="isPulsing()"
+                  [class.custom-bordered]="hasBorder()"
+                >
+                  <div class="display-header">
+                    <span class="display-icon">
+                      {{ tabsList[activeTabId() - 1].icon }}
+                    </span>
+                    <div>
+                      <h4 class="display-title">{{ tabsList[activeTabId() - 1].label }}</h4>
+                      <p class="display-desc">{{ tabsList[activeTabId() - 1].description }}</p>
+                    </div>
+                  </div>
+
+                  <div class="applied-classes-preview">
+                    <span class="preview-label">Các Single Classes Đang Kích Hoạt:</span>
+                    <div class="pill-group">
+                      <span class="active-pill">[class.tab-active]=true</span>
+                      @if (isDarkMode()) {
+                        <span class="active-pill">[class.dark-theme]=true</span>
+                      }
+                      @if (isElevated()) {
+                        <span class="active-pill">[class.elevated-shadow]=true</span>
+                      }
+                      @if (isPulsing()) {
+                        <span class="active-pill">[class.pulse-animation]=true</span>
+                      }
+                      @if (hasBorder()) {
+                        <span class="active-pill">[class.custom-bordered]=true</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nút toggle hiệu ứng -->
+              <div class="render-output-box">
+                <div class="output-label">Công Tắc Bật / Tắt Single Class:</div>
+                <div class="toggles-grid">
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.btn-active]="isDarkMode()"
+                    (click)="toggleDarkMode()"
+                  >
+                    🌙 Dark Theme: {{ isDarkMode() ? 'BẬT' : 'TẮT' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.btn-active]="isElevated()"
+                    (click)="isElevated.update(v => !v)"
+                  >
+                    🏔️ Đổ Bóng Nổi: {{ isElevated() ? 'BẬT' : 'TẮT' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.btn-active]="isPulsing()"
+                    (click)="isPulsing.update(v => !v)"
+                  >
+                    💓 Nhịp Đập (Pulse): {{ isPulsing() ? 'BẬT' : 'TẮT' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.btn-active]="hasBorder()"
+                    (click)="hasBorder.update(v => !v)"
+                  >
+                    🔲 Viền Đậm: {{ hasBorder() ? 'BẬT' : 'TẮT' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Cú Pháp Single Class Toggle</span>
+                <span class="code-lang">HTML</span>
+              </div>
+              <pre><code><span class="c-comment">&lt;!-- 1. Gắn class tab-active khi tab này đang được chọn --&gt;</span>
+&lt;<span class="c-tag">button</span>
+  <span class="c-attr">class</span>=<span class="c-str">"nav-tab-item"</span>
+  <span class="c-highlight">[class.tab-active]</span>=<span class="c-str">"activeTabId === tab.id"</span>
+  (<span class="c-attr">click</span>)=<span class="c-str">"selectTab(tab.id)"</span>
+&gt;
+  <span>&#123;</span><span>&#123;</span> tab.label <span>&#125;</span><span>&#125;</span>
+&lt;/<span class="c-tag">button</span>&gt;
+
+<span class="c-comment">&lt;!-- 2. Kết hợp nhiều single class trên cùng 1 thẻ: --&gt;</span>
+&lt;<span class="c-tag">div</span>
+  <span class="c-highlight">[class.dark-theme]</span>=<span class="c-str">"isDarkMode"</span>
+  <span class="c-highlight">[class.elevated-shadow]</span>=<span class="c-str">"isElevated"</span>
+  <span class="c-highlight">[class.pulse-animation]</span>=<span class="c-str">"isPulsing"</span>
+&gt;
+  Nội dung bảng điều khiển
+&lt;/<span class="c-tag">div</span>&gt;</code></pre>
+
+              <div class="callout callout-info">
+                <strong>Ưu điểm của Single Class Binding:</strong> Rất trực quan, ngắn gọn, không làm ảnh hưởng đến các class tĩnh
+                khác được định nghĩa sẵn trong thuộc tính <code>class="..."</code> của thẻ.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 2: Multi-format Class Expressions                      -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'multi-class') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge success">Phần 2</span>
+            <h2 class="card-title">Đa Dạng Biểu Thức: [class]="classExpr" (String | Array | Object)</h2>
+          </div>
+          <span class="info-tag">3 Dạng Biểu Thức Từ Tài Liệu</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🎛️</div>
+            <div class="concept-text">
+              <strong>3 định dạng của <code>classExpr</code>:</strong>
+              Khi cần gán hoặc tính toán nhiều class cùng lúc, Angular hỗ trợ 3 dạng dữ liệu:
+              <strong>1. String</strong> (chuỗi cách nhau dấu cách: <code>"class1 class2"</code>),
+              <strong>2. Array String</strong> (mảng các chuỗi: <code>['class1', 'class2']</code>),
+              <strong>3. Object Map</strong> (key là tên class, value là boolean: <code>&#123; class1: true, class2: false &#125;</code>).
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Panel tương tác trực tiếp -->
+            <div class="panel-box">
+              <h3 class="panel-title">🧪 Thử Nghiệm: Chuyển Đổi 3 Định Dạng Biểu Thức</h3>
+
+              <!-- Chọn định dạng -->
+              <div class="format-selector-row">
+                <span class="selector-label">Định dạng <code>classExpr</code>:</span>
+                <div class="btn-toggle-group">
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.btn-active]="classFormat() === 'string'"
+                    (click)="classFormat.set('string')"
+                  >
+                    1. Chuỗi (String)
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.btn-active]="classFormat() === 'array'"
+                    (click)="classFormat.set('array')"
+                  >
+                    2. Mảng (Array String)
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.btn-active]="classFormat() === 'object'"
+                    (click)="classFormat.set('object')"
+                  >
+                    3. Đối tượng (Object Map)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Checkboxes toggle các class -->
+              <div class="checkboxes-matrix">
+                <label class="custom-chk">
+                  <input
+                    type="checkbox"
+                    [checked]="cbRounded()"
+                    (change)="cbRounded.set($any($event.target).checked)"
+                  />
+                  <span><code>box-rounded</code> (Bo góc)</span>
+                </label>
+
+                <label class="custom-chk">
+                  <input
+                    type="checkbox"
+                    [checked]="cbShadow()"
+                    (change)="cbShadow.set($any($event.target).checked)"
+                  />
+                  <span><code>box-shadow</code> (Đổ bóng)</span>
+                </label>
+
+                <label class="custom-chk">
+                  <input
+                    type="checkbox"
+                    [checked]="cbGlow()"
+                    (change)="cbGlow.set($any($event.target).checked)"
+                  />
+                  <span><code>box-glow</code> (Hiệu ứng phát sáng)</span>
+                </label>
+
+                <label class="custom-chk">
+                  <input
+                    type="checkbox"
+                    [checked]="cbBordered()"
+                    (change)="cbBordered.set($any($event.target).checked)"
+                  />
+                  <span><code>box-bordered</code> (Viền đậm)</span>
+                </label>
+
+                <label class="custom-chk">
+                  <input
+                    type="checkbox"
+                    [checked]="cbUppercase()"
+                    (change)="cbUppercase.set($any($event.target).checked)"
+                  />
+                  <span><code>box-uppercase</code> (Chữ in hoa)</span>
+                </label>
+
+                <label class="custom-chk">
+                  <input
+                    type="checkbox"
+                    [checked]="cbGradient()"
+                    (change)="cbGradient.set($any($event.target).checked)"
+                  />
+                  <span><code>box-gradient</code> (Màu chuyển sắc)</span>
+                </label>
+              </div>
+
+              <!-- Hộp kết quả hiển thị áp dụng [class] -->
+              <div class="preview-target-wrapper">
+                @if (classFormat() === 'string') {
+                  <div [class]="stringClassExpr()">
+                    📦 Hộp Thử Nghiệm: Dùng [class]="String"
+                  </div>
+                } @else if (classFormat() === 'array') {
+                  <div [class]="arrayClassExpr()">
+                    📦 Hộp Thử Nghiệm: Dùng [class]="Array String"
+                  </div>
+                } @else {
+                  <div [class]="objectClassExpr()">
+                    📦 Hộp Thử Nghiệm: Dùng [class]="Object Map"
+                  </div>
+                }
+              </div>
+
+              <!-- Live DOM Inspector -->
+              <div class="render-output-box">
+                <div class="output-label">Live DOM Class Inspector:</div>
+                <div class="dom-class-code">
+                  <code>class="{{ stringClassExpr() }}"</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">3 Dạng Biểu Thức classExpr</span>
+                <span class="code-lang">TypeScript / HTML</span>
+              </div>
+              <pre><code><span class="c-comment">// 1. Dạng String (Chuỗi ghép nhau bởi dấu cách)</span>
+stringExpr = <span class="c-str">"demo-box box-rounded box-shadow"</span>;
+<span class="c-comment">&lt;div [class]="stringExpr"&gt;&lt;/div&gt;</span>
+
+<span class="c-comment">// 2. Dạng Array String (Mảng các tên class)</span>
+arrayExpr = [<span class="c-str">'demo-box'</span>, <span class="c-str">'box-rounded'</span>, <span class="c-str">'box-shadow'</span>];
+<span class="c-comment">&lt;div [class]="arrayExpr"&gt;&lt;/div&gt;</span>
+
+<span class="c-comment">// 3. Dạng Object Map (Key là class, Value là boolean)</span>
+objectExpr = &#123;
+  <span class="c-str">'demo-box'</span>: <span class="c-highlight">true</span>,
+  <span class="c-str">'box-rounded'</span>: <span class="c-highlight">this.isRounded</span>,
+  <span class="c-str">'box-shadow'</span>: <span class="c-highlight">this.hasShadow</span>
+&#125;;
+<span class="c-comment">&lt;div [class]="objectExpr"&gt;&lt;/div&gt;</span></code></pre>
+
+              <div class="callout callout-success">
+                <strong>Khi nào dùng dạng nào?</strong>
+                Dạng <strong>String</strong> thích hợp khi nối chuỗi class từ CSS framework (như Bootstrap).
+                Dạng <strong>Array</strong> thích hợp khi lọc danh sách class động.
+                Dạng <strong>Object Map</strong> là phổ biến và mạnh mẽ nhất khi mỗi class phụ thuộc vào một điều kiện logic riêng biệt!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 3: Style Binding with Unit Suffix                      -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'style-units') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge warning">Phần 3</span>
+            <h2 class="card-title">Style Binding Kèm Đơn Vị Đo: [style.property.unit]="numericValue"</h2>
+          </div>
+          <span class="info-tag">Tự động gắn đơn vị px, %, deg, rem</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner banner-warning">
+            <div class="concept-icon">📐</div>
+            <div class="concept-text">
+              <strong>Đặc quyền cú pháp của Angular:</strong> Thay vì phải cộng chuỗi thủ công
+              (ví dụ: <code>[style.width]="width + 'px'"</code>), Angular cho phép viết trực tiếp hậu tố đơn vị:
+              <code>[style.width.%]="80"</code>, <code>[style.height.px]="150"</code>, <code>[style.fontSize.px]="18"</code>, hoặc <code>[style.transform.deg]="45"</code>!
+              Giá trị truyền vào chỉ cần là kiểu <code>number</code> thuần túy.
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Sandbox điều khiển kích thước -->
+            <div class="panel-box">
+              <div class="panel-header-row">
+                <h3 class="panel-title">🎮 Sandbox: Điều Khiển Kích Thước & Góc Xoay</h3>
+                <button type="button" class="btn btn-sm btn-outline" (click)="resetStyleUnitSandbox()">
+                  🔄 Hoàn Tác Mặc Định
+                </button>
+              </div>
+
+              <div class="sliders-form">
+                <!-- Chiều rộng (%) -->
+                <div class="slider-row">
+                  <div class="slider-label">
+                    <span>Chiều Rộng <code>[style.width.%]</code>:</span>
+                    <strong>{{ boxWidthPercent() }}%</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="30"
+                    max="100"
+                    [value]="boxWidthPercent()"
+                    (input)="boxWidthPercent.set(+$any($event.target).value)"
+                  />
+                </div>
+
+                <!-- Chiều cao (px) -->
+                <div class="slider-row">
+                  <div class="slider-label">
+                    <span>Chiều Cao <code>[style.height.px]</code>:</span>
+                    <strong>{{ boxHeightPx() }}px</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="80"
+                    max="220"
+                    [value]="boxHeightPx()"
+                    (input)="boxHeightPx.set(+$any($event.target).value)"
+                  />
+                </div>
+
+                <!-- Bo góc (px) -->
+                <div class="slider-row">
+                  <div class="slider-label">
+                    <span>Bo Góc <code>[style.borderRadius.px]</code>:</span>
+                    <strong>{{ boxRadiusPx() }}px</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="60"
+                    [value]="boxRadiusPx()"
+                    (input)="boxRadiusPx.set(+$any($event.target).value)"
+                  />
+                </div>
+
+                <!-- Góc xoay (deg) -->
+                <div class="slider-row">
+                  <div class="slider-label">
+                    <span>Góc Xoay <code>[style.transform]</code>:</span>
+                    <strong>{{ boxRotationDeg() }}°</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="-25"
+                    max="25"
+                    [value]="boxRotationDeg()"
+                    (input)="boxRotationDeg.set(+$any($event.target).value)"
+                  />
+                </div>
+
+                <!-- Độ trong suốt (%) -->
+                <div class="slider-row">
+                  <div class="slider-label">
+                    <span>Độ Trong Suốt <code>[style.opacity.%]</code>:</span>
+                    <strong>{{ boxOpacityPercent() }}%</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="20"
+                    max="100"
+                    [value]="boxOpacityPercent()"
+                    (input)="boxOpacityPercent.set(+$any($event.target).value)"
+                  />
+                </div>
+              </div>
+
+              <!-- Hộp đồ họa trực quan áp dụng style binding với unit -->
+              <div class="shape-sandbox-stage">
+                <div
+                  class="interactive-shape-box"
+                  [style.width.%]="boxWidthPercent()"
+                  [style.height.px]="boxHeightPx()"
+                  [style.borderRadius.px]="boxRadiusPx()"
+                  [style.transform]="'rotate(' + boxRotationDeg() + 'deg)'"
+                  [style.opacity.%]="boxOpacityPercent()"
+                  [style.backgroundColor]="boxPrimaryColor()"
+                >
+                  <div class="shape-inner-badge">
+                    <span>{{ boxWidthPercent() }}% × {{ boxHeightPx() }}px</span>
+                    <small>Góc xoay: {{ boxRotationDeg() }}deg • Radius: {{ boxRadiusPx() }}px</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích cú pháp -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Cú Pháp Style Binding Kèm Đơn Vị</span>
+                <span class="code-lang">HTML</span>
+              </div>
+              <pre><code><span class="c-comment">&lt;!-- 1. Đơn vị phần trăm (%) --&gt;</span>
+&lt;<span class="c-tag">div</span> <span class="c-highlight">[style.width.%]</span>=<span class="c-str">"boxWidthPercent"</span>&gt;&lt;/<span class="c-tag">div</span>&gt;
+&lt;<span class="c-tag">div</span> <span class="c-highlight">[style.opacity.%]</span>=<span class="c-str">"boxOpacityPercent"</span>&gt;&lt;/<span class="c-tag">div</span>&gt;
+
+<span class="c-comment">&lt;!-- 2. Đơn vị pixel (px) --&gt;</span>
+&lt;<span class="c-tag">div</span> <span class="c-highlight">[style.height.px]</span>=<span class="c-str">"boxHeightPx"</span>&gt;&lt;/<span class="c-tag">div</span>&gt;
+&lt;<span class="c-tag">div</span> <span class="c-highlight">[style.borderRadius.px]</span>=<span class="c-str">"boxRadiusPx"</span>&gt;&lt;/<span class="c-tag">div</span>&gt;
+&lt;<span class="c-tag">div</span> <span class="c-highlight">[style.fontSize.px]</span>=<span class="c-str">"boxFontSizePx"</span>&gt;&lt;/<span class="c-tag">div</span>&gt;
+
+<span class="c-comment">&lt;!-- 3. Đơn vị rem, em, vh, vw --&gt;</span>
+&lt;<span class="c-tag">div</span> <span class="c-highlight">[style.padding.rem]</span>=<span class="c-str">"1.5"</span>&gt;&lt;/<span class="c-tag">div</span>&gt;
+&lt;<span class="c-tag">div</span> <span class="c-highlight">[style.minHeight.vh]</span>=<span class="c-str">"50"</span>&gt;&lt;/<span class="c-tag">div</span>&gt;</code></pre>
+
+              <div class="callout callout-warning">
+                <strong>Lưu ý quan trọng:</strong> Nếu giá trị của biến là <code>null</code> hoặc <code>undefined</code>,
+                Angular sẽ <strong>tự động xóa bỏ</strong> thuộc tính inline style đó khỏi phần tử DOM, giúp DOM luôn sạch sẽ!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 4: Multi-style Expressions & Studio                    -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'multi-style') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 4</span>
+            <h2 class="card-title">Multi-style Expressions & Studio Thiết Kế: [style]="styleExpr"</h2>
+          </div>
+          <span class="info-tag">Hỗ trợ camelCase và dash-case</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🎨</div>
+            <div class="concept-text">
+              <strong>Gán đồng thời nhiều style:</strong> Cú pháp <code>[style]="styleExpr"</code> cho phép truyền một đối tượng
+              (Object) chứa tập hợp các thuộc tính CSS. Trong object đó, tên thuộc tính có thể viết theo kiểu
+              <strong>camelCase</strong> (ví dụ: <code>backgroundColor</code>) hoặc kiểu <strong>dash-case</strong>
+              (ví dụ: <code>'background-color'</code>) đều được Angular hỗ trợ hoàn hảo!
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Studio điều khiển phong cách -->
+            <div class="panel-box">
+              <h3 class="panel-title">🎛️ Bảng Điều Khiển Style Studio</h3>
+
+              <div class="studio-controls-grid">
+                <!-- Chế độ đặt tên thuộc tính -->
+                <div class="control-item full-width">
+                  <span class="control-label">Quy ước đặt tên thuộc tính:</span>
+                  <div class="btn-toggle-group">
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-active]="studioCaseMode() === 'camelCase'"
+                      (click)="studioCaseMode.set('camelCase')"
+                    >
+                      camelCase (backgroundColor, fontSize)
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-active]="studioCaseMode() === 'dash-case'"
+                      (click)="studioCaseMode.set('dash-case')"
+                    >
+                      dash-case ('background-color', 'font-size')
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Màu nền -->
+                <div class="control-item">
+                  <label class="control-label" for="bgColorPicker">Màu Nền (Background):</label>
+                  <div class="color-picker-row">
+                    <input
+                      id="bgColorPicker"
+                      type="color"
+                      [value]="studioBgColor()"
+                      (input)="studioBgColor.set($any($event.target).value)"
+                    />
+                    <code>{{ studioBgColor() }}</code>
+                  </div>
+                </div>
+
+                <!-- Màu chữ -->
+                <div class="control-item">
+                  <label class="control-label" for="textColorPicker">Màu Chữ (Text Color):</label>
+                  <div class="color-picker-row">
+                    <input
+                      id="textColorPicker"
+                      type="color"
+                      [value]="studioTextColor()"
+                      (input)="studioTextColor.set($any($event.target).value)"
+                    />
+                    <code>{{ studioTextColor() }}</code>
+                  </div>
+                </div>
+
+                <!-- Padding -->
+                <div class="control-item">
+                  <label class="control-label">Padding ({{ studioPaddingPx() }}px):</label>
+                  <input
+                    type="range"
+                    min="10"
+                    max="40"
+                    [value]="studioPaddingPx()"
+                    (input)="studioPaddingPx.set(+$any($event.target).value)"
+                  />
+                </div>
+
+                <!-- Độ dày viền -->
+                <div class="control-item">
+                  <label class="control-label">Độ Dày Viền ({{ studioBorderWidthPx() }}px):</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="6"
+                    [value]="studioBorderWidthPx()"
+                    (input)="studioBorderWidthPx.set(+$any($event.target).value)"
+                  />
+                </div>
+
+                <!-- Kiểu viền -->
+                <div class="control-item full-width">
+                  <label class="control-label">Kiểu Đường Viền (Border Style):</label>
+                  <div class="btn-toggle-group">
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-active]="studioBorderStyle() === 'solid'"
+                      (click)="studioBorderStyle.set('solid')"
+                    >
+                      Solid (Nét liền)
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-active]="studioBorderStyle() === 'dashed'"
+                      (click)="studioBorderStyle.set('dashed')"
+                    >
+                      Dashed (Nét đứt)
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-active]="studioBorderStyle() === 'dotted'"
+                      (click)="studioBorderStyle.set('dotted')"
+                    >
+                      Dotted (Chấm bi)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Thẻ hiển thị áp dụng [style]="computedStyleObject()" -->
+              <div class="studio-preview-box" [style]="computedStyleObject()">
+                <h4 class="studio-preview-title">✨ Card Được Định Phong Cách Động</h4>
+                <p class="studio-preview-text">
+                  Toàn bộ thuộc tính hiển thị của thẻ này được áp dụng trực tiếp từ biểu thức
+                  <code>[style]="computedStyleObject"</code> với quy ước <strong>{{ studioCaseMode() }}</strong>.
+                </p>
+                <div class="studio-preview-footer">
+                  <span class="studio-tag">Real-time Computed Style</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel giải thích Code -->
+            <div class="code-box">
+              <div class="code-header">
+                <span class="code-title">Đối Tượng Style Được Tính Toán (Computed)</span>
+                <span class="code-lang">JSON</span>
+              </div>
+              <pre><code><span class="c-comment">// Style Object được binding vào [style]:</span>
+&#123;
+  <span class="c-attr">{{ studioCaseMode() === 'camelCase' ? 'backgroundColor' : "'background-color'" }}</span>: <span class="c-str">"{{ studioBgColor() }}"</span>,
+  <span class="c-attr">color</span>: <span class="c-str">"{{ studioTextColor() }}"</span>,
+  <span class="c-attr">padding</span>: <span class="c-str">"{{ studioPaddingPx() }}px"</span>,
+  <span class="c-attr">{{ studioCaseMode() === 'camelCase' ? 'borderWidth' : "'border-width'" }}</span>: <span class="c-str">"{{ studioBorderWidthPx() }}px"</span>,
+  <span class="c-attr">{{ studioCaseMode() === 'camelCase' ? 'borderStyle' : "'border-style'" }}</span>: <span class="c-str">"{{ studioBorderStyle() }}"</span>
+&#125;</code></pre>
+
+              <div class="callout callout-info">
+                <strong>Cả hai quy ước đều hợp lệ:</strong> Bạn có thể dùng <code>backgroundColor</code> (camelCase)
+                hoặc <code>'background-color'</code> (dash-case đặt trong nháy). Angular sẽ chuẩn hóa và gán trực tiếp vào
+                <code>element.style</code> một cách tối ưu.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 5: Native Binding vs NgClass / NgStyle                 -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'vs-ngclass') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge primary">Phần 5</span>
+            <h2 class="card-title">Đối Chiếu & Khuyến Cáo: Native Binding vs NgClass / NgStyle</h2>
+          </div>
+          <span class="info-tag">Khuyến nghị chính thức từ Angular</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">⚖️</div>
+            <div class="concept-text">
+              <strong>Tại sao nên dùng <code>[class]</code> & <code>[style]</code> thay vì <code>NgClass</code> & <code>NgStyle</code>?</strong>
+              Trước đây trong Angular cũ, <code>NgClass</code> và <code>NgStyle</code> là các directive bắt buộc.
+              Tuy nhiên từ Angular 9 (Ivy engine) trở đi, bộ biên dịch Angular đã tối ưu vượt bậc cho cú pháp native binding
+              <code>[class]</code> và <code>[style]</code>, mang lại hiệu năng cao hơn, kích thước bundle nhỏ hơn và không cần import module!
+            </div>
+          </div>
+
+          <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Tiêu Chí So Sánh</th>
+                  <th>Cú Pháp Chuẩn: [class] & [style]</th>
+                  <th>Cú Pháp Cũ: [ngClass] & [ngStyle]</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Khả năng Module</strong></td>
+                  <td><span class="badge-tag green">Không cần import gì</span> (Tích hợp sẵn trong core compiler)</td>
+                  <td><span class="badge-tag orange">Phải import CommonModule / NgClass</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Single class / Single style</strong></td>
+                  <td>Cú pháp siêu ngắn: <code>[class.active]="val"</code>, <code>[style.width.px]="val"</code></td>
+                  <td>Không hỗ trợ (phải viết object map phức tạp)</td>
+                </tr>
+                <tr>
+                  <td><strong>Hậu tố đơn vị đo (Unit Suffix)</strong></td>
+                  <td><span class="badge-tag green">Có hỗ trợ</span> (<code>.px</code>, <code>.%</code>, <code>.rem</code>, <code>.deg</code>)</td>
+                  <td><span class="badge-tag red">Không hỗ trợ</span> (phải tự nối chuỗi đơn vị)</td>
+                </tr>
+                <tr>
+                  <td><strong>Hiệu năng Change Detection</strong></td>
+                  <td><span class="badge-tag green">Tối ưu trực tiếp qua Ivy DOM instruction</span></td>
+                  <td>Phải khởi tạo một Directive instance riêng cho mỗi phần tử</td>
+                </tr>
+                <tr>
+                  <td><strong>Khuyến nghị từ Angular Team</strong></td>
+                  <td><span class="badge-tag green">Khuyên dùng cho 100% dự án mới</span></td>
+                  <td>Giữ lại chủ yếu để tương thích ngược (Legacy projects)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- =============================================================== -->
+    <!-- SECTION 6: E-commerce Product Card Lab                         -->
+    <!-- =============================================================== -->
+    @if (currentTab() === 'all' || currentTab() === 'product-lab') {
+      <section class="card section-card">
+        <div class="card-header">
+          <div class="header-title-group">
+            <span class="card-badge success">Phần 6</span>
+            <h2 class="card-title">Phòng Lab Thực Tế: Thẻ Sản Phẩm Thương Mại Điện Tử (Product Card)</h2>
+          </div>
+          <span class="info-tag">Tích hợp toàn diện Class & Style Binding</span>
+        </div>
+
+        <div class="card-body">
+          <div class="concept-banner">
+            <div class="concept-icon">🛍️</div>
+            <div class="concept-text">
+              <strong>Ứng dụng thực tế hoàn chỉnh:</strong> Xây dựng thẻ sản phẩm cao cấp kết hợp đồng thời:
+              Single Class Toggle (<code>[class.on-sale]</code>, <code>[class.is-featured]</code>),
+              Multi-class Status (<code>[class]="'stock-' + status"</code>),
+              và Style Binding với CSS Variables (<code>[style.--accent-color]</code>, <code>[style.boxShadow]</code>).
+            </div>
+          </div>
+
+          <div class="demo-grid-2">
+            <!-- Bảng điều khiển thuộc tính sản phẩm -->
+            <div class="panel-box">
+              <h3 class="panel-title">⚙️ Thiết Lập Trạng Thái Sản Phẩm</h3>
+
+              <div class="product-controls-list">
+                <!-- Tình trạng kho hàng -->
+                <div class="control-row">
+                  <span class="row-label">Tình trạng kho hàng:</span>
+                  <div class="btn-toggle-group">
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-active]="productStockStatus() === 'in-stock'"
+                      (click)="setProductStock('in-stock')"
+                    >
+                      ✅ Còn Hàng
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-active]="productStockStatus() === 'low-stock'"
+                      (click)="setProductStock('low-stock')"
+                    >
+                      ⚠️ Sắp Hết (Low)
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm"
+                      [class.btn-active]="productStockStatus() === 'out-of-stock'"
+                      (click)="setProductStock('out-of-stock')"
+                    >
+                      ❌ Hết Hàng
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Giảm giá -->
+                <div class="control-row">
+                  <div class="checkbox-label-group">
+                    <label class="custom-chk">
+                      <input
+                        type="checkbox"
+                        [checked]="isProductDiscounted()"
+                        (change)="isProductDiscounted.set($any($event.target).checked)"
+                      />
+                      <span>Chương trình Khuyến Mãi (Sale)</span>
+                    </label>
+                  </div>
+                  @if (isProductDiscounted()) {
+                    <div class="discount-slider-wrap">
+                      <span>Mức giảm: <strong>-{{ productDiscountPercent() }}%</strong></span>
+                      <input
+                        type="range"
+                        min="5"
+                        max="50"
+                        step="5"
+                        [value]="productDiscountPercent()"
+                        (input)="productDiscountPercent.set(+$any($event.target).value)"
+                      />
+                    </div>
+                  }
+                </div>
+
+                <!-- Nổi bật -->
+                <div class="control-row">
+                  <label class="custom-chk">
+                    <input
+                      type="checkbox"
+                      [checked]="isProductFeatured()"
+                      (change)="isProductFeatured.set($any($event.target).checked)"
+                    />
+                    <span>⭐ Đánh dấu Sản Phẩm Nổi Bật (Featured Badge & Glow)</span>
+                  </label>
+                </div>
+
+                <!-- Màu sắc chủ đạo (Theme color) -->
+                <div class="control-row">
+                  <span class="row-label">Màu thương hiệu (Accent Color):</span>
+                  <div class="color-palette-buttons">
+                    <button
+                      type="button"
+                      class="palette-btn"
+                      style="background: #3b82f6;"
+                      [class.selected]="productThemeColor() === '#3b82f6'"
+                      (click)="productThemeColor.set('#3b82f6')"
+                    ></button>
+                    <button
+                      type="button"
+                      class="palette-btn"
+                      style="background: #10b981;"
+                      [class.selected]="productThemeColor() === '#10b981'"
+                      (click)="productThemeColor.set('#10b981')"
+                    ></button>
+                    <button
+                      type="button"
+                      class="palette-btn"
+                      style="background: #8b5cf6;"
+                      [class.selected]="productThemeColor() === '#8b5cf6'"
+                      (click)="productThemeColor.set('#8b5cf6')"
+                    ></button>
+                    <button
+                      type="button"
+                      class="palette-btn"
+                      style="background: #f59e0b;"
+                      [class.selected]="productThemeColor() === '#f59e0b'"
+                      (click)="productThemeColor.set('#f59e0b')"
+                    ></button>
+                    <button
+                      type="button"
+                      class="palette-btn"
+                      style="background: #f43f5e;"
+                      [class.selected]="productThemeColor() === '#f43f5e'"
+                      (click)="productThemeColor.set('#f43f5e')"
+                    ></button>
+                  </div>
+                </div>
+
+                <!-- Độ nổi (Shadow blur) -->
+                <div class="control-row">
+                  <span class="row-label">Độ nổi bóng (Shadow Blur: {{ cardElevationLevel() }}px):</span>
+                  <input
+                    type="range"
+                    min="4"
+                    max="24"
+                    [value]="cardElevationLevel()"
+                    (input)="cardElevationLevel.set(+$any($event.target).value)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Thẻ sản phẩm hiển thị trực quan -->
+            <div class="product-preview-container">
+              <div
+                class="product-card-widget"
+                [class.on-sale]="isProductDiscounted()"
+                [class.is-featured]="isProductFeatured()"
+                [class.out-of-stock]="productStockStatus() === 'out-of-stock'"
+                [class]="'status-' + productStockStatus()"
+                [style.boxShadow]="'0 ' + (cardElevationLevel() / 2) + 'px ' + cardElevationLevel() + 'px rgba(0, 0, 0, 0.12)'"
+                [style.--accent]="productThemeColor()"
+              >
+                <!-- Badges nổi bật trên hình ảnh -->
+                <div class="card-badges-layer">
+                  @if (isProductFeatured()) {
+                    <span class="p-badge featured-badge">⭐ Nổi Bật</span>
+                  }
+                  @if (isProductDiscounted()) {
+                    <span class="p-badge sale-badge">-{{ productDiscountPercent() }}%</span>
+                  }
+                  <span class="p-badge stock-badge">
+                    {{ productStockStatus() === 'in-stock' ? 'Còn hàng' : productStockStatus() === 'low-stock' ? 'Chỉ còn 3 cái' : 'Tạm hết hàng' }}
+                  </span>
+                </div>
+
+                <!-- Hình ảnh sản phẩm mockup -->
+                <div class="product-visual-stage" [style.background]="'radial-gradient(circle, ' + productThemeColor() + '22 0%, #f8fafc 80%)'">
+                  <div class="product-mockup-icon" [style.color]="productThemeColor()">
+                    🎧
+                  </div>
+                </div>
+
+                <!-- Nội dung thông tin sản phẩm -->
+                <div class="product-info-block">
+                  <div class="category-text">Âm Thanh Cao Cấp • Wireless</div>
+                  <h3 class="product-name">Tai Nghe Không Dây AuraSound Pro Max</h3>
+                  <p class="product-snippet">Chống ồn chủ động ANC thế hệ mới, âm vòm 3D Spatial Audio và thời lượng pin 40 giờ.</p>
+
+                  <div class="price-row">
+                    @if (isProductDiscounted()) {
+                      <div class="prices-group">
+                        <span class="final-price" [style.color]="productThemeColor()">
+                          {{ (4500000 * (1 - productDiscountPercent() / 100)) | number:'1.0-0' }} đ
+                        </span>
+                        <span class="original-price">4.500.000 đ</span>
+                      </div>
+                    } @else {
+                      <span class="final-price" [style.color]="productThemeColor()">4.500.000 đ</span>
+                    }
+                  </div>
+
+                  <button
+                    type="button"
+                    class="btn btn-buy-action"
+                    [disabled]="productStockStatus() === 'out-of-stock'"
+                    [style.backgroundColor]="productThemeColor()"
+                  >
+                    {{ productStockStatus() === 'out-of-stock' ? 'Tạm Thời Hết Hàng' : '🛒 Thêm Vào Giỏ Hàng' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+
+  </div>
 </div>

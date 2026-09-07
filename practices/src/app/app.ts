@@ -16,15 +16,20 @@ export class App {
     const q = this.search().toLowerCase().trim();
     if (!q) return this.days();
     return this.days().filter(
-      d =>
-        d.fullName.toLowerCase().includes(q) ||
-        `day ${d.dayNum}`.includes(q) ||
-        d.path.includes(q)
+      (d) =>
+        d.fullName.toLowerCase().includes(q) || `day ${d.dayNum}`.includes(q) || d.path.includes(q),
     );
   });
 
   hasBadge(dayNum: number): boolean {
-    return dayNum === 2 || dayNum === 3 || (dayNum >= 14 && dayNum <= 26);
+    return (
+      dayNum === 2 ||
+      dayNum === 3 ||
+      dayNum === 6 ||
+      dayNum === 9 ||
+      dayNum === 10 ||
+      (dayNum >= 13 && dayNum <= 26)
+    );
   }
 
   onSearch(event: Event) {

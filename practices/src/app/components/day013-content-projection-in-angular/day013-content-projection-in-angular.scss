@@ -1,10 +1,985 @@
-.day-container {
+.day013-page {
   padding: 1.5rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  font-family: inherit;
+  color: #1e293b;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* -------------------------------------------------------------
+   Page Header
+   ------------------------------------------------------------- */
+.page-header {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #0f172a 100%);
+  border-radius: 12px;
+  padding: 1.75rem 2rem;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15);
+  flex-wrap: wrap;
+
+  .header-content {
+    flex: 1;
+    min-width: 320px;
+  }
+
+  .header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .badge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    &.badge-primary {
+      background: #3b82f6;
+      color: #ffffff;
+    }
+
+    &.badge-syntax {
+      background: rgba(255, 255, 255, 0.15);
+      color: #e0e7ff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+  }
+
+  .page-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+  }
+
+  .page-subtitle {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #cbd5e1;
+    margin: 0;
+
+    strong {
+      color: #93c5fd;
+    }
+
+    code {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-family: monospace;
+      color: #fef08a;
+    }
+  }
+
+  .stats-badge-box {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #f8fafc;
+
+      &.action-highlight {
+        color: #67e8f9;
+        font-family: ui-monospace, SFMono-Regular, monospace;
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+
+/* -------------------------------------------------------------
+   Navigation Tabs
+   ------------------------------------------------------------- */
+.lab-tabs-nav {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+
+  .tab-btn {
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: #ffffff;
+    color: #64748b;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    &.active {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    }
+  }
+}
+
+/* -------------------------------------------------------------
+   Card & Section Layout
+   ------------------------------------------------------------- */
+.content-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.card.section-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+
+    .header-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .card-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+
+      &.primary {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      &.warning {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      &.success {
+        background: #d1fae5;
+        color: #065f46;
+      }
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0;
+      color: #0f172a;
+    }
+
+    .info-tag {
+      font-size: 0.775rem;
+      font-weight: 600;
+      color: #64748b;
+      background: #ffffff;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+  }
+
+  .card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+}
+
+/* -------------------------------------------------------------
+   Concept Banner
+   ------------------------------------------------------------- */
+.concept-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: #f0f9ff;
+  border-left: 4px solid #0284c7;
+  padding: 0.85rem 1.1rem;
+  border-radius: 8px;
+
+  &.banner-warning {
+    background: #fffbeb;
+    border-left-color: #f59e0b;
+  }
+
+  .concept-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .concept-text {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: #334155;
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      background: rgba(0, 0, 0, 0.06);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+/* -------------------------------------------------------------
+   2-Column Layout: Controls vs Code
+   ------------------------------------------------------------- */
+.demo-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .panel-title {
+    font-size: 0.975rem;
+    font-weight: 700;
+    margin: 0;
+    color: #0f172a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .panel-desc {
+    font-size: 0.825rem;
+    line-height: 1.5;
+    color: #64748b;
+    margin: 0;
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      background: #e2e8f0;
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+      font-size: 0.775rem;
+    }
+  }
+}
+
+/* -------------------------------------------------------------
+   Code Box & Syntax Styling
+   ------------------------------------------------------------- */
+.code-box {
+  background: #0f172a;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e293b;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #334155;
+
+    .code-title {
+      font-size: 0.775rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .code-lang {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #38bdf8;
+      text-transform: uppercase;
+      background: rgba(56, 189, 248, 0.1);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+  }
+
+  pre {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.825rem;
+    line-height: 1.6;
+    color: #cbd5e1;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  }
+
+  .c-comment {
+    color: #64748b;
+    font-style: italic;
+  }
+  .c-tag {
+    color: #f43f5e;
+  }
+  .c-attr {
+    color: #38bdf8;
+  }
+  .c-str {
+    color: #a3e635;
+  }
+  .c-highlight {
+    color: #fef08a;
+    font-weight: 700;
+    background: rgba(254, 240, 138, 0.1);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+  }
+}
+
+/* -------------------------------------------------------------
+   Callouts (Info, Warning, Success)
+   ------------------------------------------------------------- */
+.callout {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.825rem;
+  line-height: 1.5;
+  margin-top: 0.75rem;
+
+  &.callout-info {
+    background: rgba(37, 99, 235, 0.1);
+    border-left: 3px solid #2563eb;
+    color: #bfdbfe;
+  }
+
+  &.callout-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-left: 3px solid #f59e0b;
+    color: #fde68a;
+  }
+
+  &.callout-success {
+    background: rgba(16, 185, 129, 0.1);
+    border-left: 3px solid #10b981;
+    color: #a7f3d0;
+  }
+}
+
+/* -------------------------------------------------------------
+   Render Output Box
+   ------------------------------------------------------------- */
+.render-output-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .output-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.5px;
+  }
+}
+
+/* -------------------------------------------------------------
+   Demo 1: Single-slot Toggle Styles
+   ------------------------------------------------------------- */
+.toggle-list-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.toggle-item-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.75rem;
   background: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
+
+  .toggle-meta {
+    font-size: 0.725rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+  }
 }
-h2 {
-  margin-top: 0;
-  color: #1976d2;
+
+.rich-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
+  .rich-badge {
+    align-self: flex-start;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    background: #ede9fe;
+    color: #6d28d9;
+    text-transform: uppercase;
+  }
+
+  .rich-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .rich-sub {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+}
+
+.status-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  .status-pill {
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.775rem;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #64748b;
+
+    &.active {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+  }
+}
+
+/* -------------------------------------------------------------
+   Demo 2: Multiple ng-content Trap Styles
+   ------------------------------------------------------------- */
+.trap-live-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  .trap-parent-label {
+    font-size: 0.8rem;
+    color: #475569;
+    code {
+      font-size: 0.75rem;
+      background: #e2e8f0;
+      padding: 0.1rem 0.3rem;
+      border-radius: 4px;
+    }
+  }
+}
+
+.projected-sample-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+
+  .pill-icon {
+    font-size: 1rem;
+  }
+}
+
+.explanation-points {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.825rem;
+  line-height: 1.5;
+
+  .point-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+/* -------------------------------------------------------------
+   Demo 3: Multi-slot Card Styles
+   ------------------------------------------------------------- */
+.interactive-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.85rem 1.1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  .toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .toolbar-label {
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  .btn-toggle-group {
+    display: flex;
+    gap: 0.25rem;
+  }
+}
+
+.order-flag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: #dcfce7;
+  color: #166534;
+
+  &.reversed {
+    background: #fef3c7;
+    color: #92400e;
+  }
+}
+
+.demo-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+
+  .header-left-info {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .header-icon {
+    font-size: 1.35rem;
+  }
+
+  .card-heading {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .card-subhead {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  .status-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background: #d1fae5;
+    color: #065f46;
+  }
+}
+
+.demo-card-banner {
+  .banner-gradient {
+    height: 90px;
+    background: linear-gradient(135deg, #4338ca 0%, #3b82f6 50%, #06b6d4 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .banner-tag {
+      background: rgba(0, 0, 0, 0.4);
+      color: #ffffff;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.775rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+.demo-card-body {
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: #334155;
+  }
+}
+
+.demo-card-unmatched {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  color: #581c87;
+  background: #f3e8ff;
+  padding: 0.6rem 0.85rem;
+  border-radius: 6px;
+}
+
+.demo-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* -------------------------------------------------------------
+   Demo 4: ngProjectAs Styles
+   ------------------------------------------------------------- */
+.interactive-switch-row {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.project-as-wrapper {
+  margin-top: 0.5rem;
+}
+
+.badge-demo-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.825rem;
+  font-weight: 600;
+
+  &.active {
+    background: #15803d;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(21, 128, 61, 0.25);
+  }
+
+  &.inactive {
+    background: #e2e8f0;
+    color: #475569;
+  }
+}
+
+.normal-paragraph {
+  margin: 0.5rem 0 0;
+  font-size: 0.825rem;
+  color: #64748b;
+}
+
+.text-success {
+  color: #166534;
+}
+.text-warning {
+  color: #92400e;
+}
+
+/* -------------------------------------------------------------
+   Demo 5: Eager Evaluation & Lifecycle Styles
+   ------------------------------------------------------------- */
+.collapsible-demo-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.output-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.log-terminal {
+  background: #0f172a;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+  }
+
+  .log-entry {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+    color: #e2e8f0;
+  }
+
+  .log-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #38bdf8;
+    flex-shrink: 0;
+  }
+}
+
+.comparison-table-wrapper {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+
+  th,
+  td {
+    padding: 0.65rem 0.85rem;
+    text-align: left;
+    border-bottom: 1px solid #334155;
+  }
+
+  th {
+    background: #1e293b;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  .tag-eager {
+    background: rgba(244, 63, 94, 0.2);
+    color: #fda4af;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .tag-lazy {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+}
+
+/* -------------------------------------------------------------
+   Demo 6: Survey Lab Styles
+   ------------------------------------------------------------- */
+.survey-stats-card {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+
+  .survey-stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .stat-info {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .stat-big-number {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #38bdf8;
+  }
+
+  .stat-title {
+    font-size: 0.9rem;
+    color: #cbd5e1;
+  }
+
+  .stat-badge-pill {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.775rem;
+    font-weight: 600;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 8px;
+    background: #334155;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    transition: width 0.3s ease;
+  }
+}
+
+.survey-questions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.survey-card-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+  }
+
+  &.checked {
+    border-color: #bfdbfe;
+    background: #f8faff;
+  }
+}
+
+.survey-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  .item-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .category-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+
+    &.cat-ux {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+    &.cat-security {
+      background: #ffe4e6;
+      color: #be123c;
+    }
+    &.cat-feature {
+      background: #d1fae5;
+      color: #065f46;
+    }
+  }
+
+  .required-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #e11d48;
+  }
+
+  .item-question-title {
+    font-size: 0.95rem;
+    color: #0f172a;
+  }
+
+  .item-question-desc {
+    margin: 0;
+    font-size: 0.825rem;
+    color: #64748b;
+    line-height: 1.45;
+  }
 }

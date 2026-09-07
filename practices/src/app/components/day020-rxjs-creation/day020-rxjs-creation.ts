@@ -45,6 +45,15 @@ export interface OperatorCard {
   angularNote: string;
 }
 
+export interface QuickCreationSummary {
+  requirement: string;
+  operator: string;
+  autoComplete: boolean;
+  badgeClass: string;
+  icon: string;
+  angularUseCase: string;
+}
+
 export interface DeferExperimentResult {
   subscriberName: string;
   subscribedAt: string;
@@ -194,6 +203,73 @@ export class Day020RxjsCreation implements OnInit, AfterViewInit, OnDestroy {
   // ============================================================================
   // CHEAT SHEET & REFERENCE
   // ============================================================================
+  readonly quickCreationSummaryList: QuickCreationSummary[] = [
+    {
+      requirement: 'Tạo Observable từ giá trị tĩnh hoặc mock dữ liệu đồng bộ',
+      operator: 'of(...values)',
+      autoComplete: true,
+      badgeClass: 'badge-primary',
+      icon: '⚡',
+      angularUseCase: 'Mock Observable trong Unit Test, hoặc trả về fallback value trong catchError.',
+    },
+    {
+      requirement: 'Chuyển đổi Promise hoặc mảng Iterable (Array, Set, Map) thành Stream',
+      operator: 'from(iterableOrPromise)',
+      autoComplete: true,
+      badgeClass: 'badge-syntax',
+      icon: '🔄',
+      angularUseCase: 'Cầu nối biến các thư viện Promise (Firebase, SDK ngoài) thành Observable trong Angular.',
+    },
+    {
+      requirement: 'Chuyển đổi sự kiện DOM (click, scroll, resize) thành Stream',
+      operator: 'fromEvent(target, event)',
+      autoComplete: false,
+      badgeClass: 'badge-warning',
+      icon: '🖱️',
+      angularUseCase: 'Lắng nghe window scroll, resize, hoặc sự kiện kéo thả phức tạp ngoài template.',
+    },
+    {
+      requirement: 'Bọc các kết nối sự kiện ngoài có cơ chế On/Off (WebSocket, SignalR Hub)',
+      operator: 'fromEventPattern(add, remove)',
+      autoComplete: false,
+      badgeClass: 'badge-accent',
+      icon: '🔌',
+      angularUseCase: 'Tích hợp realtime message broker như Azure SignalR Hub, Socket.io vào Angular.',
+    },
+    {
+      requirement: 'Phát số tăng dần định kỳ theo chu kỳ thời gian (giống setInterval)',
+      operator: 'interval(periodMs)',
+      autoComplete: false,
+      badgeClass: 'badge-danger',
+      icon: '⏱️',
+      angularUseCase: 'Đồng hồ đếm giờ, polling tự động làm mới dữ liệu (refresh data) định kỳ.',
+    },
+    {
+      requirement: 'Chờ một khoảng thời gian delay rồi phát số 0 (thay setTimeout)',
+      operator: 'timer(dueTime)',
+      autoComplete: true,
+      badgeClass: 'badge-info',
+      icon: '⏳',
+      angularUseCase: 'Tạo độ trễ trước khi gọi API, tự động ẩn thông báo sau X giây.',
+    },
+    {
+      requirement: 'Phát ngay một Error Notification cho subscriber xử lý lỗi',
+      operator: 'throwError(() => err)',
+      autoComplete: false,
+      badgeClass: 'badge-danger',
+      icon: '⚠️',
+      angularUseCase: 'Dùng trong HttpInterceptor hoặc catchError để ném tiếp lỗi cho tầng trên xử lý.',
+    },
+    {
+      requirement: 'Trì hoãn tạo Observable, mỗi subscriber nhận 1 stream mới tinh tại lúc subscribe',
+      operator: 'defer(() => factory)',
+      autoComplete: true,
+      badgeClass: 'badge-syntax',
+      icon: '🌱',
+      angularUseCase: 'Cực kỳ hữu ích khi retry: tạo lại request mới với token/timestamp mới mỗi lần thử lại.',
+    },
+  ];
+
   readonly operatorsList: OperatorCard[] = [
     {
       id: 'of',

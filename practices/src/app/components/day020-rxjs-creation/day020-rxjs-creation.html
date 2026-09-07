@@ -86,7 +86,7 @@
       (click)="activeTab = 'cheatsheet'"
     >
       <span class="tab-icon">📚</span>
-      <span class="tab-text">6. Cheatsheet & Specs</span>
+      <span class="tab-text">6. Bảng tóm tắt & Specs</span>
     </button>
   </nav>
 
@@ -670,10 +670,62 @@
       <!-- TAB 6: CHEATSHEET & REFERENCE -->
       <!-- ================================================================= -->
       <div *ngIf="activeTab === 'cheatsheet'" class="tab-pane">
-        <section class="card demo-card">
+        <!-- Section 1: Bảng Tóm Tắt Nhanh & Lựa Chọn Creation Operator -->
+        <section class="card demo-card quick-summary-card">
           <div class="card-header">
             <div>
-              <span class="card-badge primary">Bảng Tra Cứu Toàn Diện</span>
+              <span class="card-badge primary">Quick Decision Guide</span>
+              <h2 class="card-title">Bảng Tóm Tắt Nhanh: Khi Nào Dùng Creation Operator Nào?</h2>
+            </div>
+            <span class="badge badge-syntax">Cheat Sheet</span>
+          </div>
+
+          <div class="card-body">
+            <p class="summary-desc">
+              Bảng tra cứu nhanh lựa chọn các toán tử Creation theo nhu cầu bài toán thực tế trong lập trình Angular:
+            </p>
+
+            <div class="table-responsive">
+              <table class="specs-table quick-summary-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40%;">Nhu cầu bài toán</th>
+                    <th style="width: 25%;">Dùng Operator nào?</th>
+                    <th style="width: 15%;">Tự Complete?</th>
+                    <th style="width: 20%;">Ứng dụng trong Angular</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of quickCreationSummaryList">
+                    <td class="req-cell">
+                      <span class="req-icon">{{ item.icon }}</span>
+                      <span class="req-text">{{ item.requirement }}</span>
+                    </td>
+                    <td class="op-cell">
+                      <code class="op-badge-code" [ngClass]="item.badgeClass">{{ item.operator }}</code>
+                    </td>
+                    <td>
+                      <span
+                        class="complete-pill"
+                        [class.auto-yes]="item.autoComplete"
+                        [class.auto-no]="!item.autoComplete"
+                      >
+                        {{ item.autoComplete ? 'CÓ (Tự đóng)' : 'KHÔNG (Cần hủy)' }}
+                      </span>
+                    </td>
+                    <td><small class="op-angular-small">{{ item.angularUseCase }}</small></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Bảng Đặc Tả Chi Tiết -->
+        <section class="card demo-card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <div>
+              <span class="card-badge accent">Bảng Tra Cứu Toàn Diện</span>
               <h2 class="card-title">Cheat Sheet: RxJS Creation Operators</h2>
             </div>
           </div>

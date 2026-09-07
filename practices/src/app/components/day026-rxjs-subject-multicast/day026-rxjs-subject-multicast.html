@@ -454,21 +454,75 @@
   <!-- TAB 5: Cheatsheet -->
   @if (activeTab === 'cheatsheet') {
     <section class="tab-pane">
-      <div class="cheatsheet-card">
+      <!-- Section 1: Quick Decision Guide -->
+      <div class="cheatsheet-card quick-summary-card">
         <div class="card-title-bar">
-          <h3>Bảng Tra Cứu Toàn Diện: Subject & Multicasting</h3>
-          <span class="tag">RxJS 7+ CheatSheet</span>
+          <div>
+            <span class="card-badge primary">Quick Decision Guide</span>
+            <h3>Bảng Tóm Tắt Nhanh: Khi Nào Dùng Subject / Multicast Nào?</h3>
+          </div>
+          <span class="tag">RxJS 7+ Cheat Sheet</span>
+        </div>
+        <p class="summary-desc">
+          Bảng tra cứu nhanh lựa chọn các biến thể Subject và cơ chế Multicasting theo bài toán thực tế trong lập trình Angular:
+        </p>
+        <div class="table-container">
+          <table class="spec-table quick-summary-table">
+            <thead>
+              <tr>
+                <th style="width: 38%;">Nhu cầu bài toán</th>
+                <th style="width: 24%;">Dùng Subject / Operator nào?</th>
+                <th style="width: 14%;">Lưu giữ giá trị / Buffer?</th>
+                <th style="width: 24%;">Ứng dụng trong Angular</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of quickSummaryList; track item.operator) {
+                <tr>
+                  <td class="req-cell">
+                    <span class="req-icon">{{ item.icon }}</span>
+                    <span class="req-text">{{ item.requirement }}</span>
+                  </td>
+                  <td class="op-cell">
+                    <code class="op-badge-code" [ngClass]="item.badgeClass">{{ item.operator }}</code>
+                  </td>
+                  <td>
+                    <span
+                      class="complete-pill"
+                      [class.auto-yes]="item.autoComplete.includes('Lưu') || item.autoComplete.includes('Cache')"
+                      [class.auto-no]="item.autoComplete.includes('Không') || item.autoComplete.includes('(0 giá trị)')"
+                      [class.auto-neutral]="!item.autoComplete.includes('Lưu') && !item.autoComplete.includes('Cache') && !item.autoComplete.includes('Không')"
+                    >
+                      {{ item.autoComplete }}
+                    </span>
+                  </td>
+                  <td><small class="op-angular-small">{{ item.angularUseCase }}</small></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: Comprehensive Specs Table -->
+      <div class="cheatsheet-card" style="margin-top: 1.5rem;">
+        <div class="card-title-bar">
+          <div>
+            <span class="card-badge accent">Thông Số Kỹ Thuật Chi Tiết</span>
+            <h3>Bảng Tra Cứu Toàn Diện: Subject & Multicasting</h3>
+          </div>
+          <span class="tag">RxJS 7+ Specs</span>
         </div>
         <div class="table-container">
           <table class="spec-table">
             <thead>
               <tr>
-                <th>Tên Subject / Operator</th>
-                <th>Phân loại</th>
-                <th>Cần Giá Trị Khởi Tạo?</th>
-                <th>Subscriber Đến Trễ Nhận Được Gì?</th>
-                <th>Hành Vi Khi Complete</th>
-                <th>Angular Use-Case</th>
+                <th style="width: 18%;">Tên Subject / Operator</th>
+                <th style="width: 13%;">Phân loại</th>
+                <th style="width: 12%;">Cần Giá Trị Khởi Tạo?</th>
+                <th style="width: 20%;">Subscriber Đến Trễ Nhận Được Gì?</th>
+                <th style="width: 17%;">Hành Vi Khi Complete</th>
+                <th style="width: 20%;">Angular Use-Case</th>
               </tr>
             </thead>
             <tbody>

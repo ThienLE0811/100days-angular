@@ -51,6 +51,15 @@ export interface HooDecisionSpec {
   syntax: string;
 }
 
+export interface QuickSummaryItem {
+  requirement: string;
+  operator: string;
+  badgeClass: string;
+  icon: string;
+  autoComplete: string;
+  angularUseCase: string;
+}
+
 export interface HooRequestItem {
   id: number;
   label: string;
@@ -148,6 +157,89 @@ export class Day025RxjsHooUtility implements OnInit, OnDestroy {
   // ============================================================================
   // CHEATSHEET & DECISION MATRIX
   // ============================================================================
+  readonly quickSummaryList: QuickSummaryItem[] = [
+    {
+      requirement: 'Hủy bỏ Inner stream cũ ngay khi có giá trị mới phát ra từ Outer stream',
+      operator: 'switchMap(id => api$(id))',
+      badgeClass: 'badge-primary',
+      icon: '🔀',
+      autoComplete: 'Theo inner mới nhất',
+      angularUseCase: 'Search autocomplete, typeahead input, click tab chuyển đổi dữ liệu.',
+    },
+    {
+      requirement: 'Xếp hàng chạy tuần tự từng Inner stream: xong cái cũ mới chạy cái mới',
+      operator: 'concatMap(item => save$(item))',
+      badgeClass: 'badge-secondary',
+      icon: '➡️',
+      autoComplete: 'Khi tất cả inner xong',
+      angularUseCase: 'Thực thi ghi dữ liệu theo thứ tự (Create/Update/Delete), xếp hàng upload file.',
+    },
+    {
+      requirement: 'Chạy đồng thời song song tất cả Inner streams, ai có tin thì bắn ra ngay',
+      operator: 'mergeMap(item => fetch$(item))',
+      badgeClass: 'badge-warning',
+      icon: '⚡',
+      autoComplete: 'Khi tất cả inner xong',
+      angularUseCase: 'Tải song song nhiều ảnh hoặc gọi API đọc độc lập không phụ thuộc thứ tự.',
+    },
+    {
+      requirement: 'Bỏ qua và nuốt chửng mọi request mới nếu request trước đó vẫn đang chạy',
+      operator: 'exhaustMap(() => login$())',
+      badgeClass: 'badge-danger',
+      icon: '🛡️',
+      autoComplete: 'Theo inner hiện tại',
+      angularUseCase: 'Nút Submit đơn hàng, nút Đăng nhập, nút Thanh toán (ngăn chặn spam double-click).',
+    },
+    {
+      requirement: 'Thực thi Side-Effect (ghi log, debug, gán cờ) mà KHÔNG làm thay đổi dữ liệu luồng',
+      operator: 'tap(val => console.log(val))',
+      badgeClass: 'badge-syntax',
+      icon: '👁️',
+      autoComplete: 'Theo source stream',
+      angularUseCase: 'In log debug, lưu cache vào LocalStorage, cập nhật state UI phụ.',
+    },
+    {
+      requirement: 'Thực thi hàm callback dọn dẹp khi stream kết thúc (dù Complete hay Error)',
+      operator: 'finalize(() => this.loading = false)',
+      badgeClass: 'badge-info',
+      icon: '🧹',
+      autoComplete: 'Theo source stream',
+      angularUseCase: 'Tắt loading spinner (isLoading = false), đóng modal hoặc giải phóng tài nguyên.',
+    },
+    {
+      requirement: 'Tự động lặp lại (resubscribe) luồng Observable khi hoàn tất thành công',
+      operator: 'repeat(3) / repeat({ delay: 5000 })',
+      badgeClass: 'badge-accent',
+      icon: '🔁',
+      autoComplete: 'Theo số lần lặp',
+      angularUseCase: 'Polling dữ liệu định kỳ mỗi 5s sau khi request trước đã hoàn tất.',
+    },
+    {
+      requirement: 'Ngắt kết nối và ném lỗi/fallback nếu quá thời hạn không nhận được dữ liệu',
+      operator: 'timeout({ each: 5000, with: () => of(fallback) })',
+      badgeClass: 'badge-danger',
+      icon: '⏱️',
+      autoComplete: 'Theo source/timeout',
+      angularUseCase: 'Giới hạn thời gian chờ phản hồi API, thông báo mạng yếu khi quá 5s.',
+    },
+    {
+      requirement: 'Đo lường chính xác khoảng thời gian (ms) trôi qua giữa 2 lần phát dữ liệu liên tiếp',
+      operator: 'timeInterval()',
+      badgeClass: 'badge-primary',
+      icon: '📏',
+      autoComplete: 'Theo source stream',
+      angularUseCase: 'Phát hiện nhịp gõ phím nhanh/chậm, đo lường độ trễ mạng latency.',
+    },
+    {
+      requirement: 'Tách 1 Observable nguồn thành 2 Observable song song thỏa và không thỏa điều kiện',
+      operator: 'partition(source$, predicate)',
+      badgeClass: 'badge-warning',
+      icon: '🧩',
+      autoComplete: 'Theo source stream',
+      angularUseCase: 'Phân loại danh sách thông báo: [đã đọc] và [chưa đọc], tin nhắn VIP và Normal.',
+    },
+  ];
+
   readonly cheatsheetSpecs: HooDecisionSpec[] = [
     {
       operator: 'switchMap()',

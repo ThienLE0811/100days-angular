@@ -62,6 +62,15 @@ export interface OperatorSpec {
   angularExample: string;
 }
 
+export interface QuickTransformationSummary {
+  requirement: string;
+  operator: string;
+  autoComplete: string;
+  badgeClass: string;
+  icon: string;
+  angularUseCase: string;
+}
+
 @Component({
   selector: 'app-day021-rxjs-transformation',
   standalone: true,
@@ -162,6 +171,73 @@ export class Day021RxjsTransformation implements OnInit, AfterViewInit, OnDestro
   // ============================================================================
   // CHEAT SHEET DATA
   // ============================================================================
+  readonly quickTransformationSummaryList: QuickTransformationSummary[] = [
+    {
+      requirement: 'Biến đổi dữ liệu sang định dạng mới (format, tính toán, trích xuất)',
+      operator: 'map(fn)',
+      autoComplete: 'Theo source stream',
+      badgeClass: 'badge-primary',
+      icon: '🔄',
+      angularUseCase: 'Format API response, ghép chuỗi fullname, trích xuất dữ liệu từ DTO.',
+    },
+    {
+      requirement: 'Cộng dồn / Tích lũy và EMIT NGAY sau mỗi lần phát (Realtime state)',
+      operator: 'scan(acc, seed)',
+      autoComplete: 'Không cần complete',
+      badgeClass: 'badge-accent',
+      icon: '📈',
+      angularUseCase: 'Đếm số lần click, cộng dồn tổng tiền giỏ hàng realtime, quản lý state cục bộ.',
+    },
+    {
+      requirement: 'Cộng dồn / Tích lũy nhưng CHỈ EMIT 1 LẦN khi stream hoàn tất',
+      operator: 'reduce(acc, seed)',
+      autoComplete: 'BẮT BUỘC complete',
+      badgeClass: 'badge-warning',
+      icon: '📊',
+      angularUseCase: 'Tổng hợp danh sách hoặc tính tổng chi phí sau khi tải toàn bộ dữ liệu.',
+    },
+    {
+      requirement: 'Gom toàn bộ các giá trị phát ra thành 1 mảng (Array)',
+      operator: 'toArray()',
+      autoComplete: 'BẮT BUỘC complete',
+      badgeClass: 'badge-syntax',
+      icon: '📦',
+      angularUseCase: 'Gom các chunks phân trang hoặc dữ liệu tải theo dòng thành một mảng hoàn chỉnh.',
+    },
+    {
+      requirement: 'Gom nhóm dữ liệu tạm thời cho đến khi có SỰ KIỆN KHÁC kích hoạt',
+      operator: 'buffer(notifier$)',
+      autoComplete: 'Theo notifier/source',
+      badgeClass: 'badge-info',
+      icon: '🛑',
+      angularUseCase: 'Bắt multi-click chuột, hoặc gom các thao tác chỉnh sửa cho đến khi bấm "Lưu".',
+    },
+    {
+      requirement: 'Gom nhóm dữ liệu tạm thời theo CHU KỲ THỜI GIAN (X mili-giây)',
+      operator: 'bufferTime(ms)',
+      autoComplete: 'Theo chu kỳ thời gian',
+      badgeClass: 'badge-secondary',
+      icon: '⏳',
+      angularUseCase: 'Gom log lỗi hoặc sự kiện telemetry gửi về server theo mẻ mỗi 2-5 giây.',
+    },
+    {
+      requirement: 'Biến đổi sang một giá trị hằng số cố định (VD: true/false khi hover)',
+      operator: 'mapTo(val) ➔ map(() => val)',
+      autoComplete: 'Theo source stream',
+      badgeClass: 'badge-syntax',
+      icon: '🎯',
+      angularUseCase: 'Lắng nghe hover (mouseover ➔ true, mouseleave ➔ false). Khuyên dùng map(() => val).',
+    },
+    {
+      requirement: 'Trích xuất thuộc tính trong object theo tên key',
+      operator: "pluck('key') ➔ map(x => x.key)",
+      autoComplete: 'Theo source stream',
+      badgeClass: 'badge-syntax',
+      icon: '🏷️',
+      angularUseCase: "Lấy route.params['id']. Khuyên dùng map(x => x.key) để đảm bảo Type-Safety.",
+    },
+  ];
+
   readonly specsList: OperatorSpec[] = [
     {
       name: 'map(projectFn)',

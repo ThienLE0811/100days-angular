@@ -26,6 +26,18 @@ import {
 
 /**
  * ============================================================================
+ * 4. Bảng tóm tắt nhanh để chọn đúng Operator:
+ * ============================================================================
+ * | Nhu cầu bài toán                                                     | Dùng Operator nào? |
+ * |----------------------------------------------------------------------|--------------------|
+ * | Gọi nhiều API cùng lúc, chờ tất cả xong mới nhận kết quả            | forkJoin           |
+ * | Kết hợp nhiều luồng dữ liệu / state, cái nào đổi cũng cập nhật UI    | combineLatest      |
+ * | Khi sự kiện A xảy ra, cần "ngó sang" lấy thêm giá trị hiện tại của B | withLatestFrom     |
+ * | Muốn gán giá trị mặc định ban đầu cho Stream                         | startWith          |
+ * | Chạy nhiều stream cùng lúc, ai có tin thì bắn tin ra ngay            | merge              |
+ * | Chạy lần lượt từng việc, xong việc 1 mới được làm việc 2             | concat             |
+ * | Có 3 điều kiện ngắt, cái nào tới trước thì chọn cái đó               | race               |
+ * ============================================================================
  * INTERFACES & DATA MODELS (Based on docs/Day023-rxjs-combination.md)
  * ============================================================================
  */
@@ -40,8 +52,18 @@ export interface ActivityLog {
 export interface CombinationDecisionSpec {
   operator: string;
   category: 'Static Creation' | 'Pipeable Operator';
+  signature: string;
   whenToUse: string;
   emitsWhen: string;
+  autoComplete: string;
+  angularUseCase: string;
+}
+
+export interface QuickSummaryItem {
+  requirement: string;
+  operator: string;
+  badgeClass: string;
+  icon: string;
   autoComplete: string;
   angularUseCase: string;
 }
@@ -138,11 +160,95 @@ export class Day023RxjsCombination implements OnInit, OnDestroy {
   // ============================================================================
   // DECISION MATRIX / CHEATSHEET
   // ============================================================================
+  readonly quickSummaryList: QuickSummaryItem[] = [
+    {
+      requirement: 'Gọi nhiều API cùng lúc, chờ TẤT CẢ xong mới nhận kết quả',
+      operator: 'forkJoin({...})',
+      badgeClass: 'badge-primary',
+      icon: '⚡',
+      autoComplete: 'CÓ (Tự đóng)',
+      angularUseCase: 'Tải cùng lúc dropdown data, danh mục sản phẩm, user profile khi khởi tạo màn hình.',
+    },
+    {
+      requirement: 'Kết hợp nhiều luồng dữ liệu / state, cái nào đổi cũng cập nhật UI ngay',
+      operator: 'combineLatest([...])',
+      badgeClass: 'badge-accent',
+      icon: '🔄',
+      autoComplete: 'KHÔNG (Sống lâu dài)',
+      angularUseCase: 'Tạo viewModel vm$ kết hợp Pagination, Filter, Search và Sort với AsyncPipe.',
+    },
+    {
+      requirement: 'Khi sự kiện A xảy ra, cần "ngó sang" lấy thêm giá trị hiện tại của B',
+      operator: 'withLatestFrom(b$)',
+      badgeClass: 'badge-info',
+      icon: '👁️',
+      autoComplete: 'Theo luồng gốc',
+      angularUseCase: 'Khi bấm nút Đặt Hàng, lấy kèm Token đăng nhập và Tỷ Giá USD/VND hiện thời.',
+    },
+    {
+      requirement: 'Gán giá trị mặc định ban đầu ngay lập tức cho Stream trước khi API phản hồi',
+      operator: 'startWith(val)',
+      badgeClass: 'badge-syntax',
+      icon: '🏁',
+      autoComplete: 'Theo luồng gốc',
+      angularUseCase: 'startWith([]) để template render mảng rỗng trước khi load xong, tránh crash null pointer.',
+    },
+    {
+      requirement: 'Chèn giá trị chốt hạ ngay trước khi Stream hoàn tất (complete)',
+      operator: 'endWith(val)',
+      badgeClass: 'badge-syntax',
+      icon: '🏁',
+      autoComplete: 'Theo luồng gốc',
+      angularUseCase: 'Phát thông báo [Đã tải hết danh mục] hoặc trả cờ isLoading = false sau stream.',
+    },
+    {
+      requirement: 'Chạy nhiều stream cùng lúc, ai có tin thì bắn tin ra ngay lập tức',
+      operator: 'merge(a$, b$)',
+      badgeClass: 'badge-warning',
+      icon: '🔀',
+      autoComplete: 'CÓ (Khi tất cả xong)',
+      angularUseCase: 'Gộp nhiều event (Click, Touch, Scroll) hoặc lắng nghe valueChanges từ nhiều FormControl.',
+    },
+    {
+      requirement: 'Chạy lần lượt tuần tự: xong việc 1 (complete) mới được làm việc 2',
+      operator: 'concat(a$, b$)',
+      badgeClass: 'badge-secondary',
+      icon: '➡️',
+      autoComplete: 'CÓ (Khi luồng cuối xong)',
+      angularUseCase: 'Upload từng file theo hàng đợi tuần tự, hoặc chạy chuỗi animation theo kịch bản.',
+    },
+    {
+      requirement: 'Có nhiều điều kiện cạnh tranh, cái nào tới trước thì chọn cái đó',
+      operator: 'race(a$, b$)',
+      badgeClass: 'badge-danger',
+      icon: '🏎️',
+      autoComplete: 'Theo stream thắng',
+      angularUseCase: 'Tự tắt banner thông báo: sau 5s timer HOẶC user bấm nút X HOẶC route thay đổi.',
+    },
+    {
+      requirement: 'Ghép cặp các phần tử tương ứng theo đúng thứ tự chỉ mục (1st-1st, 2nd-2nd)',
+      operator: 'zip(a$, b$)',
+      badgeClass: 'badge-primary',
+      icon: '🤐',
+      autoComplete: 'CÓ (Khi stream ngắn nhất xong)',
+      angularUseCase: 'Ghép cặp toạ độ mousedown và mouseup, hoặc tổng hợp data theo đúng index.',
+    },
+    {
+      requirement: 'So sánh giá trị hiện tại với giá trị liền trước đó theo cặp [previous, current]',
+      operator: 'pairwise()',
+      badgeClass: 'badge-accent',
+      icon: '👥',
+      autoComplete: 'Theo luồng gốc',
+      angularUseCase: 'Tính độ biến động giá cổ phiếu, phát hiện hướng cuộn scroll up/down, Router navigation history.',
+    },
+  ];
+
   readonly decisionSpecs: CombinationDecisionSpec[] = [
     {
-      operator: 'forkJoin([...])',
+      operator: 'forkJoin({...})',
       category: 'Static Creation',
-      whenToUse: 'Khi cần gọi nhiều API song song và chờ TẤT CẢ cùng hoàn tất (giống Promise.all).',
+      signature: 'forkJoin({ user: api1$, roles: api2$ })',
+      whenToUse: 'Khi cần gọi nhiều API song song và chờ TẤT CẢ cùng hoàn tất (tương đương Promise.all trong JS).',
       emitsWhen: 'Tất cả Observables con đã COMPLETE.',
       autoComplete: 'Có (Complete ngay sau 1 lần emit)',
       angularUseCase: 'Tải cùng lúc danh mục Dropdown, quyền người dùng, và config khi khởi tạo component.',
@@ -150,6 +256,7 @@ export class Day023RxjsCombination implements OnInit, OnDestroy {
     {
       operator: 'combineLatest([...])',
       category: 'Static Creation',
+      signature: 'combineLatest([page$, size$, search$])',
       whenToUse: 'Khi cần phối hợp nhiều state (long-lived) và luôn cập nhật giao diện khi BẤT KỲ state nào đổi.',
       emitsWhen: 'Tất cả con đã emit ít nhất 1 lần, sau đó emit mỗi khi có 1 con thay đổi.',
       autoComplete: 'Không (Sống cho đến khi tất cả con complete)',
@@ -158,6 +265,7 @@ export class Day023RxjsCombination implements OnInit, OnDestroy {
     {
       operator: 'zip(...)',
       category: 'Static Creation',
+      signature: 'zip(keys$, values$)',
       whenToUse: 'Khi cần ghép từng cặp phần tử theo đúng THỨ TỰ CHỈ MỤC (1st với 1st, 2nd với 2nd).',
       emitsWhen: 'Tất cả con đều có phần tử mới ở cùng chỉ mục.',
       autoComplete: 'Có (Complete khi stream ngắn nhất complete)',
@@ -166,6 +274,7 @@ export class Day023RxjsCombination implements OnInit, OnDestroy {
     {
       operator: 'concat(...)',
       category: 'Static Creation',
+      signature: 'concat(uploadStep1$, uploadStep2$)',
       whenToUse: 'Khi cần thực thi tuần tự theo thứ tự: Stream A chạy xong và complete ➡️ mới chạy Stream B.',
       emitsWhen: 'Từng stream con phát tín hiệu theo thứ tự xếp hàng.',
       autoComplete: 'Có (Khi stream con cuối cùng complete)',
@@ -174,6 +283,7 @@ export class Day023RxjsCombination implements OnInit, OnDestroy {
     {
       operator: 'merge(...)',
       category: 'Static Creation',
+      signature: 'merge(click$, touchTap$, keyEnter$)',
       whenToUse: 'Khi muốn gộp nhiều stream lại thành 1 dòng chảy đồng thời mà KHÔNG quan tâm thứ tự.',
       emitsWhen: 'Bất kỳ stream con nào phát tín hiệu.',
       autoComplete: 'Có (Khi toàn bộ stream con complete)',
@@ -182,6 +292,7 @@ export class Day023RxjsCombination implements OnInit, OnDestroy {
     {
       operator: 'race(...)',
       category: 'Static Creation',
+      signature: 'race(userClickClose$, timer5s$, routeLeave$)',
       whenToUse: 'Khi có nhiều sự kiện cạnh tranh và bạn CHỈ QUAN TÂM sự kiện nào xảy ra ĐẦU TIÊN (kẻ chiến thắng).',
       emitsWhen: 'Observable nào nhanh nhất phát giá trị đầu tiên.',
       autoComplete: 'Theo stream chiến thắng',
@@ -190,22 +301,34 @@ export class Day023RxjsCombination implements OnInit, OnDestroy {
     {
       operator: 'withLatestFrom(...)',
       category: 'Pipeable Operator',
+      signature: 'source$.pipe(withLatestFrom(rate$, token$))',
       whenToUse: 'Khi Outer Observable phát, muốn lấy thêm giá trị MỚI NHẤT của Inner Observable làm ngữ cảnh.',
       emitsWhen: 'CHỈ khi Outer stream phát tín hiệu (Inner stream phát sẽ không kích hoạt emit).',
       autoComplete: 'Theo Outer stream',
-      angularUseCase: 'Khi user click nút "Submit Order", lấy kèm token và tỷ giá tiền tệ mới nhất.',
+      angularUseCase: 'Khi user click nút "Submit Order", lấy kèm token và tỷ giá tiền tệ mới nhất trong Store.',
     },
     {
-      operator: 'startWith(...) / endWith(...)',
+      operator: 'startWith(...)',
       category: 'Pipeable Operator',
-      whenToUse: 'Chèn thêm giá trị khởi đầu (ngay lập tức) hoặc giá trị kết thúc (khi complete) cho stream.',
-      emitsWhen: 'startWith phát ngay khi subscribe; endWith phát khi source complete.',
+      signature: 'source$.pipe(startWith(initialData))',
+      whenToUse: 'Chèn thêm giá trị khởi đầu phát ra ngay lập tức khi subscribe trước khi stream gốc có dữ liệu.',
+      emitsWhen: 'Phát ngay lập tức tại thời điểm đăng ký (synchronous).',
       autoComplete: 'Theo source stream',
       angularUseCase: 'startWith([]) để template hiển thị mảng rỗng trước khi API load xong, tránh lỗi null pointer.',
     },
     {
+      operator: 'endWith(...)',
+      category: 'Pipeable Operator',
+      signature: 'source$.pipe(endWith(completedNotice))',
+      whenToUse: 'Chèn thêm một hoặc nhiều giá trị phát ra ngay trước khi stream gốc complete.',
+      emitsWhen: 'Ngay khi source stream chuẩn bị phát tín hiệu Complete.',
+      autoComplete: 'Theo source stream',
+      angularUseCase: 'Phát tín hiệu kết thúc luồng dữ liệu, thông báo hoàn tất danh mục, hoặc reset spinner loading.',
+    },
+    {
       operator: 'pairwise()',
       category: 'Pipeable Operator',
+      signature: 'source$.pipe(pairwise())',
       whenToUse: 'Khi cần so sánh giá trị hiện tại với giá trị LIỀN TRƯỚC ĐÓ theo cặp [previous, current].',
       emitsWhen: 'Từ lần emit thứ 2 trở đi của source stream.',
       autoComplete: 'Theo source stream',

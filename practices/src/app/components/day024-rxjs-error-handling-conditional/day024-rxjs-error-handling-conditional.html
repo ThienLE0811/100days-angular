@@ -481,34 +481,91 @@
   <!-- TAB 5: Cheatsheet -->
   @if (activeTab === 'cheatsheet') {
     <section class="tab-pane">
-      <div class="cheatsheet-card">
+      <!-- Section 1: Quick Decision Guide -->
+      <div class="cheatsheet-card quick-summary-card">
         <div class="card-title-bar">
-          <h3>Bảng Tra Cứu Toán Tử RxJS Error Handling & Conditional</h3>
-          <span class="tag">RxJS 7+ CheatSheet</span>
+          <div>
+            <span class="card-badge primary">Quick Decision Guide</span>
+            <h3>Bảng Tóm Tắt Nhanh: Khi Nào Dùng Operator Xử Lý Lỗi & Điều Kiện?</h3>
+          </div>
+          <span class="tag">Cheat Sheet</span>
+        </div>
+        <p class="summary-desc">
+          Bảng tra cứu nhanh lựa chọn các toán tử Error Handling & Conditional theo nhu cầu bài toán thực tế trong lập trình Angular:
+        </p>
+        <div class="table-container">
+          <table class="spec-table quick-summary-table">
+            <thead>
+              <tr>
+                <th style="width: 40%;">Nhu cầu bài toán</th>
+                <th style="width: 22%;">Dùng Operator nào?</th>
+                <th style="width: 14%;">Tự Complete?</th>
+                <th style="width: 24%;">Ứng dụng trong Angular</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of quickSummaryList; track item.operator) {
+                <tr>
+                  <td class="req-cell">
+                    <span class="req-icon">{{ item.icon }}</span>
+                    <span class="req-text">{{ item.requirement }}</span>
+                  </td>
+                  <td class="op-cell">
+                    <code class="op-badge-code" [ngClass]="item.badgeClass">{{ item.operator }}</code>
+                  </td>
+                  <td>
+                    <span
+                      class="complete-pill"
+                      [class.auto-yes]="item.autoComplete.includes('CÓ')"
+                      [class.auto-no]="item.autoComplete.includes('KHÔNG')"
+                      [class.auto-neutral]="!item.autoComplete.includes('CÓ') && !item.autoComplete.includes('KHÔNG')"
+                    >
+                      {{ item.autoComplete }}
+                    </span>
+                  </td>
+                  <td><small class="op-angular-small">{{ item.angularUseCase }}</small></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: Comprehensive Specs Table -->
+      <div class="cheatsheet-card" style="margin-top: 1.5rem;">
+        <div class="card-title-bar">
+          <div>
+            <span class="card-badge accent">Thông Số Kỹ Thuật Chi Tiết</span>
+            <h3>Bảng Đặc Tả Chi Tiết RxJS Error Handling & Conditional Operators</h3>
+          </div>
+          <span class="tag">RxJS 7+ Specs</span>
         </div>
         <div class="table-container">
           <table class="spec-table">
             <thead>
               <tr>
-                <th>Operator</th>
-                <th>Phân loại</th>
-                <th>Hành vi khi có Lỗi / Stream Rỗng</th>
-                <th>Cú pháp mẫu</th>
-                <th>Angular Use-Case</th>
+                <th style="width: 16%;">Operator</th>
+                <th style="width: 14%;">Phân loại</th>
+                <th style="width: 24%;">Cú pháp mẫu</th>
+                <th style="width: 22%;">Hành vi khi có Lỗi / Rỗng</th>
+                <th style="width: 24%;">Angular Use-Case</th>
               </tr>
             </thead>
             <tbody>
               @for (spec of cheatsheetSpecs; track spec.operator) {
                 <tr>
-                  <td><code>{{ spec.operator }}</code></td>
+                  <td>
+                    <strong class="op-name">{{ spec.operator }}</strong>
+                    <span class="op-desc-small">{{ spec.description }}</span>
+                  </td>
                   <td>
                     <span class="category-badge" [class.error-cat]="spec.category === 'Error Handling'">
                       {{ spec.category }}
                     </span>
                   </td>
-                  <td>{{ spec.behaviorOnErrorOrEmpty }}</td>
                   <td><code class="syntax-code">{{ spec.syntax }}</code></td>
-                  <td>{{ spec.angularUseCase }}</td>
+                  <td><span class="behavior-text">{{ spec.behaviorOnErrorOrEmpty }}</span></td>
+                  <td><small class="op-angular">{{ spec.angularUseCase }}</small></td>
                 </tr>
               }
             </tbody>

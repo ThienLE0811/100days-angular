@@ -483,36 +483,95 @@
   <!-- TAB 5: Cheatsheet -->
   @if (activeTab === 'cheatsheet') {
     <section class="tab-pane">
-      <div class="cheatsheet-card">
+      <!-- Section 1: Quick Decision Guide -->
+      <div class="cheatsheet-card quick-summary-card">
         <div class="card-title-bar">
-          <h3>Bảng Tra Cứu Toàn Diện: HOOs & Utility Operators</h3>
-          <span class="tag">RxJS 7+ CheatSheet</span>
+          <div>
+            <span class="card-badge primary">Quick Decision Guide</span>
+            <h3>Bảng Tóm Tắt Nhanh: Khi Nào Dùng HOO & Utility Operator Nào?</h3>
+          </div>
+          <span class="tag">Cheat Sheet</span>
+        </div>
+        <p class="summary-desc">
+          Bảng tra cứu nhanh lựa chọn các toán tử Higher-Order Observables & Utility theo bài toán thực tế trong lập trình Angular:
+        </p>
+        <div class="table-container">
+          <table class="spec-table quick-summary-table">
+            <thead>
+              <tr>
+                <th style="width: 40%;">Nhu cầu bài toán</th>
+                <th style="width: 22%;">Dùng Operator nào?</th>
+                <th style="width: 14%;">Cơ chế Đóng/Hủy</th>
+                <th style="width: 24%;">Ứng dụng trong Angular</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of quickSummaryList; track item.operator) {
+                <tr>
+                  <td class="req-cell">
+                    <span class="req-icon">{{ item.icon }}</span>
+                    <span class="req-text">{{ item.requirement }}</span>
+                  </td>
+                  <td class="op-cell">
+                    <code class="op-badge-code" [ngClass]="item.badgeClass">{{ item.operator }}</code>
+                  </td>
+                  <td>
+                    <span
+                      class="complete-pill"
+                      [class.auto-yes]="item.autoComplete.includes('CÓ') || item.autoComplete.includes('khi')"
+                      [class.auto-no]="item.autoComplete.includes('KHÔNG')"
+                      [class.auto-neutral]="!item.autoComplete.includes('CÓ') && !item.autoComplete.includes('KHÔNG') && !item.autoComplete.includes('khi')"
+                    >
+                      {{ item.autoComplete }}
+                    </span>
+                  </td>
+                  <td><small class="op-angular-small">{{ item.angularUseCase }}</small></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: Comprehensive Specs Table -->
+      <div class="cheatsheet-card" style="margin-top: 1.5rem;">
+        <div class="card-title-bar">
+          <div>
+            <span class="card-badge accent">Thông Số Kỹ Thuật Chi Tiết</span>
+            <h3>Bảng Đặc Tả Chi Tiết: HOOs & Utility Operators</h3>
+          </div>
+          <span class="tag">RxJS 7+ Specs</span>
         </div>
         <div class="table-container">
           <table class="spec-table">
             <thead>
               <tr>
-                <th>Operator</th>
-                <th>Phân loại</th>
-                <th>Cơ chế xử lý Inner Observable</th>
-                <th>Cú pháp mẫu</th>
-                <th>Angular Use-Case</th>
-                <th>Lưu ý & Rủi ro</th>
+                <th style="width: 16%;">Operator</th>
+                <th style="width: 14%;">Phân loại</th>
+                <th style="width: 22%;">Cơ chế Inner Observable</th>
+                <th style="width: 20%;">Cú pháp mẫu</th>
+                <th style="width: 28%;">Angular Use-Case & Lưu Ý</th>
               </tr>
             </thead>
             <tbody>
               @for (spec of cheatsheetSpecs; track spec.operator) {
                 <tr>
-                  <td><code>{{ spec.operator }}</code></td>
+                  <td>
+                    <strong class="op-name">{{ spec.operator }}</strong>
+                  </td>
                   <td>
                     <span class="type-badge" [class.hoo-badge]="spec.type.includes('HOO')">
                       {{ spec.type }}
                     </span>
                   </td>
-                  <td>{{ spec.innerHandling }}</td>
+                  <td><span class="inner-handling">{{ spec.innerHandling }}</span></td>
                   <td><code class="syntax-code">{{ spec.syntax }}</code></td>
-                  <td>{{ spec.angularUseCase }}</td>
-                  <td class="risk-col">{{ spec.riskOrGotcha }}</td>
+                  <td>
+                    <div class="usecase-box">
+                      <small class="op-angular">{{ spec.angularUseCase }}</small>
+                      <small class="risk-col">⚠️ <strong>Lưu ý:</strong> {{ spec.riskOrGotcha }}</small>
+                    </div>
+                  </td>
                 </tr>
               }
             </tbody>

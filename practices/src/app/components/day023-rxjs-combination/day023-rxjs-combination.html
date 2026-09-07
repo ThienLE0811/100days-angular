@@ -78,7 +78,7 @@
       (click)="activeTab = 'cheatsheet'"
     >
       <span class="tab-icon">🧭</span>
-      <span class="tab-text">5. Decision Matrix & Specs</span>
+      <span class="tab-text">5. Bảng tóm tắt & Decision Matrix</span>
     </button>
   </nav>
 
@@ -521,11 +521,64 @@
       <!-- TAB 5: DECISION MATRIX & CHEATSHEET -->
       <!-- ================================================================= -->
       <div *ngIf="activeTab === 'cheatsheet'" class="tab-pane">
-        <section class="card demo-card">
+        <!-- Section 1: Bảng Tóm Tắt Nhanh Để Chọn Đúng Operator -->
+        <section class="card demo-card quick-summary-card">
           <div class="card-header">
             <div>
-              <span class="card-badge primary">Bảng Quyết Định & Tra Cứu</span>
-              <h2 class="card-title">Decision Matrix: Khi Nào Dùng Operator Nào?</h2>
+              <span class="card-badge primary">Quick Decision Guide</span>
+              <h2 class="card-title">Bảng Tóm Tắt Nhanh: Khi Nào Dùng Combination Operator Nào?</h2>
+            </div>
+            <span class="badge badge-syntax">Cheat Sheet</span>
+          </div>
+
+          <div class="card-body">
+            <p class="summary-desc">
+              Khi xây dựng ứng dụng Angular, hãy dựa vào bảng tra cứu nhanh dưới đây để chọn đúng Combination Operator theo bài toán thực tế:
+            </p>
+
+            <div class="table-responsive">
+              <table class="specs-table quick-summary-table">
+                <thead>
+                  <tr>
+                    <th style="width: 40%;">Nhu cầu bài toán</th>
+                    <th style="width: 22%;">Dùng Operator nào?</th>
+                    <th style="width: 14%;">Tự Complete?</th>
+                    <th style="width: 24%;">Ứng dụng trong Angular</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of quickSummaryList">
+                    <td class="req-cell">
+                      <span class="req-icon">{{ item.icon }}</span>
+                      <span class="req-text">{{ item.requirement }}</span>
+                    </td>
+                    <td class="op-cell">
+                      <code class="op-badge-code" [ngClass]="item.badgeClass">{{ item.operator }}</code>
+                    </td>
+                    <td>
+                      <span
+                        class="complete-pill"
+                        [class.auto-yes]="item.autoComplete.includes('CÓ')"
+                        [class.auto-no]="item.autoComplete.includes('KHÔNG')"
+                        [class.auto-neutral]="!item.autoComplete.includes('CÓ') && !item.autoComplete.includes('KHÔNG')"
+                      >
+                        {{ item.autoComplete }}
+                      </span>
+                    </td>
+                    <td><small class="op-angular-small">{{ item.angularUseCase }}</small></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Bảng Đặc Tả Chi Tiết & So Sánh Toàn Diện -->
+        <section class="card demo-card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <div>
+              <span class="card-badge accent">Thông Số Kỹ Thuật Chi Tiết</span>
+              <h2 class="card-title">Bảng Đặc Tả Chi Tiết & So Sánh Toàn Diện RxJS Combination Operators</h2>
             </div>
           </div>
 
@@ -534,22 +587,25 @@
               <table class="specs-table">
                 <thead>
                   <tr>
-                    <th>Operator</th>
-                    <th>Nhóm</th>
-                    <th>Khi Nào Nên Dùng?</th>
-                    <th>Thời Điểm Emit & Tự Complete</th>
-                    <th>Ứng Dụng Trong Angular</th>
+                    <th style="width: 18%;">Operator</th>
+                    <th style="width: 20%;">Cú Pháp Mẫu</th>
+                    <th style="width: 18%;">Thời Điểm Emit & Tự Complete</th>
+                    <th style="width: 22%;">Bản Chất & Khi Nào Nên Dùng?</th>
+                    <th style="width: 22%;">Ứng Dụng Trong Angular</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let item of decisionSpecs">
-                    <td><strong class="op-name">{{ item.operator }}</strong></td>
-                    <td><span class="op-cat">{{ item.category }}</span></td>
-                    <td><p class="op-when">{{ item.whenToUse }}</p></td>
+                    <td>
+                      <strong class="op-name">{{ item.operator }}</strong>
+                      <span class="op-cat">{{ item.category }}</span>
+                    </td>
+                    <td><code class="op-code">{{ item.signature }}</code></td>
                     <td>
                       <small class="op-emit"><strong>Emit:</strong> {{ item.emitsWhen }}</small>
                       <small class="op-comp"><strong>Complete:</strong> {{ item.autoComplete }}</small>
                     </td>
+                    <td><p class="op-when">{{ item.whenToUse }}</p></td>
                     <td><small class="op-angular">{{ item.angularUseCase }}</small></td>
                   </tr>
                 </tbody>

@@ -42,6 +42,15 @@ export interface SubjectDecisionSpec {
   angularUseCase: string;
 }
 
+export interface QuickSummaryItem {
+  requirement: string;
+  operator: string;
+  badgeClass: string;
+  icon: string;
+  autoComplete: string;
+  angularUseCase: string;
+}
+
 export interface CartItem {
   id: number;
   name: string;
@@ -128,6 +137,57 @@ export class Day026RxjsSubjectMulticast implements OnInit, OnDestroy {
   // ============================================================================
   // CHEATSHEET & DECISION MATRIX
   // ============================================================================
+  readonly quickSummaryList: QuickSummaryItem[] = [
+    {
+      requirement: 'Quản lý state hiện tại (UI State), luôn có giá trị ban đầu và subscriber mới nhận ngay giá trị đó',
+      operator: 'BehaviorSubject(initVal)',
+      badgeClass: 'badge-primary',
+      icon: '📦',
+      autoComplete: 'Lưu 1 giá trị mới nhất',
+      angularUseCase: 'Quản lý currentUser$, giỏ hàng cart$, themeMode$ trong Service; đồng bộ qua getter .value.',
+    },
+    {
+      requirement: 'Phát sự kiện (Event Emitter / Event Bus), chỉ các subscriber đang lắng nghe mới nhận tin',
+      operator: 'new Subject()',
+      badgeClass: 'badge-syntax',
+      icon: '📢',
+      autoComplete: 'Không lưu (0 giá trị)',
+      angularUseCase: 'Kênh truyền sự kiện (destroy$, clickSearch$, globalEventBus) giữa các component độc lập.',
+    },
+    {
+      requirement: 'Lưu lại buffer N giá trị đã phát gần nhất (hoặc trong khoảng thời gian) cho subscriber đến sau',
+      operator: 'ReplaySubject(buffer, windowTime)',
+      badgeClass: 'badge-accent',
+      icon: '📼',
+      autoComplete: 'Lưu N giá trị gần nhất',
+      angularUseCase: 'Lưu lịch sử tin nhắn chat, danh sách thông báo gần đây, route navigation history.',
+    },
+    {
+      requirement: 'Chỉ nhận giá trị cuối cùng của luồng tính toán và CHỈ PHÁT KHI COMPLETE (giống Promise)',
+      operator: 'new AsyncSubject()',
+      badgeClass: 'badge-warning',
+      icon: '🏁',
+      autoComplete: 'Chỉ 1 giá trị cuối',
+      angularUseCase: 'Tác vụ tính toán nặng chỉ cần kết quả cuối, export báo cáo Excel, load app config 1 lần.',
+    },
+    {
+      requirement: 'Cache lại kết quả HTTP request và chia sẻ (multicast) cho nhiều nơi cùng dùng',
+      operator: 'shareReplay({ bufferSize: 1, refCount: true })',
+      badgeClass: 'badge-info',
+      icon: '💾',
+      autoComplete: 'Cache & Replay 1 giá trị',
+      angularUseCase: 'Tránh gọi lại API nhiều lần khi dùng nhiều AsyncPipe trong template hoặc nhiều component cùng sub.',
+    },
+    {
+      requirement: 'Chia sẻ 1 execution duy nhất đang chạy (multicast) theo thời gian thực giữa nhiều subscriber',
+      operator: 'share()',
+      badgeClass: 'badge-secondary',
+      icon: '📡',
+      autoComplete: 'Không cache (Real-time)',
+      angularUseCase: 'Multicast sự kiện DOM (mousemove, window resize), chia sẻ kết nối WebSocket live data.',
+    },
+  ];
+
   readonly cheatsheetSpecs: SubjectDecisionSpec[] = [
     {
       name: 'Subject',

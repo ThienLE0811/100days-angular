@@ -1,8 +1,9 @@
 .day018-page {
   position: relative;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 1.5rem;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
   color: #1e293b;
 }
 
@@ -19,7 +20,7 @@
   .header-content { flex: 1; min-width: 320px; }
   .header-badges { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
   .page-title { font-size: 1.75rem; font-weight: 800; color: #0f172a; margin: 0 0 0.5rem; line-height: 1.25; }
-  .page-subtitle { font-size: 0.95rem; color: #475569; margin: 0; max-width: 860px; line-height: 1.55; strong { color: #0f172a; } }
+  .page-subtitle { font-size: 0.95rem; color: #475569; margin: 0; max-width: none; line-height: 1.55; strong { color: #0f172a; } }
 }
 
 .badge {

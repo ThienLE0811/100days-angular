@@ -1,8 +1,9 @@
 .day017-page {
   position: relative;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 1.5rem;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
   color: #1e293b;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
@@ -62,7 +63,7 @@
     font-size: 0.95rem;
     color: #475569;
     margin: 0;
-    max-width: 860px;
+    max-width: none;
     line-height: 1.55;
 
     strong {

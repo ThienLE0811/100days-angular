@@ -47,6 +47,15 @@ export interface ErrorConditionalSpec {
   syntax: string;
 }
 
+export interface QuickSummaryItem {
+  requirement: string;
+  operator: string;
+  badgeClass: string;
+  icon: string;
+  autoComplete: string;
+  angularUseCase: string;
+}
+
 export interface ForkJoinResponseItem {
   name: string;
   status: 'SUCCESS' | 'ERROR';
@@ -144,6 +153,65 @@ export class Day024RxjsErrorHandlingConditional implements OnInit, OnDestroy {
   // ============================================================================
   // CHEATSHEET & DECISION MATRIX
   // ============================================================================
+  readonly quickSummaryList: QuickSummaryItem[] = [
+    {
+      requirement: 'Bắt lỗi từ HTTP/Stream và trả về giá trị dự phòng (Fallback) tránh sập app',
+      operator: 'catchError(err => of(fallback))',
+      badgeClass: 'badge-danger',
+      icon: '🛡️',
+      autoComplete: 'Theo stream fallback',
+      angularUseCase: 'Bọc từng API con trong forkJoin; hoặc trả về [] khi tải danh sách thất bại.',
+    },
+    {
+      requirement: 'Tự động thử lại gọi API khi gặp lỗi mạng/máy chủ chập chờn (tối đa N lần)',
+      operator: 'retry(3) / retry({ count, delay })',
+      badgeClass: 'badge-warning',
+      icon: '🔄',
+      autoComplete: 'Theo stream gốc',
+      angularUseCase: 'Thử lại request GET khi nhận lỗi 503/504 hoặc offline, không dùng cho POST/DELETE.',
+    },
+    {
+      requirement: 'Thử lại có giãn cách thời gian tăng dần theo cấp số nhân (Exponential Backoff)',
+      operator: 'retry({ delay: (err, retryCount) => timer(...) })',
+      badgeClass: 'badge-accent',
+      icon: '⏳',
+      autoComplete: 'Theo luồng retry',
+      angularUseCase: 'Tái kết nối WebSocket hoặc gọi lại API sau 1s, 2s, 4s, 8s để tránh nghẽn server.',
+    },
+    {
+      requirement: 'Cung cấp giá trị mặc định nếu stream hoàn tất (complete) mà KHÔNG có giá trị nào',
+      operator: 'defaultIfEmpty(defaultValue)',
+      badgeClass: 'badge-info',
+      icon: '📦',
+      autoComplete: 'CÓ (Tự đóng)',
+      angularUseCase: 'Xử lý kết quả tìm kiếm rỗng, đảm bảo template luôn nhận mảng [] thay vì undefined.',
+    },
+    {
+      requirement: 'Chủ động ném ra lỗi nếu stream hoàn tất (complete) mà không phát ra bất kỳ value nào',
+      operator: 'throwIfEmpty(() => new Error(...))',
+      badgeClass: 'badge-danger',
+      icon: '🚨',
+      autoComplete: 'KHÔNG (Terminate bằng Error)',
+      angularUseCase: 'Bắt buộc thao tác: hủy phiên giao dịch nếu người dùng không click xác nhận trong 1s.',
+    },
+    {
+      requirement: 'Kiểm tra xem TẤT CẢ giá trị trong stream có thỏa mãn một điều kiện hay không',
+      operator: 'every(x => condition)',
+      badgeClass: 'badge-primary',
+      icon: '⚖️',
+      autoComplete: 'CÓ (Khi source complete hoặc gặp false)',
+      angularUseCase: 'Kiểm tra tính hợp lệ của tất cả các bước trong Wizard Form hoặc danh sách file upload.',
+    },
+    {
+      requirement: 'Quyết định chọn 1 trong 2 luồng Observable dựa vào điều kiện TẠI LÚC SUBSCRIBE',
+      operator: 'iif(() => isVip, vipStream$, guestStream$)',
+      badgeClass: 'badge-secondary',
+      icon: '🔀',
+      autoComplete: 'Theo stream được chọn',
+      angularUseCase: 'Tải cấu hình giao diện VIP vs Thường, hoặc tải dữ liệu cache vs live API tùy trạng thái.',
+    },
+  ];
+
   readonly cheatsheetSpecs: ErrorConditionalSpec[] = [
     {
       operator: 'catchError',

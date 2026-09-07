@@ -65,6 +65,15 @@ export interface FilteringSpec {
   angularUseCase: string;
 }
 
+export interface QuickFilterSummary {
+  requirement: string;
+  operator: string;
+  autoComplete: boolean;
+  badgeClass: string;
+  icon: string;
+  angularUseCase: string;
+}
+
 @Component({
   selector: 'app-day022-rxjs-filtering',
   standalone: true,
@@ -136,6 +145,97 @@ export class Day022RxjsFiltering implements OnInit, AfterViewInit, OnDestroy {
   // ============================================================================
   // CHEATSHEET DATA
   // ============================================================================
+  readonly quickFilterSummaryList: QuickFilterSummary[] = [
+    {
+      requirement: 'Lọc theo điều kiện logic thông thường (truthy / falsy)',
+      operator: 'filter(predicate)',
+      autoComplete: false,
+      badgeClass: 'badge-primary',
+      icon: '🎯',
+      angularUseCase: 'Lọc bỏ null/undefined từ API hoặc bắt sự kiện NavigationEnd của Router.',
+    },
+    {
+      requirement: 'Lấy 1 phần tử đầu tiên AN TOÀN (không ném lỗi nếu stream rỗng)',
+      operator: 'take(1)',
+      autoComplete: true,
+      badgeClass: 'badge-syntax',
+      icon: '🛡️',
+      angularUseCase: 'Snapshot dữ liệu 1 lần duy nhất, khuyên dùng trong Angular Route Guards.',
+    },
+    {
+      requirement: 'Lấy 1 phần tử đầu tiên (NGHIÊM NGẶT, ném EmptyError nếu rỗng)',
+      operator: 'first(predicate?)',
+      autoComplete: true,
+      badgeClass: 'badge-accent',
+      icon: '🥇',
+      angularUseCase: 'Lấy giá trị đầu tiên và đảm bảo stream phải có dữ liệu (nếu không có sẽ báo lỗi).',
+    },
+    {
+      requirement: 'Lấy phần tử cuối cùng trước khi stream hoàn tất',
+      operator: 'last(predicate?)',
+      autoComplete: true,
+      badgeClass: 'badge-secondary',
+      icon: '🏁',
+      angularUseCase: 'Lấy trạng thái cuối cùng của tiến trình tải tệp hoặc batch upload.',
+    },
+    {
+      requirement: 'Chỉ cho phép DUY NHẤT 1 phần tử thỏa mãn (ném Error nếu có >= 2)',
+      operator: 'single(predicate?)',
+      autoComplete: true,
+      badgeClass: 'badge-danger',
+      icon: '⚠️',
+      angularUseCase: 'Xác thực tính duy nhất của dữ liệu (Unique constraint check).',
+    },
+    {
+      requirement: 'Hủy subscription khi Component bị Destroy (chống Memory Leak)',
+      operator: 'takeUntil(notifier$)',
+      autoComplete: true,
+      badgeClass: 'badge-danger',
+      icon: '🛑',
+      angularUseCase: 'Pattern kinh điển: source$.pipe(takeUntil(this.destroy$)) trong ngOnDestroy().',
+    },
+    {
+      requirement: 'Lắng nghe CHỪNG NÀO điều kiện còn đúng, dừng ngay khi sai',
+      operator: 'takeWhile(predicate)',
+      autoComplete: true,
+      badgeClass: 'badge-info',
+      icon: '⏳',
+      angularUseCase: 'Đồng hồ đếm ngược (countdown) hoặc tải dữ liệu theo % tiến độ.',
+    },
+    {
+      requirement: 'Bỏ qua N giá trị đầu tiên phát ra',
+      operator: 'skip(n)',
+      autoComplete: false,
+      badgeClass: 'badge-secondary',
+      icon: '⏭️',
+      angularUseCase: 'skip(1) để bỏ qua giá trị khởi tạo mặc định ban đầu của FormControl.valueChanges.',
+    },
+    {
+      requirement: 'Chỉ phát khi giá trị THAY ĐỔI so với giá trị liền kề trước đó',
+      operator: 'distinctUntilChanged()',
+      autoComplete: false,
+      badgeClass: 'badge-accent',
+      icon: '💎',
+      angularUseCase: 'Chặn gọi API tìm kiếm khi người dùng gõ rồi xóa về lại từ khóa cũ.',
+    },
+    {
+      requirement: 'Chờ người dùng NGỪNG THAO TÁC X ms rồi mới phát giá trị cuối',
+      operator: 'debounceTime(ms)',
+      autoComplete: false,
+      badgeClass: 'badge-warning',
+      icon: '⏱️',
+      angularUseCase: 'Vua làm ô tìm kiếm (Typeahead / Autocomplete Search) để chống spam API.',
+    },
+    {
+      requirement: 'Phát ngay lần đầu, sau đó KHÓA CHẶN SPAM trong X ms',
+      operator: 'throttleTime(ms)',
+      autoComplete: false,
+      badgeClass: 'badge-info',
+      icon: '⚡',
+      angularUseCase: 'Chống click đúp nút Đặt hàng/Submit, giảm tải sự kiện mousemove / scroll.',
+    },
+  ];
+
   readonly specsList: FilteringSpec[] = [
     {
       name: 'filter(predicate)',

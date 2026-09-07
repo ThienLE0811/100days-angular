@@ -1,8 +1,15 @@
 .day-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   color: #1e293b;
 }
 
@@ -50,7 +57,7 @@
   .subtitle {
     font-size: 1rem;
     color: #64748b;
-    max-width: 820px;
+    max-width: none;
     margin: 0 auto;
     line-height: 1.5;
 
@@ -108,7 +115,8 @@
   }
 }
 
-.demo-card, .cheatsheet-card {
+.demo-card,
+.cheatsheet-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -173,38 +181,50 @@
   &.primary {
     background: #3b82f6;
     color: #ffffff;
-    &:hover:not(:disabled) { background: #2563eb; }
+    &:hover:not(:disabled) {
+      background: #2563eb;
+    }
   }
 
   &.success {
     background: #10b981;
     color: #ffffff;
-    &:hover:not(:disabled) { background: #059669; }
+    &:hover:not(:disabled) {
+      background: #059669;
+    }
   }
 
   &.danger {
     background: #ef4444;
     color: #ffffff;
-    &:hover:not(:disabled) { background: #dc2626; }
+    &:hover:not(:disabled) {
+      background: #dc2626;
+    }
   }
 
   &.warning {
     background: #f59e0b;
     color: #ffffff;
-    &:hover:not(:disabled) { background: #d97706; }
+    &:hover:not(:disabled) {
+      background: #d97706;
+    }
   }
 
   &.accent {
     background: #8b5cf6;
     color: #ffffff;
-    &:hover:not(:disabled) { background: #7c3aed; }
+    &:hover:not(:disabled) {
+      background: #7c3aed;
+    }
   }
 
   &.secondary {
     background: #f1f5f9;
     color: #334155;
     border: 1px solid #cbd5e1;
-    &:hover:not(:disabled) { background: #e2e8f0; }
+    &:hover:not(:disabled) {
+      background: #e2e8f0;
+    }
   }
 
   &:disabled {
@@ -229,7 +249,9 @@
     .status-badge {
       font-weight: 600;
       color: #16a34a;
-      &.danger { color: #dc2626; }
+      &.danger {
+        color: #dc2626;
+      }
     }
   }
 
@@ -260,8 +282,12 @@
       &.error-chip {
         background: #fee2e2;
         border-color: #fca5a5;
-        .val { color: #b91c1c; }
-        .subtext { color: #991b1b; }
+        .val {
+          color: #b91c1c;
+        }
+        .subtext {
+          color: #991b1b;
+        }
       }
     }
 
@@ -319,8 +345,14 @@
         font-size: 0.7rem;
         padding: 0.15rem 0.4rem;
         border-radius: 4px;
-        &.success { background: #dcfce7; color: #166534; }
-        &.danger { background: #fee2e2; color: #991b1b; }
+        &.success {
+          background: #dcfce7;
+          color: #166534;
+        }
+        &.danger {
+          background: #fee2e2;
+          color: #991b1b;
+        }
       }
     }
 
@@ -389,8 +421,14 @@
   border-radius: 8px;
   padding: 1rem;
 
-  &.success { border-color: #86efac; background: #f0fdf4; }
-  &.failed { border-color: #fca5a5; background: #fef2f2; }
+  &.success {
+    border-color: #86efac;
+    background: #f0fdf4;
+  }
+  &.failed {
+    border-color: #fca5a5;
+    background: #fef2f2;
+  }
 
   .status-title {
     font-size: 0.95rem;
@@ -408,8 +446,14 @@
       padding: 0.3rem 0.5rem;
       border-radius: 4px;
 
-      &.fail { background: #fee2e2; color: #991b1b; }
-      &.ok { background: #dcfce7; color: #166534; }
+      &.fail {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      &.ok {
+        background: #dcfce7;
+        color: #166534;
+      }
 
       .timeline-time {
         font-family: monospace;
@@ -436,9 +480,20 @@
       padding: 0.6rem 0.8rem;
       text-align: center;
 
-      .step-badge { font-weight: 700; color: #6b21a8; font-size: 0.85rem; }
-      .step-delay { font-size: 0.8rem; color: #2563eb; }
-      .step-time { font-size: 0.7rem; color: #94a3b8; font-family: monospace; }
+      .step-badge {
+        font-weight: 700;
+        color: #6b21a8;
+        font-size: 0.85rem;
+      }
+      .step-delay {
+        font-size: 0.8rem;
+        color: #2563eb;
+      }
+      .step-time {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        font-family: monospace;
+      }
     }
   }
 
@@ -491,9 +546,18 @@
   padding: 1rem;
   margin-top: 1rem;
 
-  &.active { border-color: #60a5fa; background: #eff6ff; }
-  &.success { border-color: #86efac; background: #f0fdf4; }
-  &.expired { border-color: #fca5a5; background: #fef2f2; }
+  &.active {
+    border-color: #60a5fa;
+    background: #eff6ff;
+  }
+  &.success {
+    border-color: #86efac;
+    background: #f0fdf4;
+  }
+  &.expired {
+    border-color: #fca5a5;
+    background: #fef2f2;
+  }
 
   .timer-display {
     margin-bottom: 0.5rem;
@@ -536,8 +600,14 @@
     background: #e2e8f0;
     color: #334155;
 
-    &.fail { background: #fee2e2; color: #991b1b; }
-    &.top { background: #fef08a; color: #854d0e; }
+    &.fail {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    &.top {
+      background: #fef08a;
+      color: #854d0e;
+    }
   }
 }
 
@@ -552,12 +622,31 @@
     border-radius: 8px;
     padding: 1rem;
 
-    &.pass { border-color: #86efac; background: #f0fdf4; }
-    &.fail { border-color: #fca5a5; background: #fef2f2; }
+    &.pass {
+      border-color: #86efac;
+      background: #f0fdf4;
+    }
+    &.fail {
+      border-color: #fca5a5;
+      background: #fef2f2;
+    }
 
-    .eval-title { font-size: 0.85rem; font-family: monospace; font-weight: 600; color: #475569; }
-    .eval-value { font-size: 1.5rem; font-weight: 800; margin: 0.25rem 0; color: #0f172a; }
-    .eval-desc { font-size: 0.8rem; color: #64748b; }
+    .eval-title {
+      font-size: 0.85rem;
+      font-family: monospace;
+      font-weight: 600;
+      color: #475569;
+    }
+    .eval-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 0.25rem 0;
+      color: #0f172a;
+    }
+    .eval-desc {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
   }
 }
 
@@ -590,7 +679,11 @@
     align-items: center;
     margin-bottom: 0.5rem;
 
-    h4 { margin: 0; font-size: 1.1rem; color: #581c87; }
+    h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #581c87;
+    }
     .discount-badge {
       background: #86198f;
       color: #ffffff;
@@ -617,7 +710,8 @@
   border-collapse: collapse;
   font-size: 0.85rem;
 
-  th, td {
+  th,
+  td {
     padding: 0.75rem;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
@@ -684,7 +778,10 @@
         border-radius: 50%;
         box-shadow: 0 0 8px #10b981;
       }
-      .log-count { color: #64748b; font-size: 0.8rem; }
+      .log-count {
+        color: #64748b;
+        font-size: 0.8rem;
+      }
     }
 
     .clear-btn {
@@ -695,7 +792,10 @@
       font-size: 0.75rem;
       padding: 0.3rem 0.6rem;
       cursor: pointer;
-      &:hover { background: #1e293b; color: #ffffff; }
+      &:hover {
+        background: #1e293b;
+        color: #ffffff;
+      }
     }
   }
 
@@ -713,28 +813,238 @@
       flex-wrap: wrap;
       gap: 0.4rem;
 
-      .log-time { color: #64748b; }
+      .log-time {
+        color: #64748b;
+      }
       .badge-type {
         font-weight: 700;
         padding: 0.05rem 0.35rem;
         border-radius: 4px;
         font-size: 0.7rem;
 
-        &.next { background: #14532d; color: #86efac; }
-        &.error { background: #7f1d1d; color: #fca5a5; }
-        &.catch { background: #581c87; color: #f0abfc; }
-        &.retry { background: #7c2d12; color: #fdba74; }
-        &.complete { background: #1e3a8a; color: #93c5fd; }
-        &.info { background: #1e293b; color: #cbd5e1; }
+        &.next {
+          background: #14532d;
+          color: #86efac;
+        }
+        &.error {
+          background: #7f1d1d;
+          color: #fca5a5;
+        }
+        &.catch {
+          background: #581c87;
+          color: #f0abfc;
+        }
+        &.retry {
+          background: #7c2d12;
+          color: #fdba74;
+        }
+        &.complete {
+          background: #1e3a8a;
+          color: #93c5fd;
+        }
+        &.info {
+          background: #1e293b;
+          color: #cbd5e1;
+        }
       }
-      .log-op { color: #38bdf8; }
-      .log-msg { color: #e2e8f0; }
+      .log-op {
+        color: #38bdf8;
+      }
+      .log-msg {
+        color: #e2e8f0;
+      }
     }
 
     .log-empty {
       font-size: 0.8rem;
       color: #64748b;
       font-style: italic;
+    }
+  }
+}
+
+/* Cheatsheet Tables Styling */
+.cheatsheet-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+
+  &.quick-summary-card {
+    border-top: 3px solid #4338ca;
+  }
+
+  .card-title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0.25rem 0 0;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+  }
+
+  .card-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    &.primary { background: #e0e7ff; color: #3730a3; }
+    &.accent { background: #f5f3ff; color: #6d28d9; }
+  }
+
+  .summary-desc {
+    margin: 0 0 1rem;
+    color: #475569;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    text-align: left;
+
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 700;
+      padding: 0.75rem 0.85rem;
+      border-bottom: 2px solid #e2e8f0;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.75rem 0.85rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    tr:nth-child(even) td {
+      background: #fcfcfd;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    .req-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #334155;
+      font-weight: 500;
+    }
+
+    .req-icon {
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .op-name {
+      display: block;
+      color: #0f172a;
+      font-size: 0.9rem;
+      font-family: monospace;
+    }
+
+    .op-desc-small {
+      display: block;
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 0.15rem;
+      line-height: 1.35;
+    }
+
+    .op-badge-code {
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+
+      &.badge-primary { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+      &.badge-accent { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+      &.badge-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+      &.badge-syntax { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+      &.badge-warning { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+      &.badge-secondary { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+      &.badge-danger { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    }
+
+    .complete-pill {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      &.auto-yes { background: #dcfce7; color: #15803d; }
+      &.auto-no { background: #fee2e2; color: #991b1b; }
+      &.auto-neutral { background: #f1f5f9; color: #475569; }
+    }
+
+    .category-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: #e0f2fe;
+      color: #0369a1;
+      &.error-cat { background: #fee2e2; color: #991b1b; }
+    }
+
+    .syntax-code {
+      background: #f1f5f9;
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+      color: #0f766e;
+      font-family: monospace;
+      font-size: 0.775rem;
+    }
+
+    .behavior-text {
+      font-size: 0.8rem;
+      color: #334155;
+      line-height: 1.4;
+      display: block;
+    }
+
+    .op-angular {
+      color: #64748b;
+      font-size: 0.75rem;
+      line-height: 1.4;
+      display: block;
+    }
+
+    .op-angular-small {
+      color: #475569;
+      font-size: 0.8rem;
+      line-height: 1.4;
     }
   }
 }

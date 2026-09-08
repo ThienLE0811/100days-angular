@@ -1,0 +1,496 @@
+<div class="day049-lab">
+
+  <!-- ════════════════════════ HEADER ════════════════════════ -->
+  <header class="lab-header">
+    <div class="lab-title-area">
+      <span class="day-badge">Day 049</span>
+      <div>
+        <h1 class="lab-title">JavaScript Nâng Cao</h1>
+        <p class="lab-subtitle">Event Loop · Closure · Prototype · Async · Proxy · FP · ESM</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span class="meta-chip">🧠 10 chủ đề</span>
+      <span class="meta-chip">⚡ Interactive Lab</span>
+    </div>
+  </header>
+
+  <!-- ════════════════════════ TABS ════════════════════════ -->
+  <nav class="tab-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'event-loop'" (click)="setTab('event-loop')">
+      <span class="tab-icon">⚙️</span> Event Loop
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'async-generator'" (click)="setTab('async-generator')">
+      <span class="tab-icon">⚡</span> Async / Generator
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'closure-memory'" (click)="setTab('closure-memory')">
+      <span class="tab-icon">🧠</span> Closure & Memory
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'this-prototype'" (click)="setTab('this-prototype')">
+      <span class="tab-icon">🔗</span> this & Prototype
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'proxy-reactivity'" (click)="setTab('proxy-reactivity')">
+      <span class="tab-icon">🪄</span> Proxy Engine
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'cheatsheet'" (click)="setTab('cheatsheet')">
+      <span class="tab-icon">📋</span> Cheatsheet
+    </button>
+  </nav>
+
+  <!-- ════════════════════════ CONTENT ════════════════════════ -->
+  <div class="tab-content">
+
+    <!-- ── TAB 1: Event Loop Visualizer ─────────────────── -->
+    @if (activeTab === 'event-loop') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <h2>Event Loop Visualizer</h2>
+          <p>Quan sát <strong>Call Stack</strong>, <strong>Microtask Queue</strong> và <strong>Macrotask Queue</strong> hoạt động theo từng bước</p>
+        </div>
+
+        <!-- Scenario selector -->
+        <div class="scenario-selector">
+          <label class="selector-label">Chọn kịch bản:</label>
+          <div class="scenario-grid">
+            @for (s of scenarioKeys; track s) {
+              <button
+                class="scenario-btn"
+                [class.selected]="selectedScenario === s"
+                [disabled]="isEventLoopRunning"
+                (click)="setScenario(s)">
+                {{ eventLoopScenarios[s].label }}
+              </button>
+            }
+          </div>
+          <div class="scenario-desc">
+            <strong>📌 {{ eventLoopScenarios[selectedScenario].description }}</strong>
+            <pre class="code-preview">{{ eventLoopScenarios[selectedScenario].code }}</pre>
+          </div>
+        </div>
+
+        <!-- Visualizer layout -->
+        <div class="el-visualizer">
+          <!-- Call Stack -->
+          <div class="queue-box stack-box">
+            <div class="queue-title">
+              <span>📚 Call Stack</span>
+              <span class="queue-count">{{ callStack.length }}</span>
+            </div>
+            <div class="queue-items">
+              @if (callStack.length === 0) {
+                <div class="queue-empty">— Trống —</div>
+              }
+              @for (item of callStack; track item.id) {
+                <div class="queue-item" [class]="'qi-' + item.type">
+                  {{ item.label }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Arrow -->
+          <div class="el-arrows">
+            <div class="arrow-label">Event Loop</div>
+            <div class="arrow-icon">⟺</div>
+          </div>
+
+          <!-- Queues -->
+          <div class="queues-column">
+            <!-- Microtask -->
+            <div class="queue-box micro-box">
+              <div class="queue-title">
+                <span>⚡ Microtask Queue</span>
+                <span class="queue-count microtask-count">{{ microtaskQueue.length }}</span>
+              </div>
+              <div class="queue-items">
+                @if (microtaskQueue.length === 0) {
+                  <div class="queue-empty">— Trống —</div>
+                }
+                @for (item of microtaskQueue; track item.id) {
+                  <div class="queue-item qi-microtask">{{ item.label }}</div>
+                }
+              </div>
+            </div>
+
+            <!-- Macrotask -->
+            <div class="queue-box macro-box">
+              <div class="queue-title">
+                <span>⏱ Macrotask Queue</span>
+                <span class="queue-count macrotask-count">{{ macrotaskQueue.length }}</span>
+              </div>
+              <div class="queue-items">
+                @if (macrotaskQueue.length === 0) {
+                  <div class="queue-empty">— Trống —</div>
+                }
+                @for (item of macrotaskQueue; track item.id) {
+                  <div class="queue-item qi-macrotask">{{ item.label }}</div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step Log -->
+        @if (eventLoopStepLog.length > 0) {
+          <div class="step-log">
+            <div class="step-log-title">📝 Diễn giải từng bước</div>
+            @for (step of eventLoopStepLog; track $index) {
+              <div class="step-item">{{ step }}</div>
+            }
+          </div>
+        }
+
+        <!-- Controls -->
+        <div class="controls">
+          <button class="btn btn-primary" [disabled]="isEventLoopRunning" (click)="runEventLoopSimulation()">
+            @if (isEventLoopRunning) { ⏳ Đang chạy... } @else { ▶ Chạy mô phỏng }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ── TAB 2: Async / Generator ──────────────────────── -->
+    @if (activeTab === 'async-generator') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <h2>Async/Await Internals & Generator Protocol</h2>
+          <p>Hiểu rõ cơ chế <strong>async/await</strong> = Generator + Promise, và <strong>Iterator Protocol</strong></p>
+        </div>
+
+        <div class="two-col">
+          <!-- Generator Sandbox -->
+          <div class="demo-card">
+            <div class="card-title">🔄 Generator — Step by Step</div>
+            <div class="gen-mode-selector">
+              <button class="mode-btn" [class.active]="generatorMode === 'manual'" (click)="generatorMode = 'manual'; initGenerator()">Manual</button>
+              <button class="mode-btn" [class.active]="generatorMode === 'fibonacci'" (click)="generatorMode = 'fibonacci'; initGenerator()">Fibonacci</button>
+              <button class="mode-btn" [class.active]="generatorMode === 'infinite'" (click)="generatorMode = 'infinite'; initGenerator()">Infinite Counter</button>
+            </div>
+
+            <div class="gen-steps">
+              @if (generatorSteps.length === 0) {
+                <div class="gen-empty">Bấm "Next Step" để khởi động Generator →</div>
+              }
+              @for (step of generatorSteps; track step.step) {
+                <div class="gen-step" [class.gen-done]="step.done">
+                  <span class="step-num">Step {{ step.step }}</span>
+                  <span class="step-val">{{ step.yielded }}</span>
+                  <span class="step-status" [class.done-badge]="step.done">{{ step.done ? 'done ✅' : 'yield ⏸' }}</span>
+                  @if (step.description) {
+                    <div class="step-desc">{{ step.description }}</div>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="controls">
+              <button class="btn btn-secondary" (click)="initGenerator()">🔄 Reset</button>
+              <button class="btn btn-primary" (click)="nextGenStep()">▶ Next Step</button>
+            </div>
+          </div>
+
+          <!-- Async/Await Demo -->
+          <div class="demo-card">
+            <div class="card-title">⚡ async/await Execution Flow</div>
+            <pre class="code-block">{{ asyncCode }}</pre>
+
+            <div class="async-steps">
+              @if (asyncStepLog.length === 0) {
+                <div class="gen-empty">Bấm "Run Demo" để thấy luồng thực thi →</div>
+              }
+              @for (step of asyncStepLog; track $index) {
+                <div class="async-step-item" [@.disabled]="true">{{ step }}</div>
+              }
+            </div>
+
+            <div class="controls">
+              <button class="btn btn-primary" [disabled]="isAsyncRunning" (click)="runAsyncDemo()">
+                @if (isAsyncRunning) { ⏳ Running... } @else { ▶ Run Demo }
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Theory box -->
+        <div class="theory-box">
+          <div class="theory-title">💡 async/await = Generator + Promise (dưới hood)</div>
+          <div class="theory-grid">
+            <div class="theory-item">
+              <div class="theory-label">Bạn viết</div>
+              <pre class="theory-code">{{ codeAsyncLeft }}</pre>
+            </div>
+            <div class="theory-arrow">≡</div>
+            <div class="theory-item">
+              <div class="theory-label">Runtime hiểu (tương đương)</div>
+              <pre class="theory-code">{{ codeAsyncRight }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── TAB 3: Closure & Memory ───────────────────────── -->
+    @if (activeTab === 'closure-memory') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <h2>Closure & Memory Leak Lab</h2>
+          <p>Thử nghiệm tạo và giải phóng closure, quan sát ảnh hưởng bộ nhớ và các cạm bẫy phổ biến</p>
+        </div>
+
+        <!-- Memory gauge -->
+        <div class="memory-gauge-area">
+          <div class="gauge-card" [class.gauge-danger]="closureState.isLeaking">
+            <div class="gauge-icon">{{ closureState.isLeaking ? '⚠️' : '✅' }}</div>
+            <div class="gauge-label">Trạng thái bộ nhớ</div>
+            <div class="gauge-value">{{ closureState.isLeaking ? 'ĐANG LEAK!' : 'Sạch' }}</div>
+          </div>
+          <div class="gauge-card">
+            <div class="gauge-icon">📦</div>
+            <div class="gauge-label">Array items (tổng)</div>
+            <div class="gauge-value">{{ closureState.arraySize | number }}</div>
+          </div>
+          <div class="gauge-card">
+            <div class="gauge-icon">🔗</div>
+            <div class="gauge-label">Closure references</div>
+            <div class="gauge-value">{{ closureState.listenerCount }}</div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="closure-controls">
+          <button class="btn btn-danger" (click)="createLeakyClosure()">
+            ⚠️ Tạo Leaky Closure (100K items)
+          </button>
+          <button class="btn btn-success" (click)="cleanupClosures()" [disabled]="!closureState.isLeaking">
+            ✅ Cleanup & GC
+          </button>
+          <button class="btn btn-secondary" (click)="demonstrateClosureBug()">
+            🐛 Demo var vs let Bug
+          </button>
+        </div>
+
+        <!-- Log -->
+        <div class="closure-log">
+          @if (closureLog.length === 0) {
+            <div class="log-empty">Bấm các nút phía trên để bắt đầu...</div>
+          }
+          @for (entry of closureLog; track $index) {
+            <div class="closure-log-item">{{ entry }}</div>
+          }
+        </div>
+
+        <!-- Theory -->
+        <div class="theory-box">
+          <div class="theory-title">🧠 Closure giữ REFERENCE, không phải VALUE</div>
+          <div class="code-block-wrapper">
+            <pre class="code-block">{{ codeClosureLeak }}</pre>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── TAB 4: this & Prototype ───────────────────────── -->
+    @if (activeTab === 'this-prototype') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <h2>`this` Binding & Prototype Chain</h2>
+          <p>Chạy 4 quy tắc xác định <strong>this</strong> và khám phá chuỗi <strong>Prototype</strong></p>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-primary" (click)="runThisDemo()">▶ Chạy tất cả Demo</button>
+        </div>
+
+        <!-- This Results -->
+        @if (thisResults.length > 0) {
+          <div class="this-results">
+            @for (result of thisResults; track result.mode) {
+              <div class="this-card">
+                <div class="this-mode">{{ result.mode }}</div>
+                <div class="this-value-row">
+                  <span class="this-label">this =</span>
+                  <code class="this-value">{{ result.thisValue }}</code>
+                </div>
+                <div class="this-result-row">
+                  <span class="result-label">→</span>
+                  <code class="result-code">{{ result.result }}</code>
+                </div>
+                <div class="this-explanation">{{ result.explanation }}</div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Prototype Chain -->
+        <div class="proto-section">
+          <div class="proto-title">🔗 Prototype Chain — Dog inherits Animal</div>
+          <div class="proto-chain">
+            @for (level of prototypeChain; track level.level; let isLast = $last) {
+              <div class="proto-level" [class.proto-null]="isLast">
+                <div class="proto-level-name">{{ level.level }}</div>
+                <div class="proto-props">
+                  @for (prop of level.props; track prop) {
+                    <span class="proto-prop">{{ prop }}</span>
+                  }
+                </div>
+              </div>
+              @if (!isLast) {
+                <div class="proto-arrow">[[Prototype]] ↓</div>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Arrow Function explanation -->
+        <div class="theory-box">
+          <div class="theory-title">💡 Tại sao Angular dùng Arrow Function trong callbacks?</div>
+          <pre class="code-block">{{ codeArrowThis }}</pre>
+        </div>
+      </div>
+    }
+
+    <!-- ── TAB 5: Proxy Reactivity ───────────────────────── -->
+    @if (activeTab === 'proxy-reactivity') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <h2>Proxy Reactivity Mini-Engine</h2>
+          <p>Tương tác trực tiếp với Proxy — quan sát các <strong>trap</strong> được kích hoạt và object state thay đổi</p>
+        </div>
+
+        <div class="two-col">
+          <!-- Controls -->
+          <div class="demo-card">
+            <div class="card-title">🎮 Điều khiển Proxy</div>
+
+            <div class="proxy-field">
+              <label>Property key:</label>
+              <input type="text" class="proxy-input" [(ngModel)]="proxyKey" placeholder="vd: name, age, role" />
+            </div>
+
+            <div class="proxy-field">
+              <label>Value (cho SET):</label>
+              <input type="text" class="proxy-input" [(ngModel)]="proxyValue" placeholder="Giá trị muốn gán" />
+            </div>
+
+            <div class="proxy-actions">
+              <button class="btn btn-info" (click)="proxyGet()">📖 GET</button>
+              <button class="btn btn-success" (click)="proxySet()">✏️ SET</button>
+              <button class="btn btn-danger" (click)="proxyDelete()">🗑️ DELETE</button>
+            </div>
+
+            <div class="proxy-field">
+              <label>Kiểm tra key tồn tại (HAS):</label>
+              <div class="has-row">
+                <input type="text" class="proxy-input" [(ngModel)]="proxyCheckKey" placeholder="Nhập key để kiểm tra" />
+                <button class="btn btn-secondary" (click)="proxyHas()">🔍 HAS</button>
+              </div>
+            </div>
+
+            @if (proxyCheckResult) {
+              <div class="has-result">{{ proxyCheckResult }}</div>
+            }
+
+            <button class="btn btn-outline mt-sm" (click)="initProxy()">🔄 Reset Proxy</button>
+          </div>
+
+          <!-- State & Logs -->
+          <div class="demo-card">
+            <div class="card-title">📊 Reactive State</div>
+            <div class="proxy-state">
+              @for (key of getProxyStateKeys(); track key) {
+                <div class="state-row">
+                  <span class="state-key">{{ key }}</span>
+                  <span class="state-colon">:</span>
+                  <span class="state-val">{{ proxyState[key] }}</span>
+                </div>
+              }
+              @if (getProxyStateKeys().length === 0) {
+                <div class="queue-empty">Object trống sau khi xóa hết</div>
+              }
+            </div>
+
+            <div class="card-title mt-sm">📝 Trap Log</div>
+            <div class="proxy-trap-log">
+              @if (proxyLogs.length === 0) {
+                <div class="log-empty">Chưa có trap nào được kích hoạt</div>
+              }
+              @for (log of proxyLogs; track log.id) {
+                <div class="trap-entry" [class]="getTrapClass(log.trap)">
+                  <span class="trap-icon">{{ getTrapIcon(log.trap) }}</span>
+                  <span class="trap-name">{{ log.trap.toUpperCase() }}</span>
+                  <code class="trap-prop">.{{ log.prop }}</code>
+                  @if (log.value !== undefined) {
+                    <span class="trap-value">= {{ log.value }}</span>
+                  }
+                  <span class="trap-time">{{ log.time }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="theory-box">
+          <div class="theory-title">🪄 Nguyên lý hoạt động của Angular Signals</div>
+          <pre class="code-block">{{ codeSignalProxy }}</pre>
+        </div>
+      </div>
+    }
+
+    <!-- ── TAB 6: Cheatsheet ─────────────────────────────── -->
+    @if (activeTab === 'cheatsheet') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <h2>Quick Decision Guide</h2>
+          <p>Bảng tra cứu nhanh khi gặp vấn đề JavaScript nâng cao trong dự án thực tế</p>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="category-filter">
+          @for (cat of categories; track cat) {
+            <button class="cat-btn" [class.active]="selectedCategory === cat" (click)="selectedCategory = cat">
+              {{ cat === 'all' ? '🗂 Tất cả' : cat }}
+            </button>
+          }
+        </div>
+
+        <!-- Table -->
+        <div class="cheatsheet-table">
+          <div class="cs-header">
+            <span>Vấn đề gặp phải</span>
+            <span>Giải pháp</span>
+            <span>Chủ đề</span>
+          </div>
+          @for (row of filteredCheatsheet; track row.problem) {
+            <div class="cs-row">
+              <div class="cs-problem">{{ row.problem }}</div>
+              <div class="cs-solution">{{ row.solution }}</div>
+              <div><span class="cs-badge" [class]="row.badge">{{ row.category }}</span></div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+
+  <!-- ════════════════════════ ACTIVITY LOG ════════════════════════ -->
+  <div class="activity-log-section">
+    <div class="log-header">
+      <span class="log-title">📋 Activity Log</span>
+      <button class="btn-clear" (click)="clearLogs()">Xóa log</button>
+    </div>
+    <div class="log-list">
+      @if (logs.length === 0) {
+        <div class="log-empty">Chưa có hoạt động nào được ghi nhận...</div>
+      }
+      @for (entry of logs; track entry.id) {
+        <div class="log-entry" [class]="getLogClass(entry.type)">
+          <span class="le-time">{{ entry.time }}</span>
+          <span class="le-label">[{{ entry.label }}]</span>
+          <span class="le-msg">{{ entry.message }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+</div>

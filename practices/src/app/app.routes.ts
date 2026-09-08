@@ -240,5 +240,10 @@ export const routes: Routes = [
     path: 'day048-using-dependency-injection-to-get-data-from-activated-route',
     title: 'Day048-using-dependency-injection-to-get-data-from-activated-route',
     loadComponent: () => import('./components/day048-using-dependency-injection-to-get-data-from-activated-route/day048-using-dependency-injection-to-get-data-from-activated-route').then(m => m.Day048UsingDependencyInjectionToGetDataFromActivatedRoute)
+  },
+  {
+    path: 'day049-advanced-javascript',
+    title: 'Day049-advanced-javascript',
+    loadComponent: () => import('./components/day049-advanced-javascript/day049-advanced-javascript').then(m => m.Day049AdvancedJavascript)
   }
 ];

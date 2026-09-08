@@ -28,7 +28,8 @@ export class App {
       dayNum === 6 ||
       dayNum === 9 ||
       dayNum === 10 ||
-      (dayNum >= 13 && dayNum <= 26)
+      (dayNum >= 13 && dayNum <= 26) ||
+      dayNum === 49
     );
   }
 

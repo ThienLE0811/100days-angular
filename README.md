@@ -84,6 +84,7 @@ Series bài học và thực hành về các chủ đề liên quan tới Angula
 | [Day 46: JavaScript Widget và Embedded Script][day46]                                    |                  |                                                                        |
 | [Day 47: Composition form datasource with Directive][day47]                              |                  |                                                                        |
 | [Day 48: Using dependency injection to get data from ActivatedRoute][day48]              |                  |                                                                        |
+| [Day 49: JavaScript Nâng Cao — Hiểu Sâu Runtime Engine][day49]                          |                  |                                                                        |
 
 ## Youtube Playlist
 
@@ -148,6 +149,7 @@ https://www.youtube.com/playlist?list=PLMTyi4Bfd5pW73uXw-6jgRxDwdPYqwk0r
 [day46]: docs/Day046-javascript-widget-embedded-script.md
 [day47]: docs/Day047-composition-form-datasource-with-directive.md
 [day48]: docs/Day048-using-dependency-injection-to-get-data-from-activated-route.md
+[day49]: docs/Day049-advanced-javascript.md
 
 [day1-video]: https://youtu.be/NS6P1fpU77o
 [day2-video]: https://youtu.be/jgFw8tAgKNs

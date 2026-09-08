@@ -287,5 +287,11 @@ export const DAYS_DATA: DayItem[] = [
     "path": "day048-using-dependency-injection-to-get-data-from-activated-route",
     "title": "using-dependency-injection-to-get-data-from-activated-route",
     "fullName": "Day048-using-dependency-injection-to-get-data-from-activated-route"
+  },
+  {
+    "dayNum": 49,
+    "path": "day049-advanced-javascript",
+    "title": "advanced-javascript",
+    "fullName": "Day049-advanced-javascript"
   }
 ];

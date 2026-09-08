@@ -1,0 +1,40 @@
+<div class="layout-toolbar">
+  <div class="sort-controls">
+    <span class="label">Sắp xếp (queryParamMap):</span>
+    <button type="button" class="sort-btn" [class.active]="sortMode() === 'title'" (click)="setSort('title')">
+      Tên (A-Z)
+    </button>
+    <button type="button" class="sort-btn" [class.active]="sortMode() === 'date'" (click)="setSort('date')">
+      Ngày đăng
+    </button>
+  </div>
+  <button type="button" class="nav-btn" (click)="goToFirstArticle()">
+    ⏮ router.navigate() tới bài đầu tiên
+  </button>
+</div>
+
+<nav class="article-nav">
+  @for (article of articles(); track article.id) {
+    <a class="article-chip" [routerLink]="[article.slug]" queryParamsHandling="preserve" routerLinkActive="active">
+      {{ article.title }}
+    </a>
+  }
+</nav>
+
+<div class="layout-outlet">
+  <router-outlet></router-outlet>
+</div>
+
+<div class="nav-log">
+  <div class="nav-log-header">
+    <span class="pulse-dot"></span>
+    <span>Router Events Log (NavigationEnd)</span>
+  </div>
+  <div class="nav-log-body">
+    @for (url of navigationLog(); track $index) {
+      <div class="nav-log-row">{{ url }}</div>
+    } @empty {
+      <div class="nav-log-empty">Chưa có điều hướng nào được ghi nhận.</div>
+    }
+  </div>
+</div>

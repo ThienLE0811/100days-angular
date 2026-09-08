@@ -1,0 +1,15 @@
+<div class="article-list">
+  <p class="hint">
+    Danh sách bài viết. Click vào một bài để xem chi tiết — URL sẽ đổi thành
+    <code>/day027-router/&lt;slug&gt;</code>, thử copy URL đó mở tab mới hoặc reload trang, nội dung vẫn hiển thị đúng.
+  </p>
+
+  @for (article of articles(); track article.id) {
+    <a class="article-card" [routerLink]="[article.slug]">
+      <h4>{{ article.title }}</h4>
+      <p>{{ article.excerpt }}</p>
+    </a>
+  } @empty {
+    <p class="empty">Đang tải danh sách bài viết...</p>
+  }
+</div>

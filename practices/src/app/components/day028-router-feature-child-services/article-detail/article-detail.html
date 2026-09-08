@@ -1,0 +1,37 @@
+<div class="comparison-grid">
+  <div class="compare-panel snapshot-panel">
+    <div class="panel-header">
+      <h4>📸 Snapshot</h4>
+      <span class="tag">route.snapshot.paramMap</span>
+    </div>
+    <p class="panel-hint">Chỉ đọc đúng 1 lần lúc component được tạo.</p>
+    <p class="slug-tag">slug: <code>{{ snapshotSlug }}</code></p>
+    @if (snapshotArticle; as article) {
+      <h5>{{ article.title }}</h5>
+    } @else {
+      <p class="not-found">Không tìm thấy bài viết.</p>
+    }
+  </div>
+
+  <div class="compare-panel observable-panel">
+    <div class="panel-header">
+      <h4>🔄 Observable</h4>
+      <span class="tag">route.paramMap</span>
+    </div>
+    <p class="panel-hint">Emit giá trị mới mỗi khi route thay đổi.</p>
+    <p class="slug-tag">slug: <code>{{ observableSlug() }}</code></p>
+    @if (observableArticle(); as article) {
+      <h5>{{ article.title }}</h5>
+    } @else {
+      <p class="not-found">Không tìm thấy bài viết.</p>
+    }
+  </div>
+</div>
+
+<div class="reuse-hint">
+  <p>
+    👉 Bấm sang một bài viết khác ở danh sách phía trên (cùng route config <code>:slug</code>) — Angular Router sẽ
+    <strong>tái sử dụng</strong> component này thay vì tạo mới. Quan sát: ô Snapshot đứng yên, ô Observable cập nhật
+    đúng bài viết mới.
+  </p>
+</div>

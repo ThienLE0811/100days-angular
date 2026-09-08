@@ -796,6 +796,103 @@
 .trap-value { color: var(--c-success); font-weight: 600; }
 .trap-time { margin-left: auto; color: var(--c-text-muted); font-size: 0.7rem; }
 
+// ─── Property Descriptors ───────────────────────────────────────────────────────
+.descriptor-table {
+  background: #f8f9fa;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.desc-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1.4fr 0.5fr 0.5fr 0.5fr;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  animation: slideIn 0.2s ease;
+
+  &:last-child { border-bottom: none; }
+
+  &.desc-header-row {
+    background: var(--c-surface2);
+    font-weight: 700;
+    color: var(--c-text-muted);
+    font-size: 0.75rem;
+  }
+}
+
+.desc-key { color: var(--c-primary); font-weight: 600; }
+.desc-val { color: var(--c-text); font-family: monospace; word-break: break-word; }
+
+.desc-flag {
+  text-align: center;
+  color: var(--c-danger);
+  font-weight: 700;
+
+  &.flag-on { color: var(--c-success); }
+}
+
+.flag-toggles {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+}
+
+.flag-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--c-text-muted);
+  cursor: pointer;
+}
+
+.hint-text {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--c-text-muted);
+  font-style: italic;
+}
+
+// ─── Functional Programming ─────────────────────────────────────────────────────
+.curry-inputs {
+  display: flex;
+  gap: 10px;
+
+  .proxy-field { flex: 1; }
+}
+
+.compose-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.compose-step {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: #f8f9fa;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  animation: slideIn 0.2s ease;
+
+  code { color: var(--c-primary); font-weight: 600; }
+}
+
+.compose-arrow { font-family: monospace; color: var(--c-success); font-weight: 600; }
+
+// ─── ESM Module comparison ───────────────────────────────────────────────────────
+.esm-header, .esm-row {
+  grid-template-columns: 1.2fr 1fr 1fr;
+}
+
 // ─── Cheatsheet ───────────────────────────────────────────────────────────────
 .category-filter {
   display: flex;

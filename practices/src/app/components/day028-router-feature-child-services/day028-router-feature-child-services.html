@@ -1,4 +1,34 @@
 <div class="day-container">
-  <h2>Day028-router-feature-child-services</h2>
-  <p>day028-router-feature-child-services works!</p>
+  <header class="day-header">
+    <span class="badge">Day 28</span>
+    <h2>Router: Feature Routes, Child Routes & Services</h2>
+    <p class="subtitle">
+      Demo cách nhóm route thành "feature" riêng (tương đương <code>RouterModule.forChild</code> trong ứng dụng
+      NgModule cũ), route cha/con với layout component chứa <code>&lt;router-outlet&gt;</code>, và so sánh
+      <code>ActivatedRoute</code> <strong>snapshot</strong> vs <strong>Observable</strong>.
+    </p>
+  </header>
+
+  <div class="concept-notes">
+    <div class="note-card">
+      <h4>🧩 Feature routes (thay cho Feature Module)</h4>
+      <p>
+        Ứng dụng hiện tại dùng standalone components nên không còn <code>NgModule</code>/<code>forChild</code>. Thay
+        vào đó, ta nhóm các route liên quan dưới một prefix chung (<code>article</code>) bằng thuộc tính
+        <code>children</code> — về bản chất đây chính là ý tưởng "feature module" của bài viết gốc.
+      </p>
+    </div>
+    <div class="note-card">
+      <h4>↪️ redirectTo & pathMatch</h4>
+      <p>
+        Route rỗng <code>''</code> ở dưới được redirect sang <code>article</code> với
+        <code>pathMatch: 'full'</code> — nghĩa là chỉ khớp khi path còn lại rỗng hoàn toàn. Nếu dùng
+        <code>pathMatch: 'prefix'</code> (mặc định), route sẽ khớp với bất kỳ path nào và có thể redirect nhầm.
+      </p>
+    </div>
+  </div>
+
+  <div class="demo-outlet">
+    <router-outlet></router-outlet>
+  </div>
 </div>

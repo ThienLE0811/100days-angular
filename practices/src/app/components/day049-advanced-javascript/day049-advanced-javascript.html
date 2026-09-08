@@ -1,5 +1,4 @@
 <div class="day049-lab">
-
   <!-- ════════════════════════ HEADER ════════════════════════ -->
   <header class="lab-header">
     <div class="lab-title-area">
@@ -17,35 +16,84 @@
 
   <!-- ════════════════════════ TABS ════════════════════════ -->
   <nav class="tab-nav">
-    <button class="tab-btn" [class.active]="activeTab === 'event-loop'" (click)="setTab('event-loop')">
-      <span class="tab-icon">⚙️</span> Event Loop
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'event-loop'"
+      (click)="setTab('event-loop')"
+    >
+      <span class="tab-icon">⚙️</span>
+      Event Loop
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'async-generator'" (click)="setTab('async-generator')">
+
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'async-generator'"
+      (click)="setTab('async-generator')"
+    >
       <span class="tab-icon">⚡</span> Async / Generator
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'closure-memory'" (click)="setTab('closure-memory')">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'closure-memory'"
+      (click)="setTab('closure-memory')"
+    >
       <span class="tab-icon">🧠</span> Closure & Memory
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'this-prototype'" (click)="setTab('this-prototype')">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'this-prototype'"
+      (click)="setTab('this-prototype')"
+    >
       <span class="tab-icon">🔗</span> this & Prototype
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'proxy-reactivity'" (click)="setTab('proxy-reactivity')">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'descriptors'"
+      (click)="setTab('descriptors')"
+    >
+      <span class="tab-icon">🔧</span> Descriptors
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'functional'"
+      (click)="setTab('functional')"
+    >
+      <span class="tab-icon">🍛</span> FP: Curry/Compose
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'proxy-reactivity'"
+      (click)="setTab('proxy-reactivity')"
+    >
       <span class="tab-icon">🪄</span> Proxy Engine
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'cheatsheet'" (click)="setTab('cheatsheet')">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'modules-weak'"
+      (click)="setTab('modules-weak')"
+    >
+      <span class="tab-icon">📦</span> ESM & WeakMap
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'cheatsheet'"
+      (click)="setTab('cheatsheet')"
+    >
       <span class="tab-icon">📋</span> Cheatsheet
     </button>
   </nav>
 
   <!-- ════════════════════════ CONTENT ════════════════════════ -->
   <div class="tab-content">
-
     <!-- ── TAB 1: Event Loop Visualizer ─────────────────── -->
     @if (activeTab === 'event-loop') {
       <div class="tab-panel">
         <div class="panel-header">
           <h2>Event Loop Visualizer</h2>
-          <p>Quan sát <strong>Call Stack</strong>, <strong>Microtask Queue</strong> và <strong>Macrotask Queue</strong> hoạt động theo từng bước</p>
+          <p>
+            Quan sát <strong>Call Stack</strong>, <strong>Microtask Queue</strong> và
+            <strong>Macrotask Queue</strong> hoạt động theo từng bước
+          </p>
         </div>
 
         <!-- Scenario selector -->
@@ -57,7 +105,8 @@
                 class="scenario-btn"
                 [class.selected]="selectedScenario === s"
                 [disabled]="isEventLoopRunning"
-                (click)="setScenario(s)">
+                (click)="setScenario(s)"
+              >
                 {{ eventLoopScenarios[s].label }}
               </button>
             }
@@ -142,8 +191,16 @@
 
         <!-- Controls -->
         <div class="controls">
-          <button class="btn btn-primary" [disabled]="isEventLoopRunning" (click)="runEventLoopSimulation()">
-            @if (isEventLoopRunning) { ⏳ Đang chạy... } @else { ▶ Chạy mô phỏng }
+          <button
+            class="btn btn-primary"
+            [disabled]="isEventLoopRunning"
+            (click)="runEventLoopSimulation()"
+          >
+            @if (isEventLoopRunning) {
+              ⏳ Đang chạy...
+            } @else {
+              ▶ Chạy mô phỏng
+            }
           </button>
         </div>
       </div>
@@ -154,7 +211,10 @@
       <div class="tab-panel">
         <div class="panel-header">
           <h2>Async/Await Internals & Generator Protocol</h2>
-          <p>Hiểu rõ cơ chế <strong>async/await</strong> = Generator + Promise, và <strong>Iterator Protocol</strong></p>
+          <p>
+            Hiểu rõ cơ chế <strong>async/await</strong> = Generator + Promise, và
+            <strong>Iterator Protocol</strong>
+          </p>
         </div>
 
         <div class="two-col">
@@ -162,9 +222,27 @@
           <div class="demo-card">
             <div class="card-title">🔄 Generator — Step by Step</div>
             <div class="gen-mode-selector">
-              <button class="mode-btn" [class.active]="generatorMode === 'manual'" (click)="generatorMode = 'manual'; initGenerator()">Manual</button>
-              <button class="mode-btn" [class.active]="generatorMode === 'fibonacci'" (click)="generatorMode = 'fibonacci'; initGenerator()">Fibonacci</button>
-              <button class="mode-btn" [class.active]="generatorMode === 'infinite'" (click)="generatorMode = 'infinite'; initGenerator()">Infinite Counter</button>
+              <button
+                class="mode-btn"
+                [class.active]="generatorMode === 'manual'"
+                (click)="generatorMode = 'manual'; initGenerator()"
+              >
+                Manual
+              </button>
+              <button
+                class="mode-btn"
+                [class.active]="generatorMode === 'fibonacci'"
+                (click)="generatorMode = 'fibonacci'; initGenerator()"
+              >
+                Fibonacci
+              </button>
+              <button
+                class="mode-btn"
+                [class.active]="generatorMode === 'infinite'"
+                (click)="generatorMode = 'infinite'; initGenerator()"
+              >
+                Infinite Counter
+              </button>
             </div>
 
             <div class="gen-steps">
@@ -175,7 +253,9 @@
                 <div class="gen-step" [class.gen-done]="step.done">
                   <span class="step-num">Step {{ step.step }}</span>
                   <span class="step-val">{{ step.yielded }}</span>
-                  <span class="step-status" [class.done-badge]="step.done">{{ step.done ? 'done ✅' : 'yield ⏸' }}</span>
+                  <span class="step-status" [class.done-badge]="step.done">{{
+                    step.done ? 'done ✅' : 'yield ⏸'
+                  }}</span>
                   @if (step.description) {
                     <div class="step-desc">{{ step.description }}</div>
                   }
@@ -205,7 +285,11 @@
 
             <div class="controls">
               <button class="btn btn-primary" [disabled]="isAsyncRunning" (click)="runAsyncDemo()">
-                @if (isAsyncRunning) { ⏳ Running... } @else { ▶ Run Demo }
+                @if (isAsyncRunning) {
+                  ⏳ Running...
+                } @else {
+                  ▶ Run Demo
+                }
               </button>
             </div>
           </div>
@@ -234,7 +318,9 @@
       <div class="tab-panel">
         <div class="panel-header">
           <h2>Closure & Memory Leak Lab</h2>
-          <p>Thử nghiệm tạo và giải phóng closure, quan sát ảnh hưởng bộ nhớ và các cạm bẫy phổ biến</p>
+          <p>
+            Thử nghiệm tạo và giải phóng closure, quan sát ảnh hưởng bộ nhớ và các cạm bẫy phổ biến
+          </p>
         </div>
 
         <!-- Memory gauge -->
@@ -261,7 +347,11 @@
           <button class="btn btn-danger" (click)="createLeakyClosure()">
             ⚠️ Tạo Leaky Closure (100K items)
           </button>
-          <button class="btn btn-success" (click)="cleanupClosures()" [disabled]="!closureState.isLeaking">
+          <button
+            class="btn btn-success"
+            (click)="cleanupClosures()"
+            [disabled]="!closureState.isLeaking"
+          >
             ✅ Cleanup & GC
           </button>
           <button class="btn btn-secondary" (click)="demonstrateClosureBug()">
@@ -294,7 +384,10 @@
       <div class="tab-panel">
         <div class="panel-header">
           <h2>`this` Binding & Prototype Chain</h2>
-          <p>Chạy 4 quy tắc xác định <strong>this</strong> và khám phá chuỗi <strong>Prototype</strong></p>
+          <p>
+            Chạy 4 quy tắc xác định <strong>this</strong> và khám phá chuỗi
+            <strong>Prototype</strong>
+          </p>
         </div>
 
         <div class="controls">
@@ -349,12 +442,262 @@
       </div>
     }
 
+    <!-- ── TAB: Property Descriptors & Decorators ───────── -->
+    @if (activeTab === 'descriptors') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <h2>Property Descriptors & Decorator Mechanism</h2>
+          <p>
+            Khám phá <strong>writable / enumerable / configurable</strong>, getter/setter, và nguyên
+            lý decorator
+          </p>
+        </div>
+
+        <div class="two-col">
+          <!-- defineProperty playground -->
+          <div class="demo-card">
+            <div class="card-title">🔧 Object.defineProperty Playground</div>
+            <div class="controls">
+              <button class="btn btn-secondary" (click)="initDescriptorDemo()">
+                🔄 Reset demo object
+              </button>
+            </div>
+
+            <div class="descriptor-table">
+              <div class="desc-row desc-header-row">
+                <span>Key</span><span>Value</span><span>W</span><span>E</span><span>C</span>
+              </div>
+              @if (demoDescriptors.length === 0) {
+                <div class="log-empty">Bấm "Reset demo object" để bắt đầu →</div>
+              }
+              @for (row of demoDescriptors; track row.key) {
+                <div class="desc-row">
+                  <code class="desc-key">{{ row.key }}</code>
+                  <span class="desc-val">{{ row.value }}</span>
+                  <span class="desc-flag" [class.flag-on]="row.writable">{{
+                    row.writable ? '✓' : '✗'
+                  }}</span>
+                  <span class="desc-flag" [class.flag-on]="row.enumerable">{{
+                    row.enumerable ? '✓' : '✗'
+                  }}</span>
+                  <span class="desc-flag" [class.flag-on]="row.configurable">{{
+                    row.configurable ? '✓' : '✗'
+                  }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="card-title mt-sm">➕ Thêm property tùy chỉnh</div>
+            <div class="proxy-field">
+              <label>Key:</label>
+              <input type="text" class="proxy-input" [(ngModel)]="newPropKey" />
+            </div>
+            <div class="proxy-field">
+              <label>Value:</label>
+              <input type="text" class="proxy-input" [(ngModel)]="newPropValue" />
+            </div>
+            <div class="flag-toggles">
+              <label class="flag-toggle"
+                ><input type="checkbox" [(ngModel)]="newPropWritable" /> writable</label
+              >
+              <label class="flag-toggle"
+                ><input type="checkbox" [(ngModel)]="newPropEnumerable" /> enumerable</label
+              >
+              <label class="flag-toggle"
+                ><input type="checkbox" [(ngModel)]="newPropConfigurable" /> configurable</label
+              >
+            </div>
+            <div class="controls">
+              <button class="btn btn-primary" (click)="addCustomProperty()">
+                Object.defineProperty()
+              </button>
+            </div>
+
+            <div class="card-title mt-sm">✏️ Thử ghi giá trị</div>
+            <div class="has-row">
+              <input
+                type="text"
+                class="proxy-input"
+                [(ngModel)]="writeAttemptKey"
+                placeholder="key"
+              />
+              <input
+                type="text"
+                class="proxy-input"
+                [(ngModel)]="writeAttemptValue"
+                placeholder="giá trị mới"
+              />
+              <button class="btn btn-outline" (click)="attemptWrite()">Ghi</button>
+            </div>
+            @if (writeAttemptResult) {
+              <div class="has-result">{{ writeAttemptResult }}</div>
+            }
+          </div>
+
+          <!-- Getter/Setter + freeze -->
+          <div class="demo-card">
+            <div class="card-title">🌡️ Getter / Setter Descriptor</div>
+            <div class="proxy-field">
+              <label>Celsius:</label>
+              <input
+                type="number"
+                class="proxy-input"
+                [ngModel]="celsiusValue"
+                (ngModelChange)="celsiusValue = $event"
+              />
+            </div>
+            <div class="proxy-field">
+              <label>Fahrenheit (tính từ getter):</label>
+              <input
+                type="number"
+                class="proxy-input"
+                [ngModel]="fahrenheitValue"
+                (ngModelChange)="fahrenheitValue = $event"
+              />
+            </div>
+            <p class="hint-text">
+              Đổi 1 trong 2 ô — ô còn lại tự cập nhật qua getter/setter descriptor.
+            </p>
+
+            <div class="card-title mt-sm">🧊 Object.freeze()</div>
+            <div class="gauge-card" [class.gauge-danger]="isFrozen">
+              <div class="gauge-icon">{{ isFrozen ? '🧊' : '📦' }}</div>
+              <div class="gauge-label">freezeTarget.count</div>
+              <div class="gauge-value">{{ freezeTarget.count }}</div>
+            </div>
+            <div class="controls">
+              <button class="btn btn-danger" [disabled]="isFrozen" (click)="toggleFreeze()">
+                🧊 Freeze object
+              </button>
+              <button class="btn btn-secondary" (click)="tryIncrementFrozen()">count++</button>
+              <button class="btn btn-outline" (click)="resetFreezeDemo()">Reset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="theory-box">
+          <div class="theory-title">
+            💡 Angular @Component / @Input dùng Decorator + Metadata (View Engine legacy)
+          </div>
+          <pre class="code-block">{{ codeDecoratorAngular }}</pre>
+        </div>
+      </div>
+    }
+
+    <!-- ── TAB: Functional Programming ───────────────────── -->
+    @if (activeTab === 'functional') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <h2>Functional Programming: Curry · Compose · Memoize</h2>
+          <p>
+            Currying, Function Composition và Memoization — nền tảng của RxJS operators & pure pipes
+          </p>
+        </div>
+
+        <div class="two-col">
+          <!-- Currying -->
+          <div class="demo-card">
+            <div class="card-title">🍛 Currying</div>
+            <pre class="code-block">const curriedAdd = (a) => (b) => (c) => a + b + c;</pre>
+            <div class="curry-inputs">
+              <div class="proxy-field">
+                <label>a</label><input type="number" class="proxy-input" [(ngModel)]="curryA" />
+              </div>
+              <div class="proxy-field">
+                <label>b</label><input type="number" class="proxy-input" [(ngModel)]="curryB" />
+              </div>
+              <div class="proxy-field">
+                <label>c</label><input type="number" class="proxy-input" [(ngModel)]="curryC" />
+              </div>
+            </div>
+            <div class="controls">
+              <button class="btn btn-primary" (click)="runCurryDemo()">
+                ▶ curriedAdd(a)(b)(c)
+              </button>
+            </div>
+            @if (currySteps.length > 0) {
+              <div class="step-log">
+                @for (s of currySteps; track $index) {
+                  <div class="step-item">{{ s }}</div>
+                }
+              </div>
+            }
+            @if (curryResult !== null) {
+              <div class="has-result">Kết quả: {{ curryResult }}</div>
+            }
+          </div>
+
+          <!-- Composition -->
+          <div class="demo-card">
+            <div class="card-title">🔗 Function Composition (pipe)</div>
+            <pre class="code-block">pipe(double, addOne, square)(x)</pre>
+            <div class="proxy-field">
+              <label>Giá trị đầu vào (x)</label>
+              <input type="number" class="proxy-input" [(ngModel)]="composeInput" />
+            </div>
+            <div class="controls">
+              <button class="btn btn-primary" (click)="runComposeDemo()">▶ Chạy pipeline</button>
+            </div>
+            @if (composeSteps.length > 0) {
+              <div class="compose-steps">
+                @for (s of composeSteps; track s.fnName) {
+                  <div class="compose-step">
+                    <code>{{ s.fnName }}</code>
+                    <span class="compose-arrow">{{ s.input }} → {{ s.output }}</span>
+                  </div>
+                }
+              </div>
+            }
+            @if (composeResult !== null) {
+              <div class="has-result">Kết quả cuối: {{ composeResult }}</div>
+            }
+          </div>
+        </div>
+
+        <!-- Memoization -->
+        <div class="demo-card">
+          <div class="card-title">⚡ Memoization — Fibonacci</div>
+          <div class="proxy-field">
+            <label>n (tối đa 30)</label>
+            <input type="number" min="1" max="30" class="proxy-input" [(ngModel)]="memoInput" />
+          </div>
+          <div class="controls">
+            <button class="btn btn-primary" [disabled]="isMemoRunning" (click)="runMemoDemo()">
+              ▶ So sánh Memoized vs Plain
+            </button>
+          </div>
+          @if (memoStats.memoCalls > 0) {
+            <div class="memory-gauge-area">
+              <div class="gauge-card">
+                <div class="gauge-icon">🎯</div>
+                <div class="gauge-label">fib(n) =</div>
+                <div class="gauge-value">{{ memoStats.result }}</div>
+              </div>
+              <div class="gauge-card">
+                <div class="gauge-icon">⚡</div>
+                <div class="gauge-label">Memoized — số lần gọi</div>
+                <div class="gauge-value">{{ memoStats.memoCalls }}</div>
+              </div>
+              <div class="gauge-card gauge-danger">
+                <div class="gauge-icon">🐢</div>
+                <div class="gauge-label">Plain recursion — số lần gọi</div>
+                <div class="gauge-value">{{ memoStats.plainCalls | number }}</div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
     <!-- ── TAB 5: Proxy Reactivity ───────────────────────── -->
     @if (activeTab === 'proxy-reactivity') {
       <div class="tab-panel">
         <div class="panel-header">
           <h2>Proxy Reactivity Mini-Engine</h2>
-          <p>Tương tác trực tiếp với Proxy — quan sát các <strong>trap</strong> được kích hoạt và object state thay đổi</p>
+          <p>
+            Tương tác trực tiếp với Proxy — quan sát các <strong>trap</strong> được kích hoạt và
+            object state thay đổi
+          </p>
         </div>
 
         <div class="two-col">
@@ -364,12 +707,22 @@
 
             <div class="proxy-field">
               <label>Property key:</label>
-              <input type="text" class="proxy-input" [(ngModel)]="proxyKey" placeholder="vd: name, age, role" />
+              <input
+                type="text"
+                class="proxy-input"
+                [(ngModel)]="proxyKey"
+                placeholder="vd: name, age, role"
+              />
             </div>
 
             <div class="proxy-field">
               <label>Value (cho SET):</label>
-              <input type="text" class="proxy-input" [(ngModel)]="proxyValue" placeholder="Giá trị muốn gán" />
+              <input
+                type="text"
+                class="proxy-input"
+                [(ngModel)]="proxyValue"
+                placeholder="Giá trị muốn gán"
+              />
             </div>
 
             <div class="proxy-actions">
@@ -381,7 +734,12 @@
             <div class="proxy-field">
               <label>Kiểm tra key tồn tại (HAS):</label>
               <div class="has-row">
-                <input type="text" class="proxy-input" [(ngModel)]="proxyCheckKey" placeholder="Nhập key để kiểm tra" />
+                <input
+                  type="text"
+                  class="proxy-input"
+                  [(ngModel)]="proxyCheckKey"
+                  placeholder="Nhập key để kiểm tra"
+                />
                 <button class="btn btn-secondary" (click)="proxyHas()">🔍 HAS</button>
               </div>
             </div>
@@ -436,6 +794,89 @@
       </div>
     }
 
+    <!-- ── TAB: ESM Modules & WeakMap/WeakSet ────────────── -->
+    @if (activeTab === 'modules-weak') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <h2>ESM Module System & WeakMap/WeakSet</h2>
+          <p>So sánh CJS vs ESM, Dynamic Import / Code Splitting, và Memory Safety với WeakMap</p>
+        </div>
+
+        <!-- ESM vs CJS table -->
+        <div class="cheatsheet-table">
+          <div class="cs-header esm-header">
+            <span>Đặc điểm</span><span>CommonJS (require)</span><span>ESM (import)</span>
+          </div>
+          @for (row of esmComparisonRows; track row.feature) {
+            <div class="cs-row esm-row">
+              <div class="cs-problem">{{ row.feature }}</div>
+              <div class="cs-solution">{{ row.cjs }}</div>
+              <div class="cs-solution">{{ row.esm }}</div>
+            </div>
+          }
+        </div>
+
+        <div class="two-col">
+          <!-- Dynamic Import -->
+          <div class="demo-card">
+            <div class="card-title">📦 Dynamic Import & Code Splitting</div>
+            <pre class="code-block">
+const &#123; HeavyModule &#125; = await import('./heavy-module');</pre>
+            <div class="controls">
+              <button
+                class="btn btn-primary"
+                [disabled]="isDynamicImportLoading"
+                (click)="runDynamicImportDemo()"
+              >
+                @if (isDynamicImportLoading) {
+                  ⏳ Đang tải chunk...
+                } @else {
+                  ▶ Chạy dynamic import() thật
+                }
+              </button>
+            </div>
+            @if (dynamicImportLog.length > 0) {
+              <div class="step-log">
+                @for (s of dynamicImportLog; track $index) {
+                  <div class="step-item">{{ s }}</div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- WeakMap Lab -->
+          <div class="demo-card">
+            <div class="card-title">🕸️ Map (leak) vs WeakMap (safe)</div>
+            <div class="controls">
+              <button
+                class="btn btn-primary"
+                [disabled]="isWeakDemoRunning"
+                (click)="runWeakMapDemo()"
+              >
+                @if (isWeakDemoRunning) {
+                  ⏳ Đang chạy...
+                } @else {
+                  ▶ Chạy demo Map vs WeakMap
+                }
+              </button>
+            </div>
+            @if (weakMapStepLog.length > 0) {
+              <div class="step-log">
+                @for (s of weakMapStepLog; track $index) {
+                  <div class="step-item">{{ s }}</div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="theory-box">
+          <div class="theory-title">🔁 Tránh Circular Dependencies</div>
+          <pre class="code-block">{{ codeCircularDeps }}</pre>
+        </div>
+      </div>
+    }
+
     <!-- ── TAB 6: Cheatsheet ─────────────────────────────── -->
     @if (activeTab === 'cheatsheet') {
       <div class="tab-panel">
@@ -447,7 +888,11 @@
         <!-- Category Filter -->
         <div class="category-filter">
           @for (cat of categories; track cat) {
-            <button class="cat-btn" [class.active]="selectedCategory === cat" (click)="selectedCategory = cat">
+            <button
+              class="cat-btn"
+              [class.active]="selectedCategory === cat"
+              (click)="selectedCategory = cat"
+            >
               {{ cat === 'all' ? '🗂 Tất cả' : cat }}
             </button>
           }
@@ -464,13 +909,14 @@
             <div class="cs-row">
               <div class="cs-problem">{{ row.problem }}</div>
               <div class="cs-solution">{{ row.solution }}</div>
-              <div><span class="cs-badge" [class]="row.badge">{{ row.category }}</span></div>
+              <div>
+                <span class="cs-badge" [class]="row.badge">{{ row.category }}</span>
+              </div>
             </div>
           }
         </div>
       </div>
     }
-
   </div>
 
   <!-- ════════════════════════ ACTIVITY LOG ════════════════════════ -->
@@ -492,5 +938,4 @@
       }
     </div>
   </div>
-
 </div>

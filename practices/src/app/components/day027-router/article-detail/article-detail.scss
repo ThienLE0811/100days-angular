@@ -1,0 +1,56 @@
+.article-detail,
+.not-found {
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: #7c3aed;
+    text-decoration: none;
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.article-detail {
+  h3 {
+    margin: 0 0 0.35rem;
+    color: #1e293b;
+  }
+
+  .slug-tag {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 0 0 0.75rem;
+
+    code {
+      background: #f1f5f9;
+      color: #7c3aed;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+  }
+
+  p {
+    color: #334155;
+    line-height: 1.6;
+  }
+}
+
+.not-found {
+  p {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+
+    code {
+      background: #fee2e2;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+  }
+}

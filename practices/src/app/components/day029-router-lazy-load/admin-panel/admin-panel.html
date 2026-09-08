@@ -1,0 +1,51 @@
+<div class="admin-panel">
+  <a class="back-link" routerLink="../">← Quay lại</a>
+
+  <div class="chunk-banner">
+    ✅ Bạn đang xem <code>AdminPanel</code> — component này (và <code>ReactiveFormsModule</code> đi kèm) chỉ vừa được
+    tải về qua một file JS riêng (bundle riêng), tách biệt hoàn toàn khỏi bundle chính của ứng dụng.
+  </div>
+
+  <table class="article-table">
+    <thead>
+      <tr>
+        <th>Tiêu đề</th>
+        <th>Trạng thái</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (article of articles(); track article.id) {
+        <tr>
+          @if (editingId() === article.id) {
+            <td colspan="2">
+              <form class="edit-form" [formGroup]="editForm" (ngSubmit)="saveEdit(article.id)">
+                <input type="text" formControlName="title" class="edit-input" aria-label="Tiêu đề bài viết" />
+              </form>
+            </td>
+          } @else {
+            <td>{{ article.title }}</td>
+            <td>
+              <button type="button" class="status-badge" [class.published]="article.status === 'published'" (click)="toggleStatus(article.id)">
+                {{ article.status === 'published' ? 'Published' : 'Draft' }}
+              </button>
+            </td>
+          }
+          <td class="actions-cell">
+            @if (editingId() === article.id) {
+              <button type="button" class="action-btn save" (click)="saveEdit(article.id)" [disabled]="editForm.invalid">Lưu</button>
+              <button type="button" class="action-btn cancel" (click)="cancelEdit()">Hủy</button>
+            } @else {
+              <button type="button" class="action-btn edit" (click)="startEdit(article)">Sửa</button>
+              <button type="button" class="action-btn delete" (click)="deleteArticle(article.id)">Xóa</button>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="3" class="empty-row">Không còn bài viết nào.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

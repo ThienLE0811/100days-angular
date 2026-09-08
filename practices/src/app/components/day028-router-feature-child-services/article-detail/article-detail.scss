@@ -1,0 +1,93 @@
+.comparison-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.compare-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1rem;
+
+  &.observable-panel {
+    border-color: #ddd6fe;
+    background: #faf5ff;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.35rem;
+
+    h4 {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #1e293b;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      font-family: monospace;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+    }
+  }
+
+  .panel-hint {
+    margin: 0 0 0.6rem;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .slug-tag {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 0 0 0.5rem;
+
+    code {
+      background: #f1f5f9;
+      color: #7c3aed;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+  }
+
+  h5 {
+    margin: 0;
+    color: #1e293b;
+  }
+
+  .not-found {
+    margin: 0;
+    color: #b91c1c;
+    font-size: 0.85rem;
+  }
+}
+
+.reuse-hint {
+  margin-top: 1rem;
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+  padding: 0.75rem 1rem;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.85rem;
+  color: #1e40af;
+
+  p {
+    margin: 0;
+  }
+
+  code {
+    background: #dbeafe;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+  }
+}

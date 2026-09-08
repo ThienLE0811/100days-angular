@@ -1,4 +1,19 @@
 <div class="day-container">
-  <h2>Day029-router-lazy-load</h2>
-  <p>day029-router-lazy-load works!</p>
+  <header class="day-header">
+    <span class="badge">Day 29</span>
+    <h2>Router: Lazy Loading & Preloading</h2>
+    <p class="subtitle">
+      Demo tách một "feature nặng" (trang <code>/admin</code>, dùng <code>ReactiveFormsModule</code>) ra một bundle
+      JS riêng chỉ tải khi cần (<code>loadComponent</code>, tương đương <code>loadChildren</code> trong NgModule cũ),
+      và mô phỏng <code>PreloadAllModules</code>.
+    </p>
+  </header>
+
+  @if (isNavigating()) {
+    <div class="route-loading-bar"><span></span></div>
+  }
+
+  <div class="demo-outlet">
+    <router-outlet></router-outlet>
+  </div>
 </div>

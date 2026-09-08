@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Day027Router } from './day027-router';
+import { LazyLoadHome } from './lazy-load-home';
 
-describe('Day027Router', () => {
-  let component: Day027Router;
-  let fixture: ComponentFixture<Day027Router>;
+describe('LazyLoadHome', () => {
+  let component: LazyLoadHome;
+  let fixture: ComponentFixture<LazyLoadHome>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Day027Router],
+      imports: [LazyLoadHome],
       providers: [provideRouter([])],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Day027Router);
+    fixture = TestBed.createComponent(LazyLoadHome);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

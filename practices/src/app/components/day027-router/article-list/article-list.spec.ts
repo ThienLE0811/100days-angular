@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Day027Router } from './day027-router';
+import { ArticleList } from './article-list';
 
-describe('Day027Router', () => {
-  let component: Day027Router;
-  let fixture: ComponentFixture<Day027Router>;
+describe('ArticleList', () => {
+  let component: ArticleList;
+  let fixture: ComponentFixture<ArticleList>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Day027Router],
+      imports: [ArticleList],
       providers: [provideRouter([])],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Day027Router);
+    fixture = TestBed.createComponent(ArticleList);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

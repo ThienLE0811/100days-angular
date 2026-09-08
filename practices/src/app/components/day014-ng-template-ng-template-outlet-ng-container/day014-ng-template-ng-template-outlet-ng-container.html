@@ -13,11 +13,10 @@
       </div>
       <h1 class="page-title">ng-template, ngTemplateOutlet và ng-container trong Angular</h1>
       <p class="page-subtitle">
-        Khám phá bộ ba công cụ mạnh mẽ nhất trong việc xây dựng UI linh hoạt:
-        hiểu rõ cơ chế <strong>Lazy Render</strong> của <code>&lt;ng-template&gt;</code>,
-        cách truyền context dữ liệu với <code>ngTemplateOutlet</code>,
-        kỹ thuật <strong>Override Template</strong> trong design system,
-        và loại bỏ hoàn toàn thẻ DOM rác với <code>&lt;ng-container&gt;</code>.
+        Khám phá bộ ba công cụ mạnh mẽ nhất trong việc xây dựng UI linh hoạt: hiểu rõ cơ chế
+        <strong>Lazy Render</strong> của <code>&lt;ng-template&gt;</code>, cách truyền context dữ
+        liệu với <code>ngTemplateOutlet</code>, kỹ thuật <strong>Override Template</strong> trong
+        design system, và loại bỏ hoàn toàn thẻ DOM rác với <code>&lt;ng-container&gt;</code>.
       </p>
     </div>
 
@@ -96,7 +95,6 @@
 
   <!-- MAIN CONTENT GRID -->
   <div class="content-sections">
-
     <!-- ================================================================= -->
     <!-- SECTION 1: ng-template Basics (Lazy Render & Structural Directive) -->
     <!-- ================================================================= -->
@@ -105,7 +103,7 @@
         <div class="card-header">
           <div class="header-title-group">
             <span class="card-badge primary">Phần 1</span>
-            <h2 class="card-title">ng-template: Cơ Chế Template Ảo & Không Render Tự Động</h2>
+            <h2 class="card-title">ng-template&#58; Cơ Chế Template Ảo & Không Render Tự Động</h2>
           </div>
           <span class="info-tag">Khái niệm cốt lõi</span>
         </div>
@@ -114,7 +112,11 @@
           <div class="concept-banner">
             <div class="concept-icon">💡</div>
             <div class="concept-text">
-              <strong>Đặc điểm cốt lõi:</strong> Nội dung đặt trong <code>&lt;ng-template&gt;</code> <strong>KHÔNG BAO GIỜ</strong> xuất hiện trực tiếp trên DOM nơi nó được khai báo. Nó chỉ được Angular biên dịch thành một <code>TemplateRef</code> trừu tượng trong bộ nhớ, và chỉ render khi được gọi (qua directive điều kiện hoặc <code>ngTemplateOutlet</code>).
+              <strong>Đặc điểm cốt lõi:</strong> Nội dung đặt trong <code>&lt;ng-template&gt;</code>
+              <strong>KHÔNG BAO GIỜ</strong> xuất hiện trực tiếp trên DOM nơi nó được khai báo. Nó
+              chỉ được Angular biên dịch thành một <code>TemplateRef</code> trừu tượng trong bộ nhớ,
+              và chỉ render khi được gọi (qua directive điều kiện hoặc
+              <code>ngTemplateOutlet</code>).
             </div>
           </div>
 
@@ -123,7 +125,8 @@
             <div class="panel-box">
               <h3 class="panel-title">🎮 Thử Nghiệm: Kiểm Tra Phân Loại Độ Tuổi (PG-13)</h3>
               <p class="panel-desc">
-                Kéo slider tuổi để xem Angular luân phiên render template chính hoặc template dự phòng <code>#noPG13</code>.
+                Kéo slider tuổi để xem Angular luân phiên render template chính hoặc template dự
+                phòng <code>#noPG13</code>.
               </p>
 
               <div class="control-row">
@@ -150,13 +153,17 @@
               <!-- Kết quả render thực tế -->
               <div class="render-output-box">
                 <div class="output-label">Kết Quả Render DOM:</div>
-                
+
                 @if (canWatchPG13()) {
                   <div class="result-badge success">
                     <span class="badge-icon">🍿</span>
                     <div>
-                      <div class="result-title">Đủ Điều Kiện Xem Phim (Tuổi: {{ userAge() }} >= 13)</div>
-                      <div class="result-sub">Khối HTML mặc định được render trực tiếp vào DOM.</div>
+                      <div class="result-title">
+                        Đủ Điều Kiện Xem Phim (Tuổi: {{ userAge() }} >= 13)
+                      </div>
+                      <div class="result-sub">
+                        Khối HTML mặc định được render trực tiếp vào DOM.
+                      </div>
                     </div>
                   </div>
                 } @else {
@@ -169,7 +176,9 @@
                   <div class="result-badge warning">
                     <span class="badge-icon">⛔</span>
                     <div>
-                      <div class="result-title">Chưa Đủ Tuổi PG-13 (Tuổi: {{ userAge() }} &lt; 13)</div>
+                      <div class="result-title">
+                        Chưa Đủ Tuổi PG-13 (Tuổi: {{ userAge() }} &lt; 13)
+                      </div>
                       <div class="result-sub">
                         Nội dung này đến từ <code>&lt;ng-template #noPG13Tmpl&gt;</code>!
                       </div>
@@ -223,8 +232,12 @@
           <div class="concept-banner emerald-theme">
             <div class="concept-icon">♻️</div>
             <div class="concept-text">
-              <strong>Vấn đề thực tế:</strong> Bạn có một khối UI nhỏ (như Counter badge, Status pill, Avatar chip) xuất hiện lặp lại ở <strong>Header, Body, Footer</strong>. Nếu copy-paste code thì khi cần sửa kiểu dáng phải sửa ở 3 nơi. Tách riêng thành component mới thì lại <em>overkill</em> cho 1-2 dòng HTML. 
-              <strong>Giải pháp hoàn hảo:</strong> Dùng <code>&lt;ng-template #tmpl&gt;</code> kết hợp <code>[ngTemplateOutlet]="tmpl"</code>.
+              <strong>Vấn đề thực tế:</strong> Bạn có một khối UI nhỏ (như Counter badge, Status
+              pill, Avatar chip) xuất hiện lặp lại ở <strong>Header, Body, Footer</strong>. Nếu
+              copy-paste code thì khi cần sửa kiểu dáng phải sửa ở 3 nơi. Tách riêng thành component
+              mới thì lại <em>overkill</em> cho 1-2 dòng HTML.
+              <strong>Giải pháp hoàn hảo:</strong> Dùng <code>&lt;ng-template #tmpl&gt;</code> kết
+              hợp <code>[ngTemplateOutlet]="tmpl"</code>.
             </div>
           </div>
 
@@ -232,10 +245,16 @@
           <div class="controls-bar">
             <div class="counter-actions">
               <span class="bar-label">Thử nghiệm Counter:</span>
-              <button type="button" class="btn btn-sm btn-outline" (click)="decrementCounter()">➖ Giảm</button>
+              <button type="button" class="btn btn-sm btn-outline" (click)="decrementCounter()">
+                ➖ Giảm
+              </button>
               <span class="counter-display">{{ counter() }} mục</span>
-              <button type="button" class="btn btn-sm btn-outline" (click)="incrementCounter()">➕ Tăng</button>
-              <button type="button" class="btn btn-sm btn-ghost" (click)="resetCounter()">↺ Reset</button>
+              <button type="button" class="btn btn-sm btn-outline" (click)="incrementCounter()">
+                ➕ Tăng
+              </button>
+              <button type="button" class="btn btn-sm btn-ghost" (click)="resetCounter()">
+                ↺ Reset
+              </button>
             </div>
 
             <div class="theme-selector">
@@ -318,11 +337,17 @@
           <div class="summary-points">
             <div class="point-item">
               <span class="check-icon">✓</span>
-              <span><strong>Bảo trì 1 điểm duy nhất:</strong> Sửa màu sắc, icon, hiệu ứng bên trong <code>#counterBadgeTmpl</code> thì cả 3 nơi lập tức cập nhật.</span>
+              <span
+                ><strong>Bảo trì 1 điểm duy nhất:</strong> Sửa màu sắc, icon, hiệu ứng bên trong
+                <code>#counterBadgeTmpl</code> thì cả 3 nơi lập tức cập nhật.</span
+              >
             </div>
             <div class="point-item">
               <span class="check-icon">✓</span>
-              <span><strong>Tối ưu Bundle:</strong> Không cần sinh thêm class Component, không overhead lifecycle hooks.</span>
+              <span
+                ><strong>Tối ưu Bundle:</strong> Không cần sinh thêm class Component, không overhead
+                lifecycle hooks.</span
+              >
             </div>
           </div>
         </div>
@@ -337,7 +362,9 @@
         <div class="card-header">
           <div class="header-title-group">
             <span class="card-badge indigo">Phần 3</span>
-            <h2 class="card-title">ngTemplateOutlet & ngTemplateOutletContext (Truyền Dữ Liệu Vào Template)</h2>
+            <h2 class="card-title">
+              ngTemplateOutlet & ngTemplateOutletContext (Truyền Dữ Liệu Vào Template)
+            </h2>
           </div>
           <span class="info-tag">Parameterization</span>
         </div>
@@ -346,10 +373,21 @@
           <div class="concept-banner indigo-theme">
             <div class="concept-icon">⚙️</div>
             <div class="concept-text">
-              Giống như component nhận <code>&#64;Input()</code>, <code>&lt;ng-template&gt;</code> nhận dữ liệu thông qua <code>ngTemplateOutletContext</code>:
+              Giống như component nhận <code>&#64;Input()</code>,
+              <code>&lt;ng-template&gt;</code> nhận dữ liệu thông qua
+              <code>ngTemplateOutletContext</code>:
               <ul class="context-rules">
-                <li><strong>Explicit (Tường minh):</strong> <code>let-myVar="keyInContext"</code> &rarr; Truy cập biến <code>{{ '{{' }} myVar {{ '}}' }}</code> tương ứng giá trị của property <code>keyInContext</code> trong object.</li>
-                <li><strong>Implicit (Ngầm định):</strong> <code>let-defaultVar</code> (không có dấu <code>=</code>) &rarr; Tự động ánh xạ với giá trị của property đặc biệt <code>$implicit</code>.</li>
+                <li>
+                  <strong>Explicit (Tường minh):</strong>
+                  <code>let-myVar="keyInContext"</code> &rarr; Truy cập biến
+                  <code>{{ '{{' }} myVar {{ '}}' }}</code> tương ứng giá trị của property
+                  <code>keyInContext</code> trong object.
+                </li>
+                <li>
+                  <strong>Implicit (Ngầm định):</strong> <code>let-defaultVar</code> (không có dấu
+                  <code>=</code>) &rarr; Tự động ánh xạ với giá trị của property đặc biệt
+                  <code>$implicit</code>.
+                </li>
               </ul>
             </div>
           </div>
@@ -382,7 +420,9 @@
 
           <!-- Danh sách các nút được sinh từ 1 template duy nhất -->
           <div class="dynamic-buttons-section">
-            <h3 class="subsection-title">1. Các Nút Được Render Từ Cùng 1 Template (#dynamicBtnTmpl)</h3>
+            <h3 class="subsection-title">
+              1. Các Nút Được Render Từ Cùng 1 Template (#dynamicBtnTmpl)
+            </h3>
             <div class="buttons-grid">
               @for (btn of dynamicButtons; track btn.actionKey) {
                 <div class="btn-card">
@@ -393,7 +433,10 @@
                     ></ng-container>
                   </div>
                   <div class="btn-context-code">
-                    <code>Context: &#123; label: '{{ btn.label }}', class: '{{ btn.className }}', icon: '{{ btn.icon }}', badge: {{ btn.badge }} &#125;</code>
+                    <code
+                      >Context: &#123; label: '{{ btn.label }}', class: '{{ btn.className }}', icon:
+                      '{{ btn.icon }}', badge: {{ btn.badge }} &#125;</code
+                    >
                   </div>
                 </div>
               }
@@ -418,9 +461,16 @@
                 <span>Kết quả truyền vào:</span>
                 <ng-container
                   [ngTemplateOutlet]="dynamicBtnTmpl"
-                  [ngTemplateOutletContext]="{ $implicit: implicitText, className: 'btn-purple', icon: '✨', actionKey: 'implicit_test' }"
+                  [ngTemplateOutletContext]="{
+                    $implicit: implicitText,
+                    className: 'btn-purple',
+                    icon: '✨',
+                    actionKey: 'implicit_test',
+                  }"
                 ></ng-container>
-                <span class="hint-tag">Template dùng <code>let-implicitVal</code> để đón <code>$implicit</code></span>
+                <span class="hint-tag"
+                  >Template dùng <code>let-implicitVal</code> để đón <code>$implicit</code></span
+                >
               </div>
             </div>
           </div>
@@ -445,7 +495,12 @@
           <div class="concept-banner purple-theme">
             <div class="concept-icon">🧩</div>
             <div class="concept-text">
-              <strong>Kỹ thuật chuyên sâu:</strong> Các UI Framework nổi tiếng (như Angular Material, NG-ZORRO, PrimeNG) đều sử dụng mô hình này. Component con cung cấp một template header mặc định, nhưng nhận thêm <code>&#64;Input() headerTemplate?: TemplateRef&lt;any&gt;</code>. Nếu component cha truyền vào template tùy chỉnh, nó sẽ ghi đè (override) template mặc định mà không cần sửa code của component con!
+              <strong>Kỹ thuật chuyên sâu:</strong> Các UI Framework nổi tiếng (như Angular
+              Material, NG-ZORRO, PrimeNG) đều sử dụng mô hình này. Component con cung cấp một
+              template header mặc định, nhưng nhận thêm
+              <code>&#64;Input() headerTemplate?: TemplateRef&lt;any&gt;</code>. Nếu component cha
+              truyền vào template tùy chỉnh, nó sẽ ghi đè (override) template mặc định mà không cần
+              sửa code của component con!
             </div>
           </div>
 
@@ -459,7 +514,12 @@
                 />
                 <span class="switch-slider"></span>
                 <span class="switch-text">
-                  Bật Override: <strong>{{ useCustomHeader() ? 'Đang Dùng Custom Header Từ Cha' : 'Đang Dùng Default Header Của Con' }}</strong>
+                  Bật Override:
+                  <strong>{{
+                    useCustomHeader()
+                      ? 'Đang Dùng Custom Header Từ Cha'
+                      : 'Đang Dùng Default Header Của Con'
+                  }}</strong>
                 </span>
               </label>
             </div>
@@ -476,7 +536,8 @@
                 <h4>📄 Nội dung bên trong Tab Body (Được chiếu qua ng-content)</h4>
                 <p>
                   Báo cáo doanh số Q3 tăng trưởng <strong>+24.8%</strong> so với cùng kỳ năm ngoái.
-                  Mọi nghiệp vụ xử lý dữ liệu diễn ra hoàn toàn bình thường bất kể Header bên trên đang dùng Template mặc định hay Custom!
+                  Mọi nghiệp vụ xử lý dữ liệu diễn ra hoàn toàn bình thường bất kể Header bên trên
+                  đang dùng Template mặc định hay Custom!
                 </p>
                 <div class="status-indicator">
                   <span class="status-dot"></span> Hệ thống đang vận hành ổn định
@@ -488,7 +549,9 @@
           <!-- Template tùy chỉnh do Parent định nghĩa -->
           <ng-template #customHeaderTmpl let-parentTitle="title" let-tabsCount="totalTabs">
             <div class="parent-custom-header">
-              <div class="custom-badge-chip">⚡ Custom Header (Được Inject từ Parent Component)</div>
+              <div class="custom-badge-chip">
+                ⚡ Custom Header (Được Inject từ Parent Component)
+              </div>
               <div class="custom-header-actions">
                 <h3 class="custom-title">💎 {{ parentTitle }}</h3>
                 <div class="custom-btn-group">
@@ -532,8 +595,11 @@
             <div class="concept-icon">🛡️</div>
             <div class="concept-text">
               <strong>Tại sao cần &lt;ng-container&gt;?</strong>
-              Khi gom nhóm các phần tử để gán directive (như <code>*ngIf</code> hoặc <code>*ngTemplateOutlet</code>), nếu bạn dùng thẻ <code>&lt;div&gt;</code> bọc ngoài, một thẻ HTML thật sẽ được sinh ra trên DOM. 
-              Thẻ thừa này sẽ <strong>phá vỡ hoàn toàn layout CSS Flexbox/Grid</strong> (vì các thẻ con không còn là con trực tiếp), hoặc làm hỏng bộ chọn <code>parent &gt; child</code>!
+              Khi gom nhóm các phần tử để gán directive (như <code>*ngIf</code> hoặc
+              <code>*ngTemplateOutlet</code>), nếu bạn dùng thẻ <code>&lt;div&gt;</code> bọc ngoài,
+              một thẻ HTML thật sẽ được sinh ra trên DOM. Thẻ thừa này sẽ
+              <strong>phá vỡ hoàn toàn layout CSS Flexbox/Grid</strong> (vì các thẻ con không còn là
+              con trực tiếp), hoặc làm hỏng bộ chọn <code>parent &gt; child</code>!
             </div>
           </div>
 
@@ -560,14 +626,20 @@
               </button>
             </div>
             <div class="layout-status-badge" [class.danger]="useDivBreaker()">
-              {{ useDivBreaker() ? '❌ CẢNH BÁO: Thẻ DIV thừa đã gom các item lại, Flexbox bị vỡ thành 1 khối!' : '✔️ HOÀN HẢO: ng-container không sinh thẻ, các nút dàn đều Flex hàng ngang.' }}
+              {{
+                useDivBreaker()
+                  ? '❌ CẢNH BÁO: Thẻ DIV thừa đã gom các item lại, Flexbox bị vỡ thành 1 khối!'
+                  : '✔️ HOÀN HẢO: ng-container không sinh thẻ, các nút dàn đều Flex hàng ngang.'
+              }}
             </div>
           </div>
 
           <!-- Khung Flexbox Demo -->
           <div class="flex-test-container">
             <div class="flex-header-bar">
-              <span>CSS: <code>display: flex; gap: 1rem; justify-content: space-between;</code></span>
+              <span
+                >CSS: <code>display: flex; gap: 1rem; justify-content: space-between;</code></span
+              >
             </div>
 
             <!-- Vùng Flexbox thực tế -->
@@ -577,7 +649,9 @@
               <!-- Trường hợp 1: Dùng DIV thừa -->
               @if (useDivBreaker()) {
                 <div class="extra-wrapper-div">
-                  <div class="dom-tag-warning">&lt;div class="extra-wrapper"&gt; (Thẻ Rác Phá Layout)</div>
+                  <div class="dom-tag-warning">
+                    &lt;div class="extra-wrapper"&gt; (Thẻ Rác Phá Layout)
+                  </div>
                   @if (showItemA()) {
                     <div class="flex-item dynamic">Nút Động A 📦</div>
                   }
@@ -627,7 +701,10 @@
           <div class="concept-banner amber-theme">
             <div class="concept-icon">📊</div>
             <div class="concept-text">
-              <strong>Kịch bản:</strong> Cùng một danh sách nhân sự, người dùng có thể chuyển đổi hiển thị giữa <strong>Thẻ (Card Grid)</strong>, <strong>Bảng (Table)</strong>, hoặc <strong>Thu gọn (Compact)</strong>. Thay vì viết 3 vòng lặp riêng biệt, ta sử dụng <code>ngTemplateOutlet</code> để tráo đổi template hiển thị từng item linh hoạt!
+              <strong>Kịch bản:</strong> Cùng một danh sách nhân sự, người dùng có thể chuyển đổi
+              hiển thị giữa <strong>Thẻ (Card Grid)</strong>, <strong>Bảng (Table)</strong>, hoặc
+              <strong>Thu gọn (Compact)</strong>. Thay vì viết 3 vòng lặp riêng biệt, ta sử dụng
+              <code>ngTemplateOutlet</code> để tráo đổi template hiển thị từng item linh hoạt!
             </div>
           </div>
 
@@ -679,19 +756,27 @@
 
           <!-- Container danh sách data áp dụng ngTemplateOutlet -->
           <div class="users-list-wrapper" [ngClass]="viewMode()">
-            @for (u of filteredUsers(); track u.id; let idx = $index; let isFirst = $first; let isLast = $last) {
+            @for (
+              u of filteredUsers();
+              track u.id;
+              let idx = $index;
+              let isFirst = $first;
+              let isLast = $last
+            ) {
               <!-- Tráo đổi template tương ứng với viewMode() -->
               <ng-container
                 [ngTemplateOutlet]="
                   viewMode() === 'grid'
                     ? userCardTmpl
-                    : (viewMode() === 'table' ? userTableTmpl : userCompactTmpl)
+                    : viewMode() === 'table'
+                      ? userTableTmpl
+                      : userCompactTmpl
                 "
                 [ngTemplateOutletContext]="{
                   $implicit: u,
                   index: idx + 1,
                   first: isFirst,
-                  last: isLast
+                  last: isLast,
                 }"
               ></ng-container>
             } @empty {
@@ -759,7 +844,9 @@
     <!-- ================================================================= -->
     <section class="card summary-table-card">
       <div class="card-header">
-        <h2 class="card-title">📖 Tóm Tắt So Sánh: ng-template, ngTemplateOutlet và ng-container</h2>
+        <h2 class="card-title">
+          📖 Tóm Tắt So Sánh: ng-template, ngTemplateOutlet và ng-container
+        </h2>
       </div>
       <div class="card-body">
         <div class="table-responsive">
@@ -775,31 +862,59 @@
             </thead>
             <tbody>
               <tr>
-                <td><strong><code>&lt;ng-template&gt;</code></strong></td>
+                <td>
+                  <strong><code>&lt;ng-template&gt;</code></strong>
+                </td>
                 <td>Là một <code>TemplateRef</code> chứa khung HTML mẫu trong bộ nhớ.</td>
                 <td><span class="tag-no">❌ Không sinh thẻ</span> (chỉ xuất hiện khi render)</td>
-                <td>Dùng trong <code>*ngIf else</code>, tách khối UI tái sử dụng, truyền template vào con.</td>
-                <td>HTML bên trong không bao giờ tự hiển thị ở vị trí định nghĩa. Biến bên trong không có strict type-check.</td>
+                <td>
+                  Dùng trong <code>*ngIf else</code>, tách khối UI tái sử dụng, truyền template vào
+                  con.
+                </td>
+                <td>
+                  HTML bên trong không bao giờ tự hiển thị ở vị trí định nghĩa. Biến bên trong không
+                  có strict type-check.
+                </td>
               </tr>
               <tr>
-                <td><strong><code>ngTemplateOutlet</code></strong></td>
-                <td>Chỉ thị (Directive) chịu trách nhiệm lấy <code>TemplateRef</code> để cắm vào DOM.</td>
-                <td>Phụ thuộc thẻ chứa nó (thường đi kèm <code>&lt;ng-container&gt;</code> để zero-tag)</td>
-                <td>Render động các template, truyền data qua <code>ngTemplateOutletContext</code>.</td>
-                <td>Cần truyền <code>$implicit</code> cho biến không tên, hoặc <code>let-key="key"</code> cho biến tường minh.</td>
+                <td>
+                  <strong><code>ngTemplateOutlet</code></strong>
+                </td>
+                <td>
+                  Chỉ thị (Directive) chịu trách nhiệm lấy <code>TemplateRef</code> để cắm vào DOM.
+                </td>
+                <td>
+                  Phụ thuộc thẻ chứa nó (thường đi kèm <code>&lt;ng-container&gt;</code> để
+                  zero-tag)
+                </td>
+                <td>
+                  Render động các template, truyền data qua <code>ngTemplateOutletContext</code>.
+                </td>
+                <td>
+                  Cần truyền <code>$implicit</code> cho biến không tên, hoặc
+                  <code>let-key="key"</code> cho biến tường minh.
+                </td>
               </tr>
               <tr>
-                <td><strong><code>&lt;ng-container&gt;</code></strong></td>
+                <td>
+                  <strong><code>&lt;ng-container&gt;</code></strong>
+                </td>
                 <td>Thẻ nhóm ảo (Virtual Grouping Element) do Angular cung cấp.</td>
-                <td><span class="tag-no">❌ Không sinh thẻ</span> (biến mất hoàn toàn khi render)</td>
-                <td>Gom nhóm để gán directive (*ngIf, *ngFor, ngTemplateOutlet), tránh phá Flex/Grid.</td>
-                <td>Tuyệt đối không gán class CSS trực tiếp lên <code>ng-container</code> vì nó không tồn tại trên DOM!</td>
+                <td>
+                  <span class="tag-no">❌ Không sinh thẻ</span> (biến mất hoàn toàn khi render)
+                </td>
+                <td>
+                  Gom nhóm để gán directive (*ngIf, *ngFor, ngTemplateOutlet), tránh phá Flex/Grid.
+                </td>
+                <td>
+                  Tuyệt đối không gán class CSS trực tiếp lên <code>ng-container</code> vì nó không
+                  tồn tại trên DOM!
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </section>
-
   </div>
 </div>

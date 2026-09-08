@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { Day029RouterLazyLoad } from './day029-router-lazy-load';
 
 describe('Day029RouterLazyLoad', () => {
@@ -8,6 +9,7 @@ describe('Day029RouterLazyLoad', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Day029RouterLazyLoad],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Day029RouterLazyLoad);

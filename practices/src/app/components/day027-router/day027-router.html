@@ -1,4 +1,20 @@
 <div class="day-container">
-  <h2>Day027-router</h2>
-  <p>day027-router works!</p>
+  <header class="day-header">
+    <span class="badge">Day 27</span>
+    <h2>Angular Router</h2>
+    <p class="subtitle">
+      Demo cơ chế điều hướng cơ bản: khai báo <code>Routes</code>, dùng <code>routerLink</code> và
+      <code>&lt;router-outlet&gt;</code>, và lấy tham số động (<code>:slug</code>) từ URL qua
+      <code>ActivatedRoute</code>.
+    </p>
+  </header>
+
+  <p class="route-order-note">
+    Lưu ý: thứ tự khai báo route quan trọng — route càng cụ thể (ví dụ <code>/detail/123/edit</code>) nên được
+    khai báo trước route tổng quát hơn (<code>/detail/123</code> hay route rỗng <code>''</code>).
+  </p>
+
+  <div class="demo-outlet">
+    <router-outlet></router-outlet>
+  </div>
 </div>

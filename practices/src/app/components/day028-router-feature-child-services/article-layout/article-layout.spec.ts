@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Day027Router } from './day027-router';
+import { ArticleLayout } from './article-layout';
 
-describe('Day027Router', () => {
-  let component: Day027Router;
-  let fixture: ComponentFixture<Day027Router>;
+describe('ArticleLayout', () => {
+  let component: ArticleLayout;
+  let fixture: ComponentFixture<ArticleLayout>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Day027Router],
+      imports: [ArticleLayout],
       providers: [provideRouter([])],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Day027Router);
+    fixture = TestBed.createComponent(ArticleLayout);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

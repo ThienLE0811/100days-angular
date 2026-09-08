@@ -11,7 +11,10 @@ export type TabId =
   | 'async-generator'
   | 'closure-memory'
   | 'this-prototype'
+  | 'descriptors'
+  | 'functional'
   | 'proxy-reactivity'
+  | 'modules-weak'
   | 'cheatsheet';
 
 export interface LogEntry {
@@ -62,6 +65,33 @@ export interface CheatsheetRow {
   solution: string;
   category: string;
   badge: string;
+}
+
+export interface DescriptorRow {
+  key: string;
+  value: string;
+  writable: boolean;
+  enumerable: boolean;
+  configurable: boolean;
+  isAccessor: boolean;
+}
+
+export interface ComposeStep {
+  fnName: string;
+  input: number;
+  output: number;
+}
+
+export interface MemoStep {
+  n: number;
+  type: 'compute' | 'cache-hit';
+  result: number;
+}
+
+export interface EsmComparisonRow {
+  feature: string;
+  cjs: string;
+  esm: string;
 }
 
 // ============================================================================
@@ -673,6 +703,334 @@ console.log('B - After call');`;
   }
 
   // ============================================================================
+  // TAB: Property Descriptors & Decorator Mechanism
+  // ============================================================================
+  demoObj: Record<string, any> = {};
+  demoDescriptors: DescriptorRow[] = [];
+  newPropKey = 'API_KEY';
+  newPropValue = 'secret-key-123';
+  newPropWritable = false;
+  newPropEnumerable = false;
+  newPropConfigurable = false;
+  writeAttemptKey = 'API_KEY';
+  writeAttemptValue = 'hacked-value';
+  writeAttemptResult: string | null = null;
+
+  private _celsius = 0;
+  get celsiusValue(): number {
+    return this._celsius;
+  }
+  set celsiusValue(v: number) {
+    this._celsius = v;
+    this.addLog('info', 'Descriptor', `set celsius(${v}) → getter fahrenheit tự tính lại = ${this.fahrenheitValue.toFixed(1)}`);
+  }
+  get fahrenheitValue(): number {
+    return (this._celsius * 9) / 5 + 32;
+  }
+  set fahrenheitValue(v: number) {
+    this._celsius = ((v - 32) * 5) / 9;
+    this.addLog('info', 'Descriptor', `set fahrenheit(${v}) → celsius tự tính lại = ${this._celsius.toFixed(1)}`);
+  }
+
+  freezeTarget: { count: number } = { count: 1 };
+  isFrozen = false;
+
+  readonly codeDecoratorAngular = `// Decorator = Higher-Order Function chạy lúc define class
+function Component(metadata) {
+  return function(constructor) {
+    Reflect.defineMetadata('annotations', [metadata], constructor);
+  };
+}
+
+@Component({ selector: 'app-root' })
+class AppComponent { @Input() title = ''; }
+// Angular đọc metadata này để biết selector, inputs...
+// (Ivy hiện đại compile tĩnh, không còn cần reflect-metadata)`;
+
+  initDescriptorDemo(): void {
+    this.demoObj = {};
+    this.demoObj['name'] = 'Thien'; // property gán bình thường → writable/enumerable/configurable đều true
+    this.refreshDescriptors();
+    this.addLog('info', 'Descriptor', 'Khởi tạo demo object { name: "Thien" }');
+  }
+
+  private refreshDescriptors(): void {
+    const descriptors = Object.getOwnPropertyDescriptors(this.demoObj);
+    this.demoDescriptors = Object.keys(descriptors).map(key => {
+      const d = descriptors[key];
+      const isAccessor = typeof d.get === 'function' || typeof d.set === 'function';
+      return {
+        key,
+        value: isAccessor ? '(getter/setter)' : String(d.value),
+        writable: !!d.writable,
+        enumerable: !!d.enumerable,
+        configurable: !!d.configurable,
+        isAccessor
+      };
+    });
+  }
+
+  addCustomProperty(): void {
+    try {
+      Object.defineProperty(this.demoObj, this.newPropKey, {
+        value: this.newPropValue,
+        writable: this.newPropWritable,
+        enumerable: this.newPropEnumerable,
+        configurable: this.newPropConfigurable
+      });
+      this.refreshDescriptors();
+      this.addLog(
+        'success',
+        'Descriptor',
+        `Object.defineProperty("${this.newPropKey}", { writable: ${this.newPropWritable}, enumerable: ${this.newPropEnumerable}, configurable: ${this.newPropConfigurable} })`
+      );
+    } catch (e) {
+      this.addLog('error', 'Descriptor', `Lỗi khi defineProperty: ${(e as Error).message}`);
+    }
+  }
+
+  attemptWrite(): void {
+    try {
+      this.demoObj[this.writeAttemptKey] = this.writeAttemptValue;
+      this.refreshDescriptors();
+      const current = this.demoObj[this.writeAttemptKey];
+      this.writeAttemptResult =
+        current === this.writeAttemptValue
+          ? `✅ Ghi thành công → ${this.writeAttemptKey} = "${current}"`
+          : `⚠️ Ghi bị bỏ qua (silent fail) → giá trị vẫn là "${current}"`;
+      this.addLog('info', 'Descriptor', this.writeAttemptResult);
+    } catch (e) {
+      this.writeAttemptResult = `❌ TypeError: ${(e as Error).message}`;
+      this.addLog('error', 'Descriptor', this.writeAttemptResult);
+    }
+  }
+
+  toggleFreeze(): void {
+    if (this.isFrozen) return;
+    Object.freeze(this.freezeTarget);
+    this.isFrozen = true;
+    this.addLog('warn', 'Object.freeze', 'Đã đóng băng freezeTarget — mọi thuộc tính giờ writable:false, configurable:false');
+  }
+
+  tryIncrementFrozen(): void {
+    try {
+      this.freezeTarget.count++;
+      this.addLog('info', 'Object.freeze', `count++ → ${this.freezeTarget.count} (chưa freeze nên vẫn tăng được)`);
+    } catch (e) {
+      this.addLog('error', 'Object.freeze', `❌ TypeError: ${(e as Error).message} — object đã bị freeze!`);
+    }
+  }
+
+  resetFreezeDemo(): void {
+    this.freezeTarget = { count: 1 };
+    this.isFrozen = false;
+    this.addLog('info', 'Object.freeze', 'Reset freeze demo');
+  }
+
+  // ============================================================================
+  // TAB: Functional Programming — Currying, Composition, Memoization
+  // ============================================================================
+  curryA = 5;
+  curryB = 3;
+  curryC = 2;
+  currySteps: string[] = [];
+  curryResult: number | null = null;
+
+  runCurryDemo(): void {
+    this.currySteps = [];
+    const curriedAdd = (a: number) => (b: number) => (c: number) => a + b + c;
+
+    const step1 = curriedAdd(this.curryA);
+    this.currySteps.push(`curriedAdd(${this.curryA}) → trả về hàm chờ tham số b`);
+    const step2 = step1(this.curryB);
+    this.currySteps.push(`...(${this.curryB}) → trả về hàm chờ tham số c`);
+    const step3 = step2(this.curryC);
+    this.currySteps.push(`...(${this.curryC}) → kết quả cuối: ${step3}`);
+
+    this.curryResult = step3;
+    this.addLog('success', 'Currying', `curriedAdd(${this.curryA})(${this.curryB})(${this.curryC}) = ${step3}`);
+  }
+
+  composeInput = 5;
+  composeSteps: ComposeStep[] = [];
+  composeResult: number | null = null;
+
+  runComposeDemo(): void {
+    const pipeline: Array<{ name: string; fn: (x: number) => number }> = [
+      { name: 'double(x) = x * 2', fn: x => x * 2 },
+      { name: 'addOne(x) = x + 1', fn: x => x + 1 },
+      { name: 'square(x) = x * x', fn: x => x * x }
+    ];
+
+    this.composeSteps = [];
+    let acc = this.composeInput;
+    for (const step of pipeline) {
+      const output = step.fn(acc);
+      this.composeSteps.push({ fnName: step.name, input: acc, output });
+      acc = output;
+    }
+    this.composeResult = acc;
+    this.addLog('success', 'Composition', `pipe(double, addOne, square)(${this.composeInput}) = ${acc}`);
+  }
+
+  memoInput = 20;
+  memoSteps: MemoStep[] = [];
+  memoStats = { memoCalls: 0, plainCalls: 0, result: 0 };
+  isMemoRunning = false;
+
+  runMemoDemo(): void {
+    if (this.isMemoRunning) return;
+    this.isMemoRunning = true;
+    const n = Math.max(1, Math.min(this.memoInput, 30));
+    this.memoSteps = [];
+    const cache = new Map<number, number>();
+
+    const memoFib = (k: number): number => {
+      if (cache.has(k)) {
+        const cached = cache.get(k)!;
+        this.memoSteps.push({ n: k, type: 'cache-hit', result: cached });
+        return cached;
+      }
+      const result = k <= 1 ? k : memoFib(k - 1) + memoFib(k - 2);
+      cache.set(k, result);
+      this.memoSteps.push({ n: k, type: 'compute', result });
+      return result;
+    };
+
+    let plainCalls = 0;
+    const plainFib = (k: number): number => {
+      plainCalls++;
+      return k <= 1 ? k : plainFib(k - 1) + plainFib(k - 2);
+    };
+
+    const memoResult = memoFib(n);
+    const memoCalls = this.memoSteps.length;
+    plainFib(n);
+
+    this.memoStats = { memoCalls, plainCalls, result: memoResult };
+    this.addLog(
+      'success',
+      'Memoization',
+      `fib(${n}) = ${memoResult} — Memoized: ${memoCalls} lần gọi vs Plain: ${plainCalls.toLocaleString()} lần gọi`
+    );
+    this.isMemoRunning = false;
+  }
+
+  // ============================================================================
+  // TAB: ESM Module System & WeakMap/WeakSet
+  // ============================================================================
+  readonly esmComparisonRows: EsmComparisonRow[] = [
+    { feature: 'Thời điểm resolve', cjs: 'Runtime', esm: 'Parse time (static)' },
+    { feature: 'Circular deps', cjs: 'Partial values', esm: 'Live bindings' },
+    { feature: 'Tree-shaking', cjs: '❌ Khó', esm: '✅ Dễ (static analysis)' },
+    { feature: 'Top-level await', cjs: '❌', esm: '✅' },
+    { feature: 'Synchronous', cjs: '✅', esm: '❌ (async loading)' }
+  ];
+
+  readonly codeCircularDeps = `// ❌ Circular — A imports B, B imports A
+// a.ts: import { b } from './b';
+// b.ts: import { a } from './a'; // Circular!
+// Kết quả: một trong hai nhận \`undefined\` lúc initialization
+
+// ✅ Giải pháp: tách phần chung ra file thứ ba
+// shared.ts: export const sharedValue = ...;
+// a.ts: import { sharedValue } from './shared';
+// b.ts: import { sharedValue } from './shared';`;
+
+  dynamicImportLog: string[] = [];
+  isDynamicImportLoading = false;
+
+  async runDynamicImportDemo(): Promise<void> {
+    if (this.isDynamicImportLoading) return;
+    this.isDynamicImportLoading = true;
+    this.dynamicImportLog = [];
+    this.triggerRender();
+
+    const log = (msg: string) => {
+      if (this.isDestroyed) return;
+      this.dynamicImportLog.push(msg);
+      this.addLog('info', 'Dynamic Import', msg);
+      this.triggerRender();
+    };
+
+    log("▶ import('./heavy-module') được gọi (lazy loading)...");
+    await this.delay(400);
+    log('📦 Trình duyệt tải một chunk JS riêng biệt (code splitting)...');
+
+    const moduleSource = 'export function heavyCompute(n) { return n * n * 42; }';
+    const blob = new Blob([moduleSource], { type: 'text/javascript' });
+    const url = URL.createObjectURL(blob);
+
+    try {
+      await this.delay(500);
+      const mod: any = await import(url);
+      log(`✅ Module tải xong! heavyCompute(3) = ${mod.heavyCompute(3)}`);
+    } catch {
+      log('⚠️ Môi trường demo chặn dynamic import runtime (CSP/bundler) — nguyên lý code splitting vẫn như mô tả ở trên');
+    } finally {
+      URL.revokeObjectURL(url);
+      this.isDynamicImportLoading = false;
+      this.triggerRender();
+    }
+  }
+
+  weakMapStepLog: string[] = [];
+  isWeakDemoRunning = false;
+  mapDemoSize = 0;
+
+  async runWeakMapDemo(): Promise<void> {
+    if (this.isWeakDemoRunning) return;
+    this.isWeakDemoRunning = true;
+    this.weakMapStepLog = [];
+    this.mapDemoSize = 0;
+    this.triggerRender();
+
+    const log = (msg: string) => {
+      if (this.isDestroyed) return;
+      this.weakMapStepLog.push(msg);
+      this.addLog('info', 'WeakMap Lab', msg);
+      this.triggerRender();
+    };
+
+    const cache = new Map<object, string>();
+    let bigObject: object | null = { data: 'array 1.000.000 phần tử' };
+    log('▶ new Map() + tạo object lớn (bigObject)');
+    await this.delay(500);
+
+    cache.set(bigObject, 'metadata');
+    this.mapDemoSize = cache.size;
+    log(`📦 cache.set(bigObject, 'metadata') → cache.size = ${cache.size}`);
+    await this.delay(500);
+
+    bigObject = null;
+    log('❌ bigObject = null — xóa reference bên ngoài');
+    await this.delay(500);
+
+    this.mapDemoSize = cache.size;
+    log(`⚠️ cache.size vẫn = ${cache.size} → Map giữ STRONG reference → GC KHÔNG thể thu hồi object → LEAK!`);
+    await this.delay(700);
+
+    const weakCache = new WeakMap<object, string>();
+    let bigObject2: object | null = { data: 'array 1.000.000 phần tử #2' };
+    log('▶ new WeakMap() + tạo object lớn thứ 2 (bigObject2)');
+    await this.delay(500);
+
+    weakCache.set(bigObject2, 'metadata');
+    log("📦 weakCache.set(bigObject2, 'metadata') → WEAK reference");
+    await this.delay(500);
+
+    bigObject2 = null;
+    log('❌ bigObject2 = null — xóa reference bên ngoài');
+    await this.delay(500);
+
+    log('✅ Không còn reference nào khác trỏ tới object → GC có thể thu hồi → entry trong WeakMap tự động biến mất, không leak!');
+    this.addLog('success', 'WeakMap Lab', 'Hoàn tất: Map giữ object mãi mãi (leak) vs WeakMap để GC tự do (safe)');
+
+    this.isWeakDemoRunning = false;
+    this.triggerRender();
+  }
+
+  // ============================================================================
   // TAB 6: Cheatsheet
   // ============================================================================
   readonly cheatsheetRows: CheatsheetRow[] = [
@@ -784,6 +1142,7 @@ count.set(1); // -> "trigger" -> notify tất cả subscribers -> chạy lại e
     this.addLog('info', 'System', '📚 Chọn tab để bắt đầu khám phá từng chủ đề');
     this.initProxy();
     this.buildPrototypeChain();
+    this.initDescriptorDemo();
   }
 
   ngOnDestroy(): void {

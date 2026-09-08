@@ -1,0 +1,121 @@
+.admin-panel {
+  .back-link {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+    color: #7c3aed;
+    text-decoration: none;
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .chunk-banner {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+
+    code {
+      background: #dcfce7;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+  }
+}
+
+.article-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.65rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  th {
+    background: #f8fafc;
+    color: #475569;
+  }
+
+  .status-badge {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    cursor: pointer;
+
+    &.published {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #15803d;
+    }
+  }
+
+  .edit-form {
+    .edit-input {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+  }
+
+  .actions-cell {
+    white-space: nowrap;
+  }
+
+  .action-btn {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    margin-right: 0.35rem;
+
+    &.edit {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    &.delete {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    &.save {
+      background: #dcfce7;
+      color: #15803d;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    &.cancel {
+      background: #f1f5f9;
+      color: #334155;
+    }
+  }
+
+  .empty-row {
+    text-align: center;
+    color: #94a3b8;
+    font-style: italic;
+  }
+}

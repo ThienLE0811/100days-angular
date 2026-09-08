@@ -1,0 +1,134 @@
+.layout-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  .sort-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.7rem;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:hover {
+      background: #e2e8f0;
+    }
+
+    &.active {
+      background: #7c3aed;
+      border-color: #7c3aed;
+      color: #ffffff;
+    }
+  }
+}
+
+.nav-btn {
+  background: #0284c7;
+  border: none;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &:hover {
+    background: #0369a1;
+  }
+}
+
+.article-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  .article-chip {
+    text-decoration: none;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.45rem 0.85rem;
+    border-radius: 9999px;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+    }
+
+    &.active {
+      background: #eef2ff;
+      border-color: #7c3aed;
+      color: #6d28d9;
+    }
+  }
+}
+
+.layout-outlet {
+  min-height: 100px;
+  margin-bottom: 1rem;
+}
+
+.nav-log {
+  background: #0f172a;
+  border-radius: 10px;
+  padding: 1rem;
+  color: #e2e8f0;
+  font-family: monospace;
+
+  .nav-log-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-bottom: 0.6rem;
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #38bdf8;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #38bdf8;
+    }
+  }
+
+  .nav-log-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+
+    .nav-log-row {
+      font-size: 0.8rem;
+      color: #bae6fd;
+    }
+
+    .nav-log-empty {
+      font-size: 0.8rem;
+      color: #64748b;
+      font-style: italic;
+    }
+  }
+}

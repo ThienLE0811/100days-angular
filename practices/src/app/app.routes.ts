@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { loadAdminPanelModule } from './components/day029-router-lazy-load/admin-chunk-loader';
 
 export const routes: Routes = [
   {
@@ -134,17 +135,59 @@ export const routes: Routes = [
   {
     path: 'day027-router',
     title: 'Day027-router',
-    loadComponent: () => import('./components/day027-router/day027-router').then(m => m.Day027Router)
+    loadComponent: () => import('./components/day027-router/day027-router').then(m => m.Day027Router),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./components/day027-router/article-list/article-list').then(m => m.ArticleList)
+      },
+      {
+        path: ':slug',
+        loadComponent: () => import('./components/day027-router/article-detail/article-detail').then(m => m.ArticleDetail)
+      }
+    ]
   },
   {
     path: 'day028-router-feature-child-services',
     title: 'Day028-router-feature-child-services',
-    loadComponent: () => import('./components/day028-router-feature-child-services/day028-router-feature-child-services').then(m => m.Day028RouterFeatureChildServices)
+    loadComponent: () => import('./components/day028-router-feature-child-services/day028-router-feature-child-services').then(m => m.Day028RouterFeatureChildServices),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'article'
+      },
+      {
+        path: 'article',
+        loadComponent: () => import('./components/day028-router-feature-child-services/article-layout/article-layout').then(m => m.ArticleLayout),
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            redirectTo: 'feature-module-va-child-routes'
+          },
+          {
+            path: ':slug',
+            loadComponent: () => import('./components/day028-router-feature-child-services/article-detail/article-detail').then(m => m.ArticleDetail)
+          }
+        ]
+      }
+    ]
   },
   {
     path: 'day029-router-lazy-load',
     title: 'Day029-router-lazy-load',
-    loadComponent: () => import('./components/day029-router-lazy-load/day029-router-lazy-load').then(m => m.Day029RouterLazyLoad)
+    loadComponent: () => import('./components/day029-router-lazy-load/day029-router-lazy-load').then(m => m.Day029RouterLazyLoad),
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./components/day029-router-lazy-load/lazy-load-home/lazy-load-home').then(m => m.LazyLoadHome)
+      },
+      {
+        path: 'admin',
+        loadComponent: () => loadAdminPanelModule().then(m => m.AdminPanel)
+      }
+    ]
   },
   {
     path: 'day030-router-guards-resolvers',

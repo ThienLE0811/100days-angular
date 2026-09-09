@@ -20,6 +20,10 @@ const returnObservable = observableInstance.pipe(operator1(), operator2());
 
 Nếu bạn dùng với RxJS version < 5.5 thì có thể các bạn sẽ thấy cú pháp sử dụng khác là prototype method chain, nhưng nếu bạn dùng từ version 5.5 trở lên thì nên dùng pipe operators, dựa theo một số giải thích ở đây: [pipeable operators](https://rxjs.dev/guide/v6/pipeable-operators)
 
+> [!NOTE]
+> **Lưu ý về Import từ RxJS v7.2+:**
+> Trước đây (RxJS 6), các operators thường được import từ `'rxjs/operators'` (ví dụ: `import { map } from 'rxjs/operators'`). Từ RxJS 7.2 trở đi, đường dẫn này đã bị **Deprecated**. Bạn hãy import trực tiếp tất cả operators từ package `'rxjs'` chính (ví dụ: `import { map, scan, buffer } from 'rxjs'`).
+
 Pipeable Operators có thể chia thành nhiều category khác nhau, trong ngày hôm nay chúng ta sẽ tìm hiểu về **Transformation Operators**.
 
 ## Transformation Operators
@@ -76,8 +80,7 @@ Như vậy qua một lần biến đổi, chúng ta sẽ có được dữ liệ
 Vậy với Observable thì sao. Giả sử chúng ta đang có một hệ thống tracking xem những ai đăng nhập vào hệ thống. Do đó ở một số thời điểm sẽ có một/một vài người đăng nhập, và mỗi lần như thế hệ thống sẽ gửi cho chúng ta một event để biết. Bây giờ chúng ta cũng làm nhiệm vụ tương tự như `map` ở trên thì sao.
 
 ```ts
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, map } from 'rxjs';
 
 interface User {
   id: string;
@@ -132,7 +135,7 @@ Cách đơn giản nhất là bạn sẽ vào hàm next để thực hiện tín
 Đây chính là lúc bạn có thể sử dụng đến Operator như map của RxJS.
 
 ```ts
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 source
   .pipe(
@@ -156,23 +159,41 @@ Cách dùng map này _khá giống_ cách dùng map của array ở trên phải
 
 ![RxJS map](assets/rxjs-map.png)
 
-### pluck
+### pluck (⚠️ Đã Deprecated từ RxJS 7+)
 
 `pluck<T, R>(...properties: string[]): OperatorFunction<T, R>`
 
-Đối với yêu cầu map ra một property trong một object như vừa rồi, bạn có thể sử dụng một cách khác là `pluck`:
+> [!WARNING]
+> **Toán tử này đã bị DEPRECATED từ RxJS 7.0 và bị gỡ bỏ trong RxJS 8.**
+> - **Lý do:** `pluck` nhận tên thuộc tính dưới dạng chuỗi (strings), khiến TypeScript khó suy diễn kiểu (type safety) và dễ gây lỗi runtime nếu bạn đổi tên thuộc tính.
+> - **Giải pháp thay thế:** Sử dụng toán tử chuẩn `map()` kết hợp với Optional Chaining (`?.`).
+
+Trước đây, đối với yêu cầu trích xuất một property trong object, bạn có thể sử dụng `pluck`:
 
 ```ts
-import { pluck } from 'rxjs/operators';
+// Cách cũ (RxJS 6 - ĐÃ DEPRECATED):
+// import { pluck } from 'rxjs/operators';
+// source.pipe(pluck('id')).subscribe(observer);
 
-source.pipe(pluck('id')).subscribe(observer);
+// Cách chuẩn hiện đại (RxJS 7+): Khuyên dùng map()
+import { map } from 'rxjs';
+
+source.pipe(map((user) => user.id)).subscribe(observer);
+
+// Khi cần trích xuất thuộc tính lồng nhau sâu (nested):
+// pluck('address', 'city')  --->  map(user => user?.address?.city)
 ```
 
 ![RxJS pluck](assets/rxjs-pluck.png)
 
-### mapTo
+### mapTo (⚠️ Đã Deprecated từ RxJS 7+)
 
 `mapTo<T, R>(value: R): OperatorFunction<T, R>`
+
+> [!WARNING]
+> **Toán tử này đã bị DEPRECATED từ RxJS 7.0 và bị gỡ bỏ trong RxJS 8.**
+> - **Lý do:** `mapTo(val)` chỉ là cách viết tắt của `map(() => val)`. Để giảm kích thước thư viện và tránh trùng lặp cú pháp, RxJS đã deprecate `mapTo`.
+> - **Giải pháp thay thế:** Sử dụng trực tiếp `map(() => constantValue)`.
 
 Sẽ thế nào nếu bạn muốn bất cứ khi nào stream emit một giá trị thì bạn luôn trả về một giá trị fixed không?
 
@@ -180,18 +201,27 @@ Giả sử bạn đang làm chức năng để lắng nghe mouse hover. Như b�
 
 Khi `mouseover` chúng ta luôn trả về `true`, và khi `mouseleave` chúng ta luôn trả về `false`.
 
-Trong đoạn code dưới đây các bạn tạm thời hiểu rằng merge sẽ gộp 2 streams lại thành một, chúng ta sẽ học về combine streams những ngày sau.
+Trong đoạn code dưới đây các bạn tạm thời hiểu rằng `merge` sẽ gộp 2 streams lại thành một, chúng ta sẽ học về combine streams những ngày sau.
 
 ```ts
+import { fromEvent, merge, map } from 'rxjs';
+
 const element = document.querySelector('#hover');
 
 const mouseover$ = fromEvent(element, 'mouseover');
 const mouseleave$ = fromEvent(element, 'mouseleave');
 
+// Cách chuẩn hiện đại (RxJS 7+): sử dụng map(() => value) thay cho mapTo(value)
 const hover$ = merge(
-  mouseover$.pipe(mapTo(true)),
-  mouseleave$.pipe(mapTo(false))
+  mouseover$.pipe(map(() => true)),
+  mouseleave$.pipe(map(() => false))
 );
+
+// Cách cũ với mapTo (ĐÃ DEPRECATED):
+// const hover$ = merge(
+//   mouseover$.pipe(mapTo(true)),
+//   mouseleave$.pipe(mapTo(false))
+// );
 
 hover$.subscribe(observer);
 ```

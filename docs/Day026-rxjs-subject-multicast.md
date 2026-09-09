@@ -2,6 +2,10 @@
 
 Trong ngày đầu tiên tìm hiểu về RxJS chúng ta đã được giới thiệu đến **Observable**, và cũng đã nhắc đến một số kiểu dữ liệu vệ tinh như **Subject**. Vậy **Subject** có chức năng gì trong hệ sinh thái RxJS? Hôm nay chúng ta sẽ cùng tìm hiểu.
 
+> [!NOTE]
+> **Lưu ý về Import từ RxJS v7.2+:**
+> Tất cả các Subject (`Subject`, `BehaviorSubject`, `ReplaySubject`, `AsyncSubject`), các multicasting operators (`share`, `shareReplay`, `connect`), và creation functions (`connectable`, `interval`, `timer`, `fromEvent`) hiện nay đều được import trực tiếp từ package chính `'rxjs'`, ví dụ: `import { Subject, BehaviorSubject, share, shareReplay, connectable } from 'rxjs';`. Các đường dẫn con cũ như `'rxjs/Subject'`, `'rxjs/Observable'`, `'rxjs/operators'` đều đã bị **Deprecated/Removed**.
+
 ## Observable Execution
 
 Như chúng ta đã biết, đối với các **Observable** thông thường, mỗi khi thực hiện `subscribe` sẽ sinh ra một `execution` mới, và chúng độc lập với nhau.
@@ -555,21 +559,30 @@ setTimeout(() => {
 
 Chúng ta sẽ có thể thay thế bằng cách dùng multicast operator như sau.
 
-### multicast
+### multicast (⚠️ Đã Deprecated từ RxJS 7+)
 
 `multicast<T, R>(subjectOrSubjectFactory: Subject<T> | (() => Subject<T>), selector?: (source: Observable<T>) => Observable<R>): OperatorFunction<T, R>`
 
-> Returns an Observable that emits the results of invoking a specified selector on items emitted by a `ConnectableObservable` that shares a single subscription to the underlying stream. [multicast](https://rxjs.dev/api/operators/multicast)
+> [!WARNING]
+> **Toán tử `multicast` và class `ConnectableObservable` đã bị DEPRECATED từ RxJS 7.0 và bị loại bỏ trong RxJS 8.**
+> - **Lý do:** Cơ chế quản lý kết nối thủ công bằng `ConnectableObservable` (gọi `.connect()` và lưu giữ `Subscription`) rất phức tạp và dễ gây rò rỉ bộ nhớ (memory leak).
+> - **Giải pháp thay thế:**
+>   - Nếu cần tự động chia sẻ stream (auto connect/disconnect theo số lượng subscriber): Dùng trực tiếp toán tử **`share()`**.
+>   - Nếu cần kiểm soát thời điểm kết nối thủ công: Dùng creation function **`connectable(source$, { connector: () => new Subject() })`** của RxJS 7+.
 
-Operator này sẽ trả về một Observable đặc biệt là [`ConnectableObservable`](https://rxjs.dev/api/index/class/ConnectableObservable), mà nó có thể share cùng một execution.
+Trước đây trong RxJS 6, `multicast` trả về một Observable đặc biệt là `ConnectableObservable` để chia sẻ execution:
 
 ```ts
-const subject = new Subject();
+// Cách cũ (RxJS 6 - ĐÃ DEPRECATED):
+// const connectableObservable = interval(500).pipe(take(5), multicast(subject)) as ConnectableObservable<number>;
 
-const connectableObservable = interval(500).pipe(
-  take(5),
-  multicast(subject)
-) as ConnectableObservable<number>;
+// Cách chuẩn hiện đại (RxJS 7+): Dùng hàm connectable()
+import { interval, take, connectable, Subject } from 'rxjs';
+
+const connectableObservable = connectable(
+  interval(500).pipe(take(5)),
+  { connector: () => new Subject() }
+);
 
 const observerA = {
   next: (val) => console.log(`Observer A: ${val}`),
@@ -695,7 +708,11 @@ setTimeout(() => {
 
 Lúc này bạn chỉ cần `connectSub.unsubscribe()` là sẽ unsubscribe internal Subject do đó không cần chạy `sub.unsubscribe()` cũng được.
 
-#### refCount
+#### refCount (⚠️ Đã Deprecated từ RxJS 7+)
+
+> [!WARNING]
+> **Toán tử `refCount` đã bị DEPRECATED từ RxJS 7.0 và bị loại bỏ trong RxJS 8.**
+> Thay vì viết chuỗi thủ công `multicast(...) + refCount()` hoặc `publish() + refCount()`, RxJS 7+ khuyến nghị sử dụng trực tiếp toán tử **`share()`**.
 
 Việc phải connect và disconnect manually khá là low level. Do đó `ConnectableObservable` có một protocol khá thuận tiện đó là: Khi có sự biến đổi về số lượng Observer từ 0 lên 1 thì sẽ tự gọi connect, và khi có sự biến đổi từ 1 về 0 thì sẽ tự động unsubscribe. Đây chính là lúc bạn có thể sử dụng đến `refCount`.
 
@@ -803,15 +820,20 @@ setTimeout(() => {
 
 ![RxJS multicast](assets/rxjs-multicast.png)
 
-### publish
-
-Việc sử dụng `multicast(new Subject())` có thể được viết gọn lại bằng cách sử dụng `publish`.
+### publish và các biến thể (⚠️ Đã Deprecated từ RxJS 7+)
 
 `publish<T, R>(selector?: OperatorFunction<T, R>): MonoTypeOperatorFunction<T> | OperatorFunction<T, R>`
 
-> Returns a ConnectableObservable, which is a variety of Observable that waits until its connect method is called before it begins emitting items to those Observers that have subscribed to it. [publish](https://rxjs.dev/api/operators/publish)
+> [!WARNING]
+> **Toàn bộ họ toán tử `publish`, `publishBehavior`, `publishReplay`, `publishLast` đã bị DEPRECATED từ RxJS 7.0 và bị loại bỏ trong RxJS 8.**
+> - **Lý do:** Các toán tử này thực chất chỉ là wrapper gọi `multicast()` với các loại Subject khác nhau, gây dư thừa và phân mảnh API.
+> - **Giải pháp thay thế:** Trong RxJS 7+, hãy sử dụng toán tử **`share()`** với cấu hình `connector` tương ứng hoặc **`shareReplay()`**:
+>   - `publish() + refCount()` ➔ `share()`
+>   - `publishBehavior(val) + refCount()` ➔ `share({ connector: () => new BehaviorSubject(val) })`
+>   - `publishReplay(buffer) + refCount()` ➔ `shareReplay({ bufferSize: buffer, refCount: true })` hoặc `share({ connector: () => new ReplaySubject(buffer) })`
+>   - `publishLast() + refCount()` ➔ `share({ connector: () => new AsyncSubject(), resetOnComplete: false })`
 
-> Makes a cold Observable hot
+Trước đây trong RxJS 6, việc sử dụng `multicast(new Subject())` có thể được viết gọn lại bằng cách sử dụng `publish`:
 
 ```ts
 const connectableObservable = interval(500).pipe(
@@ -850,12 +872,6 @@ setTimeout(() => {
 ```
 
 ![RxJS publish](assets/rxjs-publish.png)
-
-Ngoài ra, giống như Subject có các biến thể thì publish cũng có các biến thể tương ứng với một số loại Subject.
-
-- BehaviorSubject => [publishBehavior](https://rxjs.dev/api/operators/publishBehavior)
-- ReplaySubject => [publishReplay](https://rxjs.dev/api/operators/publishReplay)
-- AsyncSubject => [publishLast](https://rxjs.dev/api/operators/publishLast)
 
 ### share
 
@@ -920,10 +936,7 @@ Một use-case khá phổ biến là sử dụng `shareReplay` để làm [cachi
 ```ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
-import { Subject } from 'rxjs/Subject';
-import { timer } from 'rxjs/observable/timer';
-import { switchMap, shareReplay, map, takeUntil } from 'rxjs/operators';
+import { Observable, Subject, timer, switchMap, shareReplay, map, takeUntil } from 'rxjs';
 
 export interface Joke {
   id: number;
@@ -955,15 +968,12 @@ export class JokeService {
       // Set up timer that ticks every X milliseconds
       const timer$ = timer(0, REFRESH_INTERVAL);
 
-      // For each timer tick make an http request to fetch new data
-      // We use shareReplay(X) to multicast the cache so that all
-      // subscribers share one underlying source and don't re-create
-      // the source over and over again. We use takeUntil to complete
-      // this stream when the user forces an update.
+      // Lưu ý RxJS 7+: Luôn cấu hình { bufferSize, refCount: true } để tránh memory leak
+      // khi tất cả component unmount mà timer stream vẫn tiếp tục chạy ngầm!
       this.cache$ = timer$.pipe(
         switchMap(() => this.requestJokes()),
         takeUntil(this.reload$),
-        shareReplay(CACHE_SIZE)
+        shareReplay({ bufferSize: CACHE_SIZE, refCount: true })
       );
     }
 

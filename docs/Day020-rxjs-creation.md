@@ -248,8 +248,10 @@ timer(1000, 1000).subscribe(observer);
 
 ```typescript
 // error: 'an error'
-throwError('an error').subscribe(observer);
+throwError(() => new Error('an error')).subscribe(observer);
 ```
+
+> Lưu ý: Từ RxJS 7 trở lên, cú pháp truyền thẳng giá trị error `throwError(error)` đã bị **deprecated**. Bạn nên truyền vào một `errorFactory` (`throwError(() => error)`) để error được tạo mới tại thời điểm subscribe, tránh việc share chung 1 error object giữa các lần subscribe/retry.
 
 `throwError()` thường dùng trong việc xử lý lỗi của 1 `Observable`, sau khi xử lý lỗi, chúng ta muốn throw tiếp error cho `ErrorHandler` tiếp theo, chúng ta sẽ dùng `throwError`. Khi làm
 việc với `Observable`, có 1 số `operators` yêu cầu các bạn phải cung cấp 1 `Observable` (ví dụ như `switchMap`, `catchError`) thì việc `throwError` trả về 1 `Observable` là rất thích hợp.
@@ -283,9 +285,38 @@ now$.subscribe(observer);
 
 Với `defer()`, chúng ta đã có 3 giá trị khác nhau cho mỗi lần subscribe. Điều này giúp ích ở điểm nào? Ví dụ trường hợp chúng ta cần `retry` 1 `Observable` nào đó mà cần so sánh với 1 giá trị random để quyết định xem có chạy tiếp hay không, thì `defer()` (kết hợp với `retry`) là 1 giải pháp cực kỳ hiệu quả.
 
+#### `EMPTY` và `NEVER`
+
+Khác với các operators bên trên, `EMPTY` và `NEVER` là 2 hằng số (constant), không phải là function, nên các bạn dùng trực tiếp mà không cần gọi `()`.
+
+- `EMPTY`: là 1 `Observable` sẽ `complete` ngay lập tức mà không emit bất kỳ giá trị nào.
+
+```typescript
+// complete: 'complete'
+EMPTY.subscribe(observer);
+```
+
+`EMPTY` rất hữu ích khi bạn cần trả về 1 `Observable` "rỗng" trong các operators như `switchMap`, `catchError`, `mergeMap`, ví dụ như khi muốn bỏ qua 1 nhánh xử lý nào đó mà vẫn phải trả về `Observable` để giữ đúng kiểu dữ liệu.
+
+```typescript
+// bỏ qua request nếu không có `id`
+source$.pipe(switchMap((id) => (id ? this.http.get(`/api/item/${id}`) : EMPTY)));
+```
+
+- `NEVER`: là 1 `Observable` sẽ không bao giờ emit giá trị, cũng không `complete` hay `error`. Nó tồn tại mãi mãi cho đến khi bạn `unsubscribe`.
+
+```typescript
+// không có gì được log ra cả
+NEVER.subscribe(observer);
+```
+
+`NEVER` ít khi dùng trong ứng dụng thực tế, chủ yếu dùng trong testing (ví dụ để giả lập 1 stream "treo" mãi mãi) hoặc trong 1 số trường hợp cần biểu diễn 1 `Observable` không bao giờ kết thúc về mặt logic.
+
+> Lưu ý: `EMPTY` và `NEVER` chính là dạng "hằng số hóa" của `of()`/`from()` khi không có giá trị nào, thay vì phải viết `of()` hay `from([])` mỗi lần, RxJS cung cấp sẵn 2 instance dùng chung này để tối ưu và rõ nghĩa hơn.
+
 ## Summary
 
-Ở ngày 20 này, chúng ta đã tìm hiểu qua kha khá các `operators` dùng để tạo `Observable`, với tên gọi chính thức là `Creation Operators`. Đây là những operators khá phổ biến, tuy nhiên, các bạn chỉ cần nắm kĩ: `from()`, `of()`, `interval()`, `timer()`, và `defer()` là được. `fromEvent()` và `fromEventPattern()` rất ít khi sử dụng trong ứng dụng Angular. Ngoài những `operators` mình liệt kê trên, **RxJS** còn cung cấp 1 số `Creation Operators` khác như: `ajax()`, `fromFetch()`, `generate()`. Và cũng như lý do trên, trong `Angular`, chúng ta rất ít khi sử dụng những operators này. Ví dụ thay vì `ajax()` và `fromFetch()` chúng ta đã có `HttpClientModule`.
+Ở ngày 20 này, chúng ta đã tìm hiểu qua kha khá các `operators` dùng để tạo `Observable`, với tên gọi chính thức là `Creation Operators`. Đây là những operators khá phổ biến, tuy nhiên, các bạn chỉ cần nắm kĩ: `from()`, `of()`, `interval()`, `timer()`, `defer()`, và 2 hằng số `EMPTY`/`NEVER` là được. `fromEvent()` và `fromEventPattern()` rất ít khi sử dụng trong ứng dụng Angular. Ngoài những `operators` mình liệt kê trên, **RxJS** còn cung cấp 1 số `Creation Operators` khác như: `ajax()`, `fromFetch()`, `generate()`, `range()`. Và cũng như lý do trên, trong `Angular`, chúng ta rất ít khi sử dụng những operators này. Ví dụ thay vì `ajax()` và `fromFetch()` chúng ta đã có `HttpClientModule`.
 
 ## References
 

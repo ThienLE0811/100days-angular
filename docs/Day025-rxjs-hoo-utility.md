@@ -2,6 +2,10 @@
 
 Whoa, chúng ta đã cùng nhau tìm hiểu gần hết các **Operators** thường (có thể thường) sử dụng trong ứng dụng **Angular** rồi, còn mấy cái nữa thôi 💪. Ngày hôm nay, chúng ta sẽ cùng nhau tìm hiểu 2 (trong 3) loại **Operators** cuối cùng là: **RxJS Higher Order Observables** và **Utility Operators** nhé.
 
+> [!NOTE]
+> **Lưu ý về Import từ RxJS v7.2+:**
+> Tất cả các operators (`switchMap`, `mergeMap`, `concatMap`, `exhaustMap`, `tap`, `delay`, `finalize`, `repeat`, `timeout`, `partition`) và utility functions (`firstValueFrom`, `lastValueFrom`) hiện nay đều được import trực tiếp từ package chính `'rxjs'`. Không còn sử dụng đường dẫn `'rxjs/operators'`.
+
 > Loại **Operator** còn lại là **Multicasting Operator** và đây là loại **Operator** chúng ta sẽ tìm hiểu vào ngày kế tiếp
 
 ## RxJS Higher Order Observables (HOOs)
@@ -11,7 +15,7 @@ Whoa, chúng ta đã cùng nhau tìm hiểu gần hết các **Operators** thư�
 ```ts
 interval(1000)
   .pipe(map((val) => val * 2))
-  .suscribe(console.log);
+  .subscribe(console.log);
 // output: 0 -- 2 -- 4 -- 6 -- 8
 ```
 
@@ -78,7 +82,10 @@ Trên đây chỉ là 1 ví dụ trong vô vàn ví dụ vì sao Nested Subscrip
 
 #### switchMap()
 
-`switchMap<T, R, O extends ObservableInput<any>>(project: (value: T, index: number) => O, resultSelector?: (outerValue: T, innerValue: ObservedValueOf<O>, outerIndex: number, innerIndex: number) => R): OperatorFunction<T, ObservedValueOf<O> | R>`
+`switchMap<T, O extends ObservableInput<any>>(project: (value: T, index: number) => O): OperatorFunction<T, ObservedValueOf<O>>`
+
+> [!NOTE]
+> Tham số `resultSelector` (tham số thứ 2 cũ) trong `switchMap`, `mergeMap`, `concatMap`, `exhaustMap` đã bị **DEPRECATED** từ RxJS 7. Khuyên dùng toán tử `.pipe(map(...))` bên trong inner observable.
 
 `switchMap()` là một trong những HOOs được dùng nhiều nhất trong **RxJS** cũng như trong ứng dụng **Angular**. `switchMap()` sẽ nhận vào một `projectFunction` mà sẽ nhận vào giá trị được emit từ `Outer Observable` và sẽ phải trả về 1 `Observable` (`Inner Observable`) mới. Giá trị cuối cùng của `Outer Observable` khi dùng với `switchMap()` sẽ là giá trị mà `Inner Observable` emit. Vì đây là HOO đầu tiên nên mình sẽ cố giải thích kĩ càng và đầy đủ hơn. Các bạn hình dung case sau:
 
@@ -218,9 +225,9 @@ function log(val) {
 }
 
 concat(
-  timer(1000).pipe(mapTo('first timer'), tap(log)), // emit "first timer" sau 1 giây
-  timer(5000).pipe(mapTo('second timer'), tap(log)), // emit "second timer" sau 5 giây
-  timer(3000).pipe(mapTo('last timer'), tap(log)) // emit "last timer" sau 3 giây
+  timer(1000).pipe(map(() => 'first timer'), tap(log)), // emit "first timer" sau 1 giây
+  timer(5000).pipe(map(() => 'second timer'), tap(log)), // emit "second timer" sau 5 giây
+  timer(3000).pipe(map(() => 'last timer'), tap(log)) // emit "last timer" sau 3 giây
 )
   .pipe(
     exhaustMap((c) =>
@@ -250,16 +257,23 @@ concat(
 
 Các bạn có thể thấy là khi `exhaustMap()` đang chạy `Inner Observable` của `second timer` mà `last timer` emit, thì `exhaustMap()` bỏ qua hoàn toàn `Inner Observable` của `last timer` và mọi nghiệp vụ dừng lại sau khi `Inner Observable` của `second timer` complete. Đây là tính chất của `exhaustMap()`, là 1 trong những **Rate Limiting HOO** hiếm hoi 😎
 
-#### switch/concat/mergeMapTo()
+#### switch/concat/mergeMapTo() (⚠️ Đã Deprecated từ RxJS 7+)
 
-3 HOOs này đều có cách HOO `*mapTo()` tương ứng. Cách thức hoạt động giống với HOO nguyên bản. Tuy nhiên, thay vì nhận vào `projectFunction` thì các bạn truyền hẳn vào `Inner Observable` luôn. Nếu các bạn có các nghiệp vụ cần dùng đến cái HOOs này mà không quan tâm giá trị của `Outer Observable`, thì cứ dùng các HOO `*mapTo()` này.
+> [!WARNING]
+> **Các toán tử `switchMapTo`, `concatMapTo`, `mergeMapTo` đã bị DEPRECATED từ RxJS 7.0 và bị loại bỏ trong RxJS 8.**
+> - **Lý do:** Dư thừa API. Cú pháp viết trực tiếp `switchMap(() => inner$)` ngắn gọn và rõ ràng hơn mà không cần duy trì thêm các operators riêng biệt.
+> - **Giải pháp thay thế:** Sử dụng toán tử mapping gốc với hàm trả về Observable: `switchMap(() => inner$)`, `mergeMap(() => inner$)`, `concatMap(() => inner$)`.
 
 ```ts
-fromEvent(document, 'click').pipe(switchMapTo(interval(1000).pipe(take(10))));
+// Cách cũ (RxJS 6 - ĐÃ DEPRECATED):
+// fromEvent(document, 'click').pipe(switchMapTo(interval(1000).pipe(take(10))));
 
-fromEvent(document, 'click').pipe(mergeMapTo(interval(1000).pipe(take(10))));
+// Cách chuẩn hiện đại (RxJS 7+):
+fromEvent(document, 'click').pipe(switchMap(() => interval(1000).pipe(take(10))));
 
-fromEvent(document, 'click').pipe(concatMapTo(interval(1000).pipe(take(10))));
+fromEvent(document, 'click').pipe(mergeMap(() => interval(1000).pipe(take(10))));
+
+fromEvent(document, 'click').pipe(concatMap(() => interval(1000).pipe(take(10))));
 ```
 
 #### partition()
@@ -298,9 +312,12 @@ Trên đây là những HOOs thường dùng nhất trong **RxJS**. Ngoài ra, *
 
 #### tap()
 
-`tap<T>(nextOrObserver?: NextObserver<T> | ErrorObserver<T> | CompletionObserver<T> | ((x: T) => void), error?: (e: any) => void, complete?: () => void): MonoTypeOperatorFunction<T>`
+`tap<T>(observerOrNext?: Partial<Observer<T>> | ((value: T) => void)): MonoTypeOperatorFunction<T>`
 
-Ngoài hàm `subscribe` thì chắc `tap()` là 1 trong những operator được dùng nhiều nhất trong **RxJS**. `tap()` là 1 operator mà các bạn có thể `pipe` vào bất cứ `Observable` nào và tại bất cứ vị trí nào. `tap()` nhận vào tham số giống như `subscribe` đó là `Observer` hoặc là 3 functions `nextFunction`, `errorFunction`, và `completeFunction`. Vì nhận vào tham số giống `subscribe`, nên bản chất `tap()` không trả về giá trị gì. Điều này nghĩa là `tap()` hoàn toàn không làm thay đổi bất cứ gì trên 1 `Observable`. Các bạn có thể dùng `tap()` để:
+> [!NOTE]
+> Cú pháp truyền 3 callback riêng biệt `tap(nextFn, errorFn, completeFn)` đã bị **DEPRECATED** từ RxJS 7. Khuyên dùng một hàm duy nhất `tap(val => ...)` hoặc truyền vào Observer object: `tap({ next: (v) => ..., error: (e) => ..., complete: () => ... })`.
+
+Ngoài hàm `subscribe` thì chắc `tap()` là 1 trong những operator được dùng nhiều nhất trong **RxJS**. `tap()` là 1 operator mà các bạn có thể `pipe` vào bất cứ `Observable` nào và tại bất cứ vị trí nào. `tap()` nhận vào tham số là `Observer` hoặc hàm `nextFunction`. Vì nhận vào tham số giống `subscribe`, nên bản chất `tap()` không trả về giá trị gì. Điều này nghĩa là `tap()` hoàn toàn không làm thay đổi bất cứ gì trên 1 `Observable`. Các bạn có thể dùng `tap()` để:
 
 1. Log giá trị được emit ở bất cứ thời điểm nào trong Observable. Điều này giúp debug được giá trị của 1 Observable trước và sau khi dùng 1 operator nào đó.
 
@@ -417,24 +434,54 @@ interval(2000).pipe(timeout(1000)).subscribe(console.log, console.error);
 // Error { name: "TimeoutError" }
 ```
 
-#### timeoutWith()
+#### timeoutWith() (⚠️ Đã Deprecated từ RxJS 7+)
 
 `timeoutWith<T, R>(due: number | Date, withObservable: any, scheduler: SchedulerLike = async): OperatorFunction<T, T | R>`
 
-`timeoutWith()` hoạt đột tương tự `timeout()` nhưng nhận thêm tham số thứ 2 là 1 `Observable`. Nếu như trường hợp `Source Observable` emit giá trị quá chậm so với `due` thì `timeoutWith()` thay vì throw error, `timeoutWith()` sẽ subscribe vào tham số `Observable` kia.
+> [!WARNING]
+> **Toán tử `timeoutWith` đã bị DEPRECATED từ RxJS 7.0 và bị loại bỏ trong RxJS 8.**
+> - **Lý do:** Toán tử `timeout()` của RxJS 7+ đã được nâng cấp mạnh mẽ, cho phép truyền vào cấu hình object với thuộc tính `with: () => fallbackObservable`.
+> - **Giải pháp thay thế:** Sử dụng `timeout({ each: dueTime, with: () => fallbackObservable })`.
+
+```ts
+// Cách cũ (RxJS 6 - ĐÃ DEPRECATED):
+// interval(2000).pipe(timeoutWith(1000, of('fallback')));
+
+// Cách chuẩn hiện đại (RxJS 7+): Sử dụng timeout() với cấu hình `with`
+import { interval, of, timeout } from 'rxjs';
+
+interval(2000).pipe(
+  timeout({
+    each: 1000,
+    with: () => of('fallback khi quá thời gian chờ!'),
+  })
+).subscribe(console.log);
+```
 
 ![RxJS timeoutWith](assets/rxjs-timeoutWith.png)
 
-#### toPromise()
+#### toPromise() (⚠️ Đã Deprecated từ RxJS 7+ và Bị Gỡ Bỏ trong RxJS 8)
 
-À ha, mình đặt cái này cuối cùng là có ý đồ 😅. Nhìn tên hàm các bạn cũng đoán được hàm này làm gì rồi phải không? Đây không phải là 1 operator nhưng được **RxJS** liệt kê vào **Utility Operator**. `toPromise()` là 1 instance method trên class `Observable` dùng để chuyển đổi 1 `Observable` thành `Promise`🤦‍. Tuy nhiên, `toPromise()` sẽ bị `deprecated` vào **RxJS v7** sắp tới, các bạn nào dùng thì cẩn thận nhé.
+> [!WARNING]
+> **Phương thức `toPromise()` đã chính thức bị DEPRECATED từ RxJS 7.0 và bị LOẠI BỎ hoàn toàn trong RxJS 8.**
+> - **Lý do:** `toPromise()` có hành vi không rõ ràng (chờ complete mới lấy giá trị cuối cùng hay lấy giá trị đầu tiên?), không an toàn khi stream rỗng (empty stream trả về `undefined` thay vì throw lỗi) và không nhất quán với triết lý của RxJS.
+> - **Giải pháp thay thế:** RxJS 7+ cung cấp 2 hàm độc lập thay thế trực tiếp:
+>   - **`firstValueFrom(observable$)`**: Chờ giá trị đầu tiên được emit, resolve Promise rồi tự hủy subscription. (Ném ra `EmptyError` nếu stream complete trước khi emit).
+>   - **`lastValueFrom(observable$)`**: Chờ stream complete rồi resolve giá trị cuối cùng (hoạt động giống hệt `toPromise()` trước đây).
 
 ```ts
-async function test() {
-  const helloWorld = await of('hello')
-    .pipe(map((val) => val + ' World'))
-    .toPromise();
-  console.log(helloWorld); // hello World
+import { of, map, firstValueFrom, lastValueFrom } from 'rxjs';
+
+async function testModern() {
+  const source$ = of('hello').pipe(map((val) => val + ' World'));
+
+  // Cách 1 (Phổ biến nhất): Lấy giá trị đầu tiên ngay khi có (rất phù hợp cho HTTP requests)
+  const firstResult = await firstValueFrom(source$);
+  console.log('firstValueFrom:', firstResult); // hello World
+
+  // Cách 2: Chờ stream complete và lấy giá trị cuối cùng (thay thế chuẩn cho toPromise cũ)
+  const lastResult = await lastValueFrom(source$);
+  console.log('lastValueFrom:', lastResult); // hello World
 }
 ```
 

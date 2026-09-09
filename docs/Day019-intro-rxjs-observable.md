@@ -219,6 +219,8 @@ Ngoài cách dùng như trên, `observable.subscribe` sẽ chuẩn hóa các cal
 
 Cách dùng này hiện tại không khuyến cáo sử dụng, chỉ dùng cách truyền function nếu bạn có một hàm để handle `Next` notification.
 
+> Lưu ý: Từ RxJS 7 trở lên, cú pháp truyền nhiều callback rời rạc (`subscribe(next, error, complete)`) đã chính thức bị **deprecated**. Bạn nên luôn truyền một Observer object (`{ next, error, complete }`), hoặc chỉ truyền một hàm duy nhất nếu chỉ cần xử lý `next`.
+
 ```ts
 observable.subscribe(
   (x) => console.log('Observer got a next value: ' + x),
@@ -247,7 +249,7 @@ observable.subscribe(
 );
 ```
 
-# Subscription
+## Subscriptions
 
 Subscription là một object đại diện cho một nguồn tài nguyên có khả năng hủy được, thông thường trong Rxjs là hủy Observable execution. Subscription có chứa một method quan trọng unsubscribe (từ Rxjs 5 trở lên), khi method này được gọi, execution sẽ bị hủy.
 

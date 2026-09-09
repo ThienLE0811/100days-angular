@@ -2,6 +2,10 @@
 
 Tiếp tục cuộc hành trình tìm hiểu về các `operators` của **RxJS** nhé. Lần này, chúng ta sẽ tìm hiểu về 1 loại `operators` rất quan trọng khi làm việc với **Angular** vì những `operators` này sẽ cho phép các bạn kết hợp nhiều `Observable` lại với nhau. Những `operators` này gọi là **Combination Operators**.
 
+> [!NOTE]
+> **Lưu ý về Import từ RxJS v7.2+:**
+> Tất cả các functions kết hợp (`combineLatest`, `forkJoin`, `merge`, `concat`, `zip`, `race`) và các pipeable operators (`withLatestFrom`, `startWith`, `endWith`, `pairwise`, `map`) hiện nay đều được import trực tiếp từ `'rxjs'`, ví dụ: `import { combineLatest, forkJoin, map } from 'rxjs';`. Không còn sử dụng đường dẫn `'rxjs/operators'`.
+
 ```ts
 const observer = {
   next: (val) => console.log(val),
@@ -58,23 +62,36 @@ forkJoin([
 // output: 'complete'
 ```
 
-`forkJoin()` khi dùng với children `Observables` là 1 `Array`, thì `forkJoin()` có thể nhận vào 1 tham số thứ 2 gọi là `projectFunction`. `projectFunction` này sẽ được gọi với các tham số là giá trị của children `Observables` và kết quả của `projectFunction` sẽ là kết quả emit của `forkJoin()`. `projectFunction` chỉ được thực thi nếu như `forkJoin()` **SẼ** emit (nghĩa là tất cả children `Observables` đều complete)
+> [!WARNING]
+> **Cú pháp `projectFunction` (tham số thứ hai) đã bị DEPRECATED từ RxJS 7.0.**
+> - **Lý do:** Tinh giản API, cải thiện khả năng suy diễn kiểu (TypeScript inference) và giảm kích thước thư viện.
+> - **Giải pháp thay thế:** Sử dụng `.pipe(map(...))` hoặc truyền trực tiếp dưới dạng Dictionary Object.
+
+Trước đây, `forkJoin()` khi dùng với `Array` có thể nhận vào tham số thứ 2 là `projectFunction`. Trong RxJS 7+, hãy viết theo 2 cách chuẩn sau:
 
 ```ts
-forkJoin(
-  [
-    this.apiService.getAccountDropdown(),
-    this.apiService.getDepartmentDropdown(),
-    this.apiService.getStoreDropdown(),
-  ],
-  (accountList, departmentList, storeList) => {
-    return {
-      accounts: accountList,
-      departments: departmentList,
-      stores: storeList,
-    };
-  }
+// Cách cũ (RxJS 6 - ĐÃ DEPRECATED):
+// forkJoin([obs1, obs2, obs3], (a, b, c) => ({ a, b, c }));
+
+// Cách 1 chuẩn hiện đại (RxJS 7+): Dùng .pipe(map(...))
+forkJoin([
+  this.apiService.getAccountDropdown(),
+  this.apiService.getDepartmentDropdown(),
+  this.apiService.getStoreDropdown(),
+]).pipe(
+  map(([accounts, departments, stores]) => ({
+    accounts,
+    departments,
+    stores,
+  }))
 ).subscribe(observer);
+
+// Cách 2 chuẩn hiện đại (RxJS 7+): Truyền Dictionary Object trực tiếp (khuyên dùng, rất trực quan)
+forkJoin({
+  accounts: this.apiService.getAccountDropdown(),
+  departments: this.apiService.getDepartmentDropdown(),
+  stores: this.apiService.getStoreDropdown(),
+}).subscribe(observer);
 // output: { accounts: [...], departments: [...], stores: [...] }
 // output: 'complete'
 ```
@@ -83,9 +100,12 @@ forkJoin(
 
 `combineLatest<O extends ObservableInput<any>, R>(...observables: (SchedulerLike | O | ((...values: ObservedValueOf<O>[]) => R))[]): Observable<R>`
 
-`combineLatest()` giống với `forkJoin()` là cũng sẽ nhận vào tham số là 1 `Array<Observable>`. Khác với `forkJoin()` là `combineLatest()` không nhận vào `Dictionary (Object)` và `combineLatest()` sẽ emit khi **TẤT CẢ** các children `Observables` emit ít nhất một lần, nghĩa là các children `Observables` không cần phải complete mà chỉ cần emit ít nhất 1 giá trị thì `combineLatest()` sẽ emit giá trị là `Array` gồm tất cả các giá trị được children `Observables` emit, theo thứ tự.
+`combineLatest()` nhận vào tham số là 1 `Array<Observable>` hoặc `Dictionary (Object)`. `combineLatest()` sẽ emit khi **TẤT CẢ** các children `Observables` emit ít nhất một lần, nghĩa là các children `Observables` không cần phải complete mà chỉ cần emit ít nhất 1 giá trị thì `combineLatest()` sẽ emit giá trị gồm tất cả các giá trị được children `Observables` emit gần nhất.
 
-> Thay vì truyền vào `Array<Observable>` cho `combineLatest()` như sau: `combineLatest([obs1, obs2])`, bạn cũng có thể truyền vào mà ko cần `[]` như: `combineLatest(obs1, obs2)`. Cả 2 cách đều cho ra kết quả như nhau, tuy nhiên, **RxJS** khuyên dùng cách 1 hơn vì nó nhất quán với `forkJoin()` hơn và cũng dễ dự đoán được kết quả hơn, vì kết quả của `combineLatest()` là 1 `Array`. Vì vậy, mình chỉ đề cập đến cách dùng `combineLatest([obs1, obs2])`
+> [!WARNING]
+> **Lưu ý quan trọng từ RxJS 7+:**
+> - **Deprecated truyền đối số rời rạc:** Cú pháp `combineLatest(obs1, obs2)` đã bị **DEPRECATED**. Bạn bắt buộc phải bọc trong một mảng: `combineLatest([obs1, obs2])` hoặc truyền object dictionary.
+> - **Đã hỗ trợ Dictionary (Object):** Từ RxJS 7+, `combineLatest` **ĐÃ hỗ trợ Dictionary/Object** giống như `forkJoin` (ví dụ: `combineLatest({ user: user$, roles: roles$ })`), cực kỳ tiện lợi cho Angular View Model!
 
 ![RxJS combineLatest](assets/rxjs-combineLatest.png)
 
@@ -171,25 +191,35 @@ onPageChanged(newPage: number) {
 
 Như trên là 1 ví dụ khá hoàn chỉnh về việc xử lý `PaginationComponent` trong **Angular** sử dụng `combineLatest()` và `AsyncPipe`. Khi `updateSize()` và `updatePage()` được thực thi thì `currentPage$` và `currentSize$` sẽ emit giá trị mới, dẫn đến `combineLatest()` (`vm$`) sẽ emit giá trị mới và template sẽ được update (`vm$ | async`).
 
-Cũng giống như `forkJoin()`, khi dùng tham số là 1 `Array<Observable>` thì `combineLatest()` có thẻ nhận vào thêm 1 tham số là `projectFunction`. `projectFunction` này sẽ được gọi với các tham số là giá trị của children `Observables` và kết quả của `projectFunction` sẽ là kết quả emit của `combineLatest()`. Đây cũng là lí do mình chỉ đề cập đến cách dùng `combineLatest([obs1, obs2])` vì tính nhất quán với `forkJoin()`, và khả năng dùng `projectFunction`. Sau đây là ví dụ về `vm$` ở trên viết lại với `projectFunction`
+> [!WARNING]
+> **Cú pháp `projectFunction` (tham số thứ 2) của `combineLatest` đã bị DEPRECATED từ RxJS 7.0.**
+> **Khuyên dùng:** Sử dụng toán tử `.pipe(map(...))` hoặc truyền trực tiếp Dictionary Object.
+
+Ví dụ về `vm$` ở trên được viết lại theo 2 cách chuẩn hiện đại trong RxJS 7+:
 
 ```ts
-this.vm$ = combineLatest(
-  [
-    this.paginationService.currentPage$,
-    this.paginationService.currentSize$,
-    this.paginationService.totalCount$,
-    this.paginationService.currentOffset$,
-  ],
-  (currentPage, currentSize, totalCount, currentOffset) => {
-    return {
-      currentPage,
-      currentSize,
-      totalCount,
-      currentOffset,
-    };
-  }
+// Cách 1: Dùng mảng kết hợp pipe(map(...))
+this.vm$ = combineLatest([
+  this.paginationService.currentPage$,
+  this.paginationService.currentSize$,
+  this.paginationService.totalCount$,
+  this.paginationService.currentOffset$,
+]).pipe(
+  map(([currentPage, currentSize, totalCount, currentOffset]) => ({
+    currentPage,
+    currentSize,
+    totalCount,
+    currentOffset,
+  }))
 );
+
+// Cách 2: Dùng Dictionary Object (RxJS 7+ khuyên dùng - cực kỳ clean)
+this.vm$ = combineLatest({
+  currentPage: this.paginationService.currentPage$,
+  currentSize: this.paginationService.currentSize$,
+  totalCount: this.paginationService.totalCount$,
+  currentOffset: this.paginationService.currentOffset$,
+});
 ```
 
 ### zip()
@@ -228,7 +258,9 @@ zip(of(1, 2, 3, 99), of(4, 5, 6), of(7, 8, 9)).subscribe(observer);
 ```
 
 - `zip()` sẽ throw error nếu 1 trong các children `Observables` throw error.
-- Nếu tham số cuối cùng của `zip()` là 1 `Function` thì `zip()` sẽ coi tham số này là `projectFunction`. Cách thức hoạt động hoàn toàn giống với `projectFunction` của `combineLatest()` và `forkJoin()`.
+> [!WARNING]
+> **Từ RxJS 7+, việc truyền tham số rời rạc `zip(a, b, c)` và tham số `projectFunction` trong `zip()` đã bị DEPRECATED.**
+> **Khuyên dùng:** Bọc các Observable trong một mảng `zip([a, b, c])` và dùng `.pipe(map(...))` để biến đổi kết quả.
 
 #### Use-case
 
@@ -241,24 +273,17 @@ const age$ = of<number>(29, 28, 30);
 const name$ = of<string>('Chau', 'Trung', 'Tiep');
 const isAdmin$ = of<boolean>(true, false, true);
 
-zip(age$, name$, isAdmin$).pipe(
+// Cách chuẩn hiện đại (RxJS 7+): Truyền mảng và dùng map()
+zip([age$, name$, isAdmin$]).pipe(
   map(([age, name, isAdmin]) => ({ age, name, isAdmin }))
-);
+).subscribe(observer);
 // output:
 // { age: 29, name: 'Chau', isAdmin: true }
 // { age: 28, name: 'Trung', isAdmin: false }
 // { age: 30, name: 'Tiep', isAdmin: true }
 
-// dùng với projectFunction
-zip(age$, name$, isAdmin$, (age, name, isAdmin) => ({
-  age,
-  name,
-  isAdmin,
-})).subscribe(observer);
-// output:
-// { age: 29, name: 'Chau', isAdmin: true }
-// { age: 28, name: 'Trung', isAdmin: false }
-// { age: 30, name: 'Tiep', isAdmin: true }
+// Cách cũ với projectFunction (ĐÃ DEPRECATED):
+// zip(age$, name$, isAdmin$, (age, name, isAdmin) => ({ age, name, isAdmin })).subscribe(observer);
 ```
 
 - Kết hợp giá trị của 2 `Observables` khác nhau ở 2 thời điểm khác nhau. Ví dụ: các bạn muốn biết toạ độ chuột của người dùng từ lúc họ `mousedown` cho đến lúc họ `mouseup`, hoặc có thể lấy khoảng thời gian họ rê chuột (dùng `new Date()` thay vì `getCoords()` như ví dụ bên dưới)
@@ -346,9 +371,10 @@ merge(of(4, 5, 6).pipe(delay(1000)), of(1, 2, 3)).subscribe(observer);
 Các bạn thấy sự khác biệt với `concat()` chưa? Ở đây, `merge()` emit luôn `1,2,3` rồi mới tới `4,5,6` và không hề quan tâm đến thứ tự mà các children `Observables` này được truyền vào. Mình thêm 1 ví dụ khác để các bạn thấy rõ hơn cách hoạt động của `merge()`
 
 ```ts
+// Lưu ý: mapTo đã deprecated từ RxJS 7, sử dụng map(() => value)
 merge(
-  interval(2000).pipe(mapTo('emit every 2 seconds'), take(3)),
-  interval(1000).pipe(mapTo('emit every 1 second'), take(3))
+  interval(2000).pipe(map(() => 'emit every 2 seconds'), take(3)),
+  interval(1000).pipe(map(() => 'emit every 1 second'), take(3))
 ).subscribe(observer);
 
 // output:
@@ -370,9 +396,9 @@ Ví dụ trên sẽ cho các bạn thấy `merge()` sẽ emit khi mà child `Obs
 
 ```ts
 merge(
-  interval(1000).pipe(mapTo('first'), take(5)), // will take 5 seconds to complete
-  interval(2000).pipe(mapTo('second'), take(3)), // will take 6 seconds to complete
-  interval(3000).pipe(mapTo('third'), take(2)), // will take 6 seconds to complete
+  interval(1000).pipe(map(() => 'first'), take(5)), // will take 5 seconds to complete
+  interval(2000).pipe(map(() => 'second'), take(3)), // will take 6 seconds to complete
+  interval(3000).pipe(map(() => 'third'), take(2)), // will take 6 seconds to complete
   2
 ).subscribe(observer);
 
@@ -417,17 +443,21 @@ merge(...formControlValueChanges).subscribe(({key, value}) => {
 
 `race<T>(...observables: any[]): Observable<T>`
 
-`race()` là một operator khá hay ho và khá hữu ích trong 1 số trường hợp nhất định. `race()` có tham số giống như `merge()` và `concat()` nên mình sẽ không lặp lại nữa.
+`race()` là một operator khá hay ho và khá hữu ích trong 1 số trường hợp nhất định.
 
 - `race()` sẽ emit giá trị của `Observable` nào emit đầu tiên (nhanh nhất) sau đó lặp lại cho đến khi 1 trong các children `Observables` complete.
 - `race()` sẽ error ngay lập tức nếu `Observable` _nhanh nhất_ lại throw error thay vì emit giá trị.
 
+> [!NOTE]
+> Từ RxJS 7+, `race` khuyến nghị truyền vào một mảng `race([obs1, obs2, ...])` thay vì truyền đối số rời rạc.
+
 ```ts
-race(
-  interval(1000).pipe(mapTo('fast')),
-  interval(2000).pipe(mapTo('medium')),
-  interval(3000).pipe(mapTo('slow'))
-).subscribe(observer);
+// Cách chuẩn hiện đại (RxJS 7+): truyền mảng và dùng map(() => ...) thay mapTo
+race([
+  interval(1000).pipe(map(() => 'fast')),
+  interval(2000).pipe(map(() => 'medium')),
+  interval(3000).pipe(map(() => 'slow')),
+]).subscribe(observer);
 // output: fast - 1s -> fast - 1s -> fast - 1s -> fast...
 ```
 
@@ -471,7 +501,8 @@ fromEvent(document, 'click')
 // - click lúc 5.5s -> [MouseEvent, 4]; // sau 5s thì giá trị gần nhất của interval(1000) là 4 (0 - 1 - 2 - 3 -4)
 ```
 
-`withLatestFrom()` cũng nhận vào tham số thứ 2 optional là `projectFunction`. Cách thức hoạt động như những `projectFunction` được đề cập trong bài viết này.
+> [!WARNING]
+> Tương tự các toán tử khác, tham số `projectFunction` trong `withLatestFrom` đã bị **DEPRECATED** từ RxJS 7.0. Khuyên dùng `.pipe(map(...))` để biến đổi mảng kết quả trả về.
 
 #### Use-case
 
@@ -491,7 +522,7 @@ this.apiService.getSomething().pipe(withLatestFrom(this.currentLoggedInUser$));
 ![RxJS startWith](assets/rxjs-startWith.png)
 
 ```ts
-of('world').pipe(starWith('Hello')).subscribe(observer);
+of('world').pipe(startWith('Hello')).subscribe(observer);
 // output:
 // 'Hello'
 // 'word'

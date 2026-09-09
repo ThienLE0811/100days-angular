@@ -16,6 +16,10 @@ const observer = {
 };
 ```
 
+> [!NOTE]
+> **Lưu ý về Import từ RxJS v7.2+:**
+> Tất cả các operators (`catchError`, `retry`, `defaultIfEmpty`, `throwIfEmpty`, `every`, `takeUntil`, `map`) và creation functions (`of`, `forkJoin`, `throwError`, `iif`, `timer`, `fromEvent`) hiện nay đều được import trực tiếp từ package chính `'rxjs'`, ví dụ: `import { of, map, catchError, retry, throwError } from 'rxjs';`. Đường dẫn `'rxjs/operators'` đã bị **Deprecated**.
+
 ## RxJS Error Handling Operators
 
 ### catchError
@@ -27,8 +31,7 @@ const observer = {
 `catchError<T, O extends ObservableInput<any>>(selector: (err: any, caught: Observable<T>) => O): OperatorFunction<T, T | ObservedValueOf<O>>`
 
 ```ts
-import { of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { of, map, catchError } from 'rxjs';
 const cached = [4, 5];
 of(1, 2, 3, 4, 5)
   .pipe(
@@ -52,8 +55,15 @@ Trong trường hợp trên nếu chúng ta không bắt error thì `observer.er
 
 Một ví dụ trong ứng dụng là khi các bạn làm việc với `forkJoin` [Day 23](Day023-rxjs-combination.md), lúc này nếu một stream nào đó emit error thì toàn bộ stream sẽ bị văng ra error. Trong trường hợp các bạn muốn nó vẫn tiếp tục chạy hết và chúng ta sẽ tách Error ra ở pipe tiếp theo thì chỉ cần `catchError` lại như trên là được.
 
+> [!WARNING]
+> **Cú pháp `throwError(error)` đã bị DEPRECATED từ RxJS 7.0.**
+> - **Lý do:** Truyền trực tiếp đối tượng lỗi sẽ khởi tạo lỗi ngay khi hàm được gọi định nghĩa thay vì tại thời điểm subscribe.
+> - **Giải pháp thay thế:** Sử dụng error factory function: `throwError(() => new Error(...))`.
+
 ```ts
-forkJoin([of(1), of(2), throwError(new Error('401'))]).subscribe(observer);
+import { forkJoin, of, throwError, catchError } from 'rxjs';
+
+forkJoin([of(1), of(2), throwError(() => new Error('401'))]).subscribe(observer);
 /**
  * Output:
  * --(x: Error 401)--
@@ -64,7 +74,7 @@ forkJoin([of(1), of(2), throwError(new Error('401'))]).subscribe(observer);
 forkJoin([
   of(1),
   of(2),
-  throwError(new Error('401')).pipe(catchError((err) => of(err))),
+  throwError(() => new Error('401')).pipe(catchError((err) => of(err))),
 ]).subscribe(observer);
 
 /**
@@ -105,12 +115,16 @@ Ngoài ra, trong catchError bạn hoàn toàn có thể throw về một error �
 > Returns an Observable that mirrors the source Observable with the exception of an error. If the source Observable calls error, this method will resubscribe to the source Observable for a maximum of count resubscriptions (given as a number parameter) rather than propagating the error call.
 
 `retry<T>(count: number = -1): MonoTypeOperatorFunction<T>`
+hoặc dạng config (RxJS 7+):
+`retry<T>(config: RetryConfig): MonoTypeOperatorFunction<T>`
 
 Operator này sẽ resubscribe vào source Observable khi có error emit từ source. Nếu chúng ta không truyền gì vào cho param `count`, lúc này nó có thể retry không giới hạn số lần. Ngược lại, nó sẽ retry max số lần được truyền vào.
 
 Nó khá hữu ích khi bạn muốn retry HTTP request chẳng hạn. Lưu ý chỉ nên dùng cho get data, không nên dùng cho Create, Update, Delete vì có thể sinh ra race condition.
 
 ```ts
+import { of, map, retry } from 'rxjs';
+
 const cached = [4, 5];
 of(1, 2, 3, 4, 5)
   .pipe(
@@ -134,48 +148,38 @@ of(1, 2, 3, 4, 5)
 
 > Lưu ý, cách hoạt động của `retry` operator khác với catch kèm theo kỹ thuật retry ở trên.
 
-Ngoài `retry` chúng ta có thể dùng `retryWhen` để có thể control vào quá trình retry (ví dụ: khi nào sẽ retry).
+### Cải tiến `retry` trong RxJS 7+ và Cảnh báo về `retryWhen`
 
-Một use-case khá hay là [`retryBackoff` operator](https://github.com/alex-okrushko/backoff-rxjs/blob/7d38283bccc55237806062048eb5e6b90e9f9fff/src/operators/retryBackoff.ts), nó sẽ tăng thời gian sau mỗi lần retry:
+> [!WARNING]
+> **Toán tử `retryWhen` đã bị DEPRECATED từ RxJS 7.0 và bị loại bỏ trong RxJS 8.**
+> - **Lý do:** `retryWhen` có cú pháp phức tạp, khó xử lý việc reset index và dễ gây lỗi rò rỉ bộ nhớ.
+> - **Giải pháp thay thế:** Từ RxJS 7 trở đi, toán tử `retry()` được nâng cấp nhận vào một cấu hình `RetryConfig: { count?: number, delay?: number | ((error: any, retryCount: number) => ObservableInput<any>), resetOnSuccess?: boolean }`.
+
+Trước đây trong RxJS 6, để thực hiện tính năng **Exponential Backoff** (tăng dần thời gian chờ sau mỗi lần thử lại), người ta phải tự viết custom operator phức tạp với `retryWhen`:
 
 ```ts
-export function retryBackoff(
-  config: number | RetryBackoffConfig
-): <T>(source: Observable<T>) => Observable<T> {
-  const {
-    initialInterval,
-    maxRetries = Infinity,
-    maxInterval = Infinity,
-    shouldRetry = () => true,
-    resetOnSuccess = false,
-    backoffDelay = exponentialBackoffDelay,
-  } = typeof config === 'number' ? { initialInterval: config } : config;
-  return <T>(source: Observable<T>) =>
-    defer(() => {
-      let index = 0;
-      return source.pipe(
-        retryWhen<T>((errors) =>
-          errors.pipe(
-            concatMap((error) => {
-              const attempt = index++;
-              return iif(
-                () => attempt < maxRetries && shouldRetry(error),
-                timer(
-                  getDelay(backoffDelay(attempt, initialInterval), maxInterval)
-                ),
-                throwError(error)
-              );
-            })
-          )
-        ),
-        tap(() => {
-          if (resetOnSuccess) {
-            index = 0;
-          }
-        })
-      );
-    });
-}
+// Cách cũ (RxJS 6 - retryWhen ĐÃ BỊ DEPRECATED):
+// source.pipe(
+//   retryWhen(errors => errors.pipe(concatMap((err, i) => timer(i * 1000))))
+// );
+```
+
+**Cách chuẩn hiện đại (RxJS 7+):** Bạn có thể cấu hình Exponential Backoff cực kỳ gọn gàng trực tiếp bên trong `retry()`:
+
+```ts
+import { timer, retry } from 'rxjs';
+
+// Thử lại tối đa 3 lần, lần 1 chờ 1s, lần 2 chờ 2s, lần 3 chờ 3s
+source$.pipe(
+  retry({
+    count: 3,
+    delay: (error, retryCount) => {
+      console.log(`Lần thử lại thứ ${retryCount} sau lỗi:`, error);
+      return timer(retryCount * 1000);
+    },
+    resetOnSuccess: true, // Tự động reset bộ đếm khi request thành công
+  })
+);
 ```
 
 ## RxJS Error Conditional Operators
@@ -191,8 +195,7 @@ Hai operators này cho phép chúng ta trả về các giá trị tương ứng 
 Giả sử, chúng ta cần làm yêu cầu nếu người dùng không click vào sau 1s thì sẽ báo lỗi. Ví dụ tạo transaction sau 1s không confirm thì hủy và báo lỗi cho người dùng.
 
 ```ts
-import { fromEvent, timer } from 'rxjs';
-import { throwIfEmpty, takeUntil } from 'rxjs/operators';
+import { fromEvent, timer, throwIfEmpty, takeUntil } from 'rxjs';
 
 const click$ = fromEvent(document, 'click');
 
